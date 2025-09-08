@@ -1,0 +1,7 @@
+﻿services:
+  nrl_project:
+    image: nrl_project
+    build:
+      context: .
+      dockerfile: NRL_PROJECT/Dockerfile
+
