@@ -4,4 +4,14 @@
     build:
       context: .
       dockerfile: NRL_PROJECT/Dockerfile
-
+    ports:
+      - "5005:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=server=mariadbcontainer;port=3306;database=mysql;user=root;password=Hallija03;
+    networks:
+      - appnet #Koble applikasjonen til appnet nettverket
+networks:
+  appnet: #Legge til appnet nettverket som er ekstern nettverk
+    external: true  
+    name: appnet #Legge til navn på nettverket

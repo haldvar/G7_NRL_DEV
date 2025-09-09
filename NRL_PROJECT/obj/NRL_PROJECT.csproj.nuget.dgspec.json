@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/halli/RiderProjects/GROUP7/NRL_PROJECT/NRL_PROJECT.csproj": {}
+    "/Users/halli/RiderProjects/G7_NRL_DEV/NRL_PROJECT/NRL_PROJECT.csproj": {}
   },
   "projects": {
-    "/Users/halli/RiderProjects/GROUP7/NRL_PROJECT/NRL_PROJECT.csproj": {
+    "/Users/halli/RiderProjects/G7_NRL_DEV/NRL_PROJECT/NRL_PROJECT.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/halli/RiderProjects/GROUP7/NRL_PROJECT/NRL_PROJECT.csproj",
+        "projectUniqueName": "/Users/halli/RiderProjects/G7_NRL_DEV/NRL_PROJECT/NRL_PROJECT.csproj",
         "projectName": "NRL_PROJECT",
-        "projectPath": "/Users/halli/RiderProjects/GROUP7/NRL_PROJECT/NRL_PROJECT.csproj",
+        "projectPath": "/Users/halli/RiderProjects/G7_NRL_DEV/NRL_PROJECT/NRL_PROJECT.csproj",
         "packagesPath": "/Users/halli/.nuget/packages/",
-        "outputPath": "/Users/halli/RiderProjects/GROUP7/NRL_PROJECT/obj/",
+        "outputPath": "/Users/halli/RiderProjects/G7_NRL_DEV/NRL_PROJECT/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/halli/.nuget/NuGet/NuGet.Config"
@@ -43,6 +43,12 @@
       "frameworks": {
         "net9.0": {
           "targetAlias": "net9.0",
+          "dependencies": {
+            "MySqlConnector": {
+              "target": "Package",
+              "version": "[2.4.0, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
