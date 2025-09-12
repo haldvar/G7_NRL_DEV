@@ -27,7 +27,7 @@ public class HomeController : Controller
         {
             await using var conn = new MySqlConnection(_connectionString);
             await conn.OpenAsync();
-            return Content("Connected to MariaDB successfully!");
+            return View(); //("Connected to MariaDB successfully!");
         }
         catch (Exception ex)
         {
@@ -40,6 +40,18 @@ public class HomeController : Controller
     //     return View();
     // }
 
+    [HttpGet]
+    public ActionResult DataForm()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    public IActionResult DataForm(ObstacleData obstacledata)
+    {
+        return View("Overview", obstacledata);
+    }
+    
     public IActionResult Privacy()
     {
         return View();

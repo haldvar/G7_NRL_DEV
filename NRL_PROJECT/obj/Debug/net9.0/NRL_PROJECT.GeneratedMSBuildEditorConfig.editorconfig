@@ -20,8 +20,16 @@ build_property._RazorSourceGeneratorDebug =
 build_property.EffectiveAnalysisLevelStyle = 9.0
 build_property.EnableCodeStyleSeverity = 
 
+[/Users/halli/RiderProjects/G7_NRL_DEV/NRL_PROJECT/Views/Home/DataForm.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9EYXRhRm9ybS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Users/halli/RiderProjects/G7_NRL_DEV/NRL_PROJECT/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9JbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/halli/RiderProjects/G7_NRL_DEV/NRL_PROJECT/Views/Home/Overview.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9PdmVydmlldy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/halli/RiderProjects/G7_NRL_DEV/NRL_PROJECT/Views/Home/Privacy.cshtml]
