@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NRL_PROJECT")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2572ce941f6db25f90b431ce222cd557d898e5f6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+abca19742b80982554128d70cf67be72e6509311")]
 [assembly: System.Reflection.AssemblyProductAttribute("NRL_PROJECT")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NRL_PROJECT")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
