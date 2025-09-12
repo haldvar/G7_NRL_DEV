@@ -1,0 +1,24 @@
+@model NRL_PROJECT.Models.ObstacleData
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<div>
+    <h1>Overview</h1>
+    <p>Thank you for registering an obstacle:</p>
+    
+    <p>
+        @Model.ObstacleName
+    </p>
+    
+    <p>
+        @Model.ObstacleHeight
+    </p>
+    
+    <p>
+        @Model.ObstacleDescription
+    </p>
+</div>
