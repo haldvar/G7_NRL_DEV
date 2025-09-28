@@ -1,9 +1,22 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model string
+@{
+    ViewData["Title"] = "Group7";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-    Hello!
+<div class="max-w-2xl mx-auto px-4 py-10">
+    <h1 class="text-4xl font-bold text-blue-700 text-center mb-4">Velkommen</h1>
+
+    <p class="text-lg text-gray-800 text-center mb-6">@Model</p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
+        <a asp-action="DataForm" class="block bg-green-600 text-white px-6 py-3 rounded hover:bg-green-700 transition">
+            Register Obstacle
+        </a>
+        <a asp-action="MapForm" class="block bg-purple-600 text-white px-6 py-3 rounded hover:bg-purple-700 transition">
+            Go to Map
+        </a>
+        <a asp-action="Privacy" class="block bg-gray-600 text-white px-6 py-3 rounded hover:bg-gray-700 transition sm:col-span-2">
+            Privacy
+        </a>
+    </div>
 </div>

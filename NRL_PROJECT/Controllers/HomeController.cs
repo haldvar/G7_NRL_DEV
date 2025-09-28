@@ -6,9 +6,9 @@ using MySqlConnector;
 
 namespace NRL_PROJECT.Controllers
 {
-public class HomeController : Controller
-{
-    private readonly ILogger<HomeController> _logger;
+    public class HomeController : Controller
+    {
+        private readonly ILogger<HomeController> _logger;
 
         /*public HomeController(ILogger<HomeController> logger)
         {
@@ -21,6 +21,54 @@ public class HomeController : Controller
         public HomeController(IConfiguration config)
         {
             _connectionString = config.GetConnectionString("DefaultConnection")!;
+        }
+
+        // blir kalt etter at vi trykker på "Register obstacle" lenken i Index-viewet
+        [HttpGet]
+        public ActionResult DataForm()
+        {
+            return View();
+        }
+
+        // blir kalt etter at vi trykker på "Submit data" knappen i DataForm-viewet
+        [HttpPost]
+        public ActionResult DataForm(ObstacleData obstacledata)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(obstacledata); // returner skjema med feilmeldinger
+            }
+
+            return View("ObstacleOverview", obstacledata);
+        }
+
+
+
+        // blir kalt etter at vi trykker på "Register Map stuff" lenken i Index-viewet
+        [HttpGet]
+        public ActionResult MapForm()
+        {
+            return View();
+        }
+
+        // blir kalt etter at vi trykker på "Submit Map stuff" knappen i SirkusForm-viewet
+        [HttpPost]
+        public ActionResult MapForm(MapData mapdata)
+        {
+            return View("MapOverview", mapdata);
+        }
+
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+
+
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
         public async Task<IActionResult> Index()
@@ -40,21 +88,5 @@ public class HomeController : Controller
             }
         }
 
-        /*public IActionResult Index()
-    {
-        return View();
     }
-        */
-
-    public IActionResult Privacy()
-    {
-        return View();
-    }
-
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-    }
-}
 }
