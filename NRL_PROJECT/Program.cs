@@ -18,7 +18,7 @@ builder.Services.AddDbContext<NRL_Db_Context>(options =>
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 //Oppretter en instans av MySqlConnection 
-//builder.Services.AddSingleton(new MySqlConnection(connectionString));
+builder.Services.AddSingleton(new MySqlConnection(connectionString));
 
 var app = builder.Build();
 
@@ -44,15 +44,6 @@ app.MapControllerRoute(
 
 app.Run();
 
-/*
-
-// In-memory list to store todos - just testing
-var todos = new List<Todo>();
-
-
-
-public record Todo(int Id, string Name, DateTime DueDate, bool IsCompleted);
-*/
 
 
 /*

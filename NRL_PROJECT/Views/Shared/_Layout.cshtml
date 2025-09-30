@@ -11,6 +11,9 @@
     <!-- Leaflet via lokal mappe -->
     <link rel="stylesheet" href="/lib/leaflet/leaflet.css" />
     <script src="/lib/leaflet/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
+    <script src="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
+    @RenderSection("Styles", required: false)
 </head>
 
 
@@ -26,7 +29,8 @@
             <!-- Menu -->
             <div class="hidden md:flex space-x-6">
                 <a class="text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                <a class="text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="MapView">Map</a>
+                <a class="text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Map" asp-action="MapView">Go to Map</a>
+
             </div>
 
             <!-- Mobile menu button -->

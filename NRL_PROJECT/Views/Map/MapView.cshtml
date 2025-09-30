@@ -1,0 +1,58 @@
+﻿@model NRL_PROJECT.Models.MapData
+
+@{
+    ViewData["Title"] = "Register Map Location";
+    Layout = "_Layout";
+}
+
+<div class="max-w-2xl mx-auto px-4 py-10">
+    <h1 class="text-3xl font-bold text-purple-700 text-center mb-4">Register Map Location</h1>
+    <p class="text-gray-700 text-center mb-8">Draw a point or line on the map and submit it below:</p>
+
+    <form asp-action="Submit" asp-controller="Map" method="post" class="space-y-6">
+        <input type="hidden" id="geoInput" name="GeoJsonCoordinates" />
+
+        <div class="mt-6">
+            <h2 class="text-lg font-semibold text-purple-700 mb-2">Draw on Map</h2>
+            <div id="mapDraw" style="height: 400px;" class="rounded shadow"></div>
+        </div>
+
+        <div class="text-center mt-6">
+            <button type="submit" class="bg-yellow-600 text-black px-6 py-2 rounded hover:bg-orange-700 transition">
+                Submit Drawing
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
+}
+
+@section Scripts {
+    <script>
+        const map = L.map('mapDraw').setView([58.333, 8.233], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        map.pm.addControls({
+            position: 'topleft',
+            drawMarker: true,
+            drawPolyline: true,
+            drawPolygon: false,
+            drawCircle: false,
+            drawRectangle: false,
+            editMode: true,
+            removalMode: true
+        });
+
+        map.on('pm:create', e => {
+            const geojson = e.layer.toGeoJSON();
+            document.getElementById('geoInput').value = JSON.stringify(geojson.geometry.coordinates);
+        });
+
+        map.on('pm:remove', () => {
+            document.getElementById('geoInput').value = '';
+        });
+    </script>
+}

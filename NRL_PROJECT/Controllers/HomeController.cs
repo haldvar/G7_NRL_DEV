@@ -1,85 +1,30 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using NRL_PROJECT.Models;
 using MySqlConnector;
 using NRL_PROJECT.Data;
-
+using NRL_PROJECT.Models;
 
 namespace NRL_PROJECT.Controllers
 {
     public class HomeController : Controller
     {
+        // Logger for diagnostics and logging
         private readonly ILogger<HomeController> _logger;
 
-        /*public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
-        */
+        // Entity Framework DbContext for database operations
+        private readonly NRL_Db_Context _context;
 
+        // Connection string for manual MySQL access
         private readonly string _connectionString;
 
-        /* public HomeController(IConfiguration config)
+        // Constructor: injects DbContext and configuration
+        public HomeController(NRL_Db_Context context, IConfiguration config)
         {
+            _context = context;
             _connectionString = config.GetConnectionString("DefaultConnection")!;
         }
-        */
 
-        // blir kalt etter at vi trykker på "Register obstacle" lenken i Index-viewet
-        [HttpGet]
-        public ActionResult DataForm()
-        {
-            return View();
-        }
-
-        // blir kalt etter at vi trykker på "Submit data" knappen i DataForm-viewet
-        [HttpPost]
-        public ActionResult DataForm(ObstacleData obstacledata)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(obstacledata); // returner skjema med feilmeldinger
-            }
-
-            return View("ObstacleOverview", obstacledata);
-        } 
-
-        
-
-        // blir kalt etter at vi trykker på "Register Map stuff" lenken i Index-viewet
-        [HttpGet]
-        public ActionResult MapView()
-        {
-            return View();
-        }
-
-        // blir kalt etter at vi trykker på "Submit Map stuff" knappen i SirkusForm-viewet
-        [HttpPost]
-        public ActionResult MapView(MapData mapdata)
-        {
-            return View(mapdata);
-        }
-
-        
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-
-        public IActionResult About()
-        {
-            return View();
-        }
-
-
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
-
+        // Called when accessing the root page ("/")
         public async Task<IActionResult> Index()
         {
             try
@@ -90,13 +35,46 @@ namespace NRL_PROJECT.Controllers
                 //return View("Index","test");
                 return View();
             }
-
             catch (Exception ex)
             {
                 return Content("Failed to connect to MariaDB: " + ex.Message);
             }
         }
 
+        // Called when clicking "Register obstacle" link in Index view
+        [HttpGet]
+        public ActionResult DataForm()
+        {
+            return View();
+        }
+
+        // Called when submitting the "Submit data" button in DataForm view
+        [HttpPost]
+        public ActionResult DataForm(ObstacleData obstacledata)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(obstacledata); // return form with validation errors
+            }
+
+            return View("ObstacleOverview", obstacledata);
+        }
+
+             
+        // Displays the About view with disabled caching
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult About()
+        {
+            return View();
+        }
+
+        // Displays the Error view with request ID for diagnostics
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        // Returns test obstacle data in GeoJSON format
         public IActionResult GetObstacles()
         {
             var geojson = new
@@ -104,29 +82,38 @@ namespace NRL_PROJECT.Controllers
                 type = "FeatureCollection",
                 features = new[]
                 {
-            new {
-                type = "Feature",
-                geometry = new {
-                    type = "Point",
-                    coordinates = new[] { 8.233, 58.333 }
-                },
-                properties = new {
-                    name = "Test obstacle"
+                    new {
+                        type = "Feature",
+                        geometry = new {
+                            type = "Point",
+                            coordinates = new[] { 8.233, 58.333 }
+                        },
+                        properties = new {
+                            name = "Test obstacle"
+                        }
+                    }
                 }
-            }
-        }
             };
 
             return Json(geojson);
         }
 
-
-        private readonly NRL_Db_Context _context;
-
-        public HomeController(NRL_Db_Context context, IConfiguration config)
+        /*
+        // Alternative constructor with logger (commented out)
+        public HomeController(ILogger<HomeController> logger)
         {
-            _context = context;
+            _logger = logger;
+        }
+
+        // Alternative constructor with only config (commented out)
+        public HomeController(IConfiguration config)
+        {
             _connectionString = config.GetConnectionString("DefaultConnection")!;
         }
+
+        // Manual MySqlConnection registration (commented out)
+        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+        builder.Services.AddSingleton(new MySqlConnection(connectionString));
+        */
     }
 }
