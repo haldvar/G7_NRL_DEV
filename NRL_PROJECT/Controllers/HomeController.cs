@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using NRL_PROJECT.Models;
 using MySqlConnector;
+using NRL_PROJECT.Data;
 
 
 namespace NRL_PROJECT.Controllers
@@ -18,10 +19,11 @@ namespace NRL_PROJECT.Controllers
 
         private readonly string _connectionString;
 
-        public HomeController(IConfiguration config)
+        /* public HomeController(IConfiguration config)
         {
             _connectionString = config.GetConnectionString("DefaultConnection")!;
         }
+        */
 
         // blir kalt etter at vi trykker på "Register obstacle" lenken i Index-viewet
         [HttpGet]
@@ -40,23 +42,25 @@ namespace NRL_PROJECT.Controllers
             }
 
             return View("ObstacleOverview", obstacledata);
-        }
+        } 
 
-
+        
 
         // blir kalt etter at vi trykker på "Register Map stuff" lenken i Index-viewet
         [HttpGet]
-        public ActionResult MapForm()
+        public ActionResult MapView()
         {
             return View();
         }
 
         // blir kalt etter at vi trykker på "Submit Map stuff" knappen i SirkusForm-viewet
         [HttpPost]
-        public ActionResult MapForm(MapData mapdata)
+        public ActionResult MapView(MapData mapdata)
         {
-            return View("MapOverview", mapdata);
+            return View(mapdata);
         }
+
+        
 
         public IActionResult Privacy()
         {
@@ -64,6 +68,11 @@ namespace NRL_PROJECT.Controllers
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+
+        public IActionResult About()
+        {
+            return View();
+        }
 
 
         public IActionResult Error()
@@ -88,5 +97,36 @@ namespace NRL_PROJECT.Controllers
             }
         }
 
+        public IActionResult GetObstacles()
+        {
+            var geojson = new
+            {
+                type = "FeatureCollection",
+                features = new[]
+                {
+            new {
+                type = "Feature",
+                geometry = new {
+                    type = "Point",
+                    coordinates = new[] { 8.233, 58.333 }
+                },
+                properties = new {
+                    name = "Test obstacle"
+                }
+            }
+        }
+            };
+
+            return Json(geojson);
+        }
+
+
+        private readonly NRL_Db_Context _context;
+
+        public HomeController(NRL_Db_Context context, IConfiguration config)
+        {
+            _context = context;
+            _connectionString = config.GetConnectionString("DefaultConnection")!;
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿@model NRL_PROJECT.Models.MapData
+﻿<!-- @model NRL_PROJECT.Models.MapData
 
 <div class="max-w-2xl mx-auto px-4 py-10">
     <h1 class="text-3xl font-bold text-purple-700 text-center mb-6">Map Overview</h1>
@@ -23,3 +23,22 @@
         </a>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Hent koordinater fra modellen (forutsetter format "lat,lng")
+        var locationString = "@Model.CurrentLocation";
+        var coords = locationString.split(',').map(Number);
+
+        var map = L.map('map').setView(coords, 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        L.marker(coords).addTo(map)
+            .bindPopup("@Model.DescriptionOfLocation")
+            .openPopup();
+    </script>
+    }
+-->

@@ -1,0 +1,73 @@
+name: dockercompose9066445481273808976
+services:
+  mariadbcontainer:
+    environment:
+      MYSQL_DATABASE: nrl_project_db
+      MYSQL_ROOT_PASSWORD: Begripeligvis1214
+    image: mariadb:11.8
+    networks:
+      appnet: null
+    ports:
+      - mode: ingress
+        target: 3306
+        published: "3488"
+        protocol: tcp
+    restart: always
+  nrl_project:
+    build:
+      context: C:\Users\karol\Koding\IS-200
+      dockerfile: NRL_PROJECT/Dockerfile
+    depends_on:
+      mariadbcontainer:
+        condition: service_started
+        required: true
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ASPNETCORE_HTTPS_PORTS: "8081"
+      ASPNETCORE_URLS: |-
+        http://+:5000
+        - ConnectionStrings__DefaultConnection=server=mariadbcontainer;port=3306;database=mysql;user=root;password=Begripeligvis1214
+    image: nrlproject
+    networks:
+      appnet: null
+    ports:
+      - mode: ingress
+        target: 5000
+        published: "5000"
+        protocol: tcp
+      - mode: ingress
+        target: 8080
+        protocol: tcp
+      - mode: ingress
+        target: 8081
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: C:\Users\karol\AppData\Roaming/Microsoft/UserSecrets
+        target: /home/app/.microsoft/usersecrets
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: C:\Users\karol\AppData\Roaming/Microsoft/UserSecrets
+        target: /root/.microsoft/usersecrets
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: C:\Users\karol\AppData\Roaming/ASP.NET/Https
+        target: /home/app/.aspnet/https
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: C:\Users\karol\AppData\Roaming/ASP.NET/Https
+        target: /root/.aspnet/https
+        read_only: true
+        bind:
+          create_host_path: true
+networks:
+  appnet:
+    name: appnet
+    external: true

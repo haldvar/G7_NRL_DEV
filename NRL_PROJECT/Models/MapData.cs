@@ -12,4 +12,6 @@ namespace NRL_PROJECT.Models
 
         public string DescriptionOfLocation { get; set; }
     }
+
+
 }

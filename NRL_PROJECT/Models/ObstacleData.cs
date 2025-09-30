@@ -17,5 +17,9 @@ namespace NRL_PROJECT.Models
         public int ObstacleWidth { get; set; }
 
         public string ObstacleDescription { get; set; }
+
+        public double Longitude { get; set; }
+        public double Latitude { get; set; }
+
     }
 }
