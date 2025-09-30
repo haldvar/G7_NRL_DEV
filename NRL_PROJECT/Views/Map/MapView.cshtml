@@ -31,10 +31,19 @@
 }
 
 @section Scripts {
-    <script>
-        const map = L.map('mapDraw').setView([58.333, 8.233], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
 
+    <script>
+        // Init map
+        const map = L.map('mapDraw').setView([58.333, 8.233], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
+        }).addTo(map);
+
+        // Geoman controls
         map.pm.addControls({
             position: 'topleft',
             drawMarker: true,
@@ -46,13 +55,18 @@
             removalMode: true
         });
 
+        // Når noe tegnes
         map.on('pm:create', e => {
             const geojson = e.layer.toGeoJSON();
+            // geojson.geometry.coordinates = [lng, lat] eller array av punkter
             document.getElementById('geoInput').value = JSON.stringify(geojson.geometry.coordinates);
         });
 
+        // Når noe slettes
         map.on('pm:remove', () => {
             document.getElementById('geoInput').value = '';
         });
-    </script>
+
+           
+        </script>
 }
