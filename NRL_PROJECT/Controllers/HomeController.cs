@@ -43,14 +43,14 @@ namespace NRL_PROJECT.Controllers
 
         // Called when clicking "Register obstacle" link in Index view
         [HttpGet]
-        public ActionResult DataForm()
+        public ActionResult ObstacleDataForm()
         {
             return View();
         }
 
-        // Called when submitting the "Submit data" button in DataForm view
+        // Called when submitting the "Submit data" button in ObstacleDataForm view
         [HttpPost]
-        public ActionResult DataForm(ObstacleData obstacledata)
+        public ActionResult ObstacleDataForm(ObstacleData obstacledata)
         {
             if (!ModelState.IsValid)
             {
