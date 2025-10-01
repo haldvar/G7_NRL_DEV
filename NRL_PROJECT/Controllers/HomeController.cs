@@ -68,6 +68,13 @@ namespace NRL_PROJECT.Controllers
             return View();
         }
 
+        // Displays the Privacy view 
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
         // Displays the Error view with request ID for diagnostics
         public IActionResult Error()
         {
