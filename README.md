@@ -54,20 +54,24 @@ Kartintegrasjon
     - **Docker** – drift, kjører applikasjon og database i containere koblet via nettwerket **appnet**
 
 ### Testscenarier og resultater
-Foreløpig teststrategi:
+#### Foreløpig teststrategi:
 
-Manuell testing
-Gå gjennom løsningen i nettleseren og bekreft at:
+1. Manuell testing
 
-GET-forespørsler returnerer riktig data
+ - Gå gjennom løsningen i nettleseren og bekreft at:
 
-POST via skjema fungerer og viser data på ny side
+ - GET-forespørsler returnerer riktig data
 
-Kartet laster og koordinater hentes korrekt
+ - POST via skjema fungerer og viser data på ny side
 
-Integrasjonstesting
+ - Kartet laster og koordinater hentes korrekt
+
+#### Integrasjonstesting
+
 Test at databasen og applikasjonen kommuniserer korrekt. Her gjenstår arbeid, siden vi ikke har hatt særlig fokus på databasen enda.
 
-Fremtidige forbedringer
+#### Fremtidige forbedringer
+
 Legge til enhetstesting 
+
 Vurdere bruk av automatiserte testverktøy (f.eks. Playwright).
