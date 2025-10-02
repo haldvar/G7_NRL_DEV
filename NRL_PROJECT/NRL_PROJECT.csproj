@@ -37,4 +37,9 @@
       <Folder Include="wwwroot\lib\leaflet\" />
     </ItemGroup>
 
+      <!-- Pre-build event to run npm install in the solution root directory -->
+      <Target Name="NpmInstall" BeforeTargets="Build">
+        <Exec Command="npm install" WorkingDirectory="$(MSBuildProjectDirectory)\.." />
+      </Target>
+
 </Project>
