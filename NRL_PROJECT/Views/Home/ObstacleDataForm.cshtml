@@ -1,0 +1,60 @@
+﻿@model NRL_PROJECT.Models.ObstacleData
+
+<div class="max-w-3xl mx-auto px-4 py-10">
+    <!-- Title -->
+    <h1 class="text-4xl font-extrabold text-blue-700 text-center mb-3 tracking-wide">
+        🛑 Obstacle Registration Form
+    </h1>
+    <p class="text-gray-600 text-center mb-8">
+        Please register an obstacle below
+    </p>
+
+    <!-- Form Card -->
+    <form asp-action="ObstacleDataForm" method="post" class="bg-white rounded-2xl shadow-lg p-8 space-y-6">
+        <!-- Obstacle Name -->
+        <div>
+            <label asp-for="ObstacleName" class="block text-sm font-medium text-gray-800 mb-1">Obstacle Name</label>
+            <input asp-for="ObstacleName" class="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-300" />
+            <span asp-validation-for="ObstacleName" class="text-red-500 text-sm"></span>
+        </div>
+
+        <!-- Obstacle Type -->
+        <div>
+            <label asp-for="ObstacleType" class="block text-sm font-medium text-gray-800 mb-1">Obstacle Type</label>
+            <input asp-for="ObstacleType" class="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-300" />
+            <span asp-validation-for="ObstacleType" class="text-red-500 text-sm"></span>
+        </div>
+
+        <!-- Height & Width -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+                <label asp-for="ObstacleHeight" class="block text-sm font-medium text-gray-800 mb-1">Height</label>
+                <input asp-for="ObstacleHeight" class="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-300" />
+                <span asp-validation-for="ObstacleHeight" class="text-red-500 text-sm"></span>
+            </div>
+            <div>
+                <label asp-for="ObstacleWidth" class="block text-sm font-medium text-gray-800 mb-1">Width</label>
+                <input asp-for="ObstacleWidth" class="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-300" />
+                <span asp-validation-for="ObstacleWidth" class="text-red-500 text-sm"></span>
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div>
+            <label asp-for="ObstacleDescription" class="block text-sm font-medium text-gray-800 mb-1">Description</label>
+            <textarea asp-for="ObstacleDescription" class="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-300" rows="3"></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="text-center">
+            <button type="submit"
+                    class="bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold shadow-md hover:bg-blue-700 hover:shadow-lg transition">
+                ✅ Submit Data
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

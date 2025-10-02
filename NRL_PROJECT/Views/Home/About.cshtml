@@ -1,0 +1,32 @@
+﻿@{
+    ViewData["Title"] = "About Group 7";
+}
+
+<div class="flex justify-center items-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 px-4">
+    <div class="bg-white shadow-2xl rounded-3xl p-10 max-w-xl w-full">
+        <!-- Title -->
+        <h1 class="text-4xl font-extrabold text-center text-gray-800 mb-6 tracking-wide">
+            @ViewData["Title"]
+        </h1>
+
+        <!-- Intro -->
+        <p class="text-center text-gray-600 mb-10 text-lg">
+            We are the creators of this solution
+        </p>
+
+        <!-- Team List -->
+        <ul class="grid gap-4">
+            @foreach (var member in new[] { "Elise", "Emma", "Halvard", "Jan Kåre", "Karoline", "Milana" })
+            {
+                <li class="bg-gray-50 hover:bg-indigo-50 transition rounded-2xl px-5 py-3 text-center font-medium text-gray-700 shadow-sm">
+                    @member
+                </li>
+            }
+        </ul>
+
+        <!-- Optional Footer/Message -->
+        <p class="text-center text-gray-400 mt-8 text-sm">
+            © 2025 - Group 7
+        </p>
+    </div>
+</div>

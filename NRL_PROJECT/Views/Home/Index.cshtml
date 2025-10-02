@@ -1,8 +1,44 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model string
+@{
+    ViewData["Title"] = "Group7";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 flex items-center justify-center px-4">
+    <div class="bg-white shadow-2xl rounded-2xl p-10 max-w-4xl w-full">
+
+        <!-- Title -->
+        <h1 class="text-5xl md:text-6xl font-extrabold text-blue-800 text-center mb-4 tracking-wide">
+            Aviation Obstacle Registration
+        </h1>
+        <p class="text-gray-600 text-center text-lg md:text-xl mb-12">
+            @Model
+        </p>
+
+        <!-- Navigation buttons -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            <!-- Register Obstacle -->
+            <a asp-action="ObstacleDataForm"
+               class="flex flex-col md:flex-row items-center justify-center bg-green-600 text-white px-8 py-6 rounded-2xl font-semibold text-2xl md:text-3xl shadow-lg hover:bg-green-700 hover:shadow-xl transition">
+                <span class="mr-0 md:mr-4 mb-2 md:mb-0">✈️</span> Register Obstacle
+            </a>
+
+            <!-- Map -->
+            <a asp-controller="Map" asp-action="MapView"
+               class="flex flex-col md:flex-row items-center justify-center bg-blue-600 text-white px-8 py-6 rounded-2xl font-semibold text-2xl md:text-3xl shadow-lg hover:bg-blue-700 hover:shadow-xl transition">
+                <span class="mr-0 md:mr-4 mb-2 md:mb-0">🗺️</span> Go to Map
+            </a>
+
+            <!-- Privacy -->
+            <a asp-action="Privacy"
+               class="flex flex-col md:flex-row items-center justify-center bg-gray-700 text-white px-8 py-6 rounded-2xl font-medium text-2xl md:text-3xl shadow-lg hover:bg-gray-800 hover:shadow-xl transition sm:col-span-2">
+                <span class="mr-0 md:mr-4 mb-2 md:mb-0">🔒</span> Privacy Policy
+            </a>
+
+            <!-- About -->
+            <a asp-action="About"
+               class="flex flex-col md:flex-row items-center justify-center bg-gray-700 text-white px-8 py-6 rounded-2xl font-medium text-2xl md:text-3xl shadow-lg hover:bg-gray-800 hover:shadow-xl transition sm:col-span-2">
+                <span class="mr-0 md:mr-4 mb-2 md:mb-0">👥</span> About Group 7
+            </a>
+        </div>
+    </div>
 </div>
