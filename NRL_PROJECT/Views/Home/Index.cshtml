@@ -3,23 +3,42 @@
     ViewData["Title"] = "Group7";
 }
 
-<div class="max-w-2xl mx-auto px-4 py-10">
-    <h1 class="text-4xl font-bold text-blue-700 text-center mb-4">Aviation Obstacle Registration</h1>
+<div class="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 flex items-center justify-center px-4">
+    <div class="bg-white shadow-2xl rounded-2xl p-10 max-w-4xl w-full">
 
-    <p class="text-lg text-gray-800 text-center mb-6">@Model</p>
+        <!-- Title -->
+        <h1 class="text-5xl md:text-6xl font-extrabold text-blue-800 text-center mb-4 tracking-wide">
+            Aviation Obstacle Registration
+        </h1>
+        <p class="text-gray-600 text-center text-lg md:text-xl mb-12">
+            @Model
+        </p>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
-        <a asp-action="ObstacleDataForm" class="block bg-green-600 text-white px-6 py-3 rounded hover:bg-green-700 transition">
-            Register Obstacle
-        </a>
-        <a asp-controller="Map" asp-action="MapView" class="btn bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-            Go to Map
-        </a>
-        <a asp-action="Privacy" class="block bg-gray-600 text-white px-6 py-3 rounded hover:bg-gray-700 transition sm:col-span-2">
-            Privacy
-        </a>
-        <a asp-action="About" class="block bg-gray-600 text-white px-6 py-3 rounded hover:bg-gray-700 transition sm:col-span-2">
-            About 
-        </a>
+        <!-- Navigation buttons -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            <!-- Register Obstacle -->
+            <a asp-action="ObstacleDataForm"
+               class="flex flex-col md:flex-row items-center justify-center bg-green-600 text-white px-8 py-6 rounded-2xl font-semibold text-2xl md:text-3xl shadow-lg hover:bg-green-700 hover:shadow-xl transition">
+                <span class="mr-0 md:mr-4 mb-2 md:mb-0">✈️</span> Register Obstacle
+            </a>
+
+            <!-- Map -->
+            <a asp-controller="Map" asp-action="MapView"
+               class="flex flex-col md:flex-row items-center justify-center bg-blue-600 text-white px-8 py-6 rounded-2xl font-semibold text-2xl md:text-3xl shadow-lg hover:bg-blue-700 hover:shadow-xl transition">
+                <span class="mr-0 md:mr-4 mb-2 md:mb-0">🗺️</span> Go to Map
+            </a>
+
+            <!-- Privacy -->
+            <a asp-action="Privacy"
+               class="flex flex-col md:flex-row items-center justify-center bg-gray-700 text-white px-8 py-6 rounded-2xl font-medium text-2xl md:text-3xl shadow-lg hover:bg-gray-800 hover:shadow-xl transition sm:col-span-2">
+                <span class="mr-0 md:mr-4 mb-2 md:mb-0">🔒</span> Privacy Policy
+            </a>
+
+            <!-- About -->
+            <a asp-action="About"
+               class="flex flex-col md:flex-row items-center justify-center bg-gray-700 text-white px-8 py-6 rounded-2xl font-medium text-2xl md:text-3xl shadow-lg hover:bg-gray-800 hover:shadow-xl transition sm:col-span-2">
+                <span class="mr-0 md:mr-4 mb-2 md:mb-0">👥</span> About Group 7
+            </a>
+        </div>
     </div>
 </div>
