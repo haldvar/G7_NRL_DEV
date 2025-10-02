@@ -56,7 +56,7 @@ Kartintegrasjon
 ### Testscenarier og resultater
 #### Foreløpig teststrategi:
 
-1. Manuell testing
+Manuell testing
 
  - Gå gjennom løsningen i nettleseren og bekreft at:
 
