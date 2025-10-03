@@ -12,33 +12,20 @@ namespace NRL_PROJECT.Controllers
         private readonly ILogger<HomeController> _logger;
 
         // Entity Framework DbContext for database operations
-        private readonly NRL_Db_Context _context;
+        
 
         // Connection string for manual MySQL access
-        private readonly string _connectionString;
 
         // Constructor: injects DbContext and configuration
-        public HomeController(NRL_Db_Context context, IConfiguration config)
+        public HomeController()
         {
-            _context = context;
-            _connectionString = config.GetConnectionString("DefaultConnection")!;
+            
         }
 
         // Called when accessing the root page ("/")
         public async Task<IActionResult> Index()
         {
-            try
-            {
-                await using var conn = new MySqlConnection(_connectionString);
-                await conn.OpenAsync();
-                //return Content("Connected to MariaDB successfully!");
-                //return View("Index","test");
-                return View();
-            }
-            catch (Exception ex)
-            {
-                return Content("Failed to connect to MariaDB: " + ex.Message);
-            }
+            return View();
         }
 
         // Called when clicking "Register obstacle" link in Index view
