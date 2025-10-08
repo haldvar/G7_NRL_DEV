@@ -75,3 +75,5 @@ Test at databasen og applikasjonen kommuniserer korrekt. Her gjenstår arbeid, s
 Legge til enhetstesting 
 
 Vurdere bruk av automatiserte testverktøy (f.eks. Playwright).
+
+Pull request i test!!!
