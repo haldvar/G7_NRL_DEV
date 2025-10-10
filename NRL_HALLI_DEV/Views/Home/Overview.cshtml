@@ -1,0 +1,67 @@
+@model NRL_HALLI_DEV.Models.ObstacleData
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Obstacle Overview</title>
+    <link rel="stylesheet" href="~/css/output.css" />
+</head>
+<body class="min-h-screen w-full m-0 bg-gradient-to-b from-green-100 to-blue-100 font-sans">
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+            <!-- Header -->
+            <div class="flex items-center gap-3 p-6 border-b border-gray-100">
+                <img src="~/images/logo-square.png" alt="Logo" class="h-12.5 w-10 rounded-md" />
+                <div>
+                    <h1 class="text-2xl font-bold text-green-700">Overview</h1>
+                    <p class="text-gray-500 text-sm">Thank you for registering an obstacle.</p>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="p-6">
+                <dl class="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-4">
+                    <dt class="text-sm font-semibold text-gray-600">Obstacle Name</dt>
+                    <dd class="sm:col-span-2 text-gray-900 font-medium">@Model.ObstacleName</dd>
+
+                    <dt class="text-sm font-semibold text-gray-600">Height</dt>
+                    <dd class="sm:col-span-2 text-gray-900 font-medium">
+                        @Model.ObstacleHeight <span class="text-gray-500">m</span>
+                    </dd>
+
+                    <dt class="text-sm font-semibold text-gray-600">Description</dt>
+                    <dd class="sm:col-span-2 text-gray-900">
+                        @Model.ObstacleDescription
+                    </dd>
+                </dl>
+
+                <!-- Divider -->
+                <div class="my-6 h-px bg-gray-100"></div>
+
+                <!-- Actions -->
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <a href="~/"
+                       class="inline-flex justify-center items-center px-6 py-3 rounded-full font-semibold
+                              bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
+                        Home
+                    </a>
+                    <a asp-action="DataForm"
+                       class="inline-flex justify-center items-center px-6 py-3 rounded-full font-semibold
+                              bg-blue-600 text-white shadow-md hover:bg-blue-700 transition">
+                        Register Another
+                    </a>
+                </div>
+            </div>
+
+            <!-- Accent bar -->
+            <div class="h-2 bg-gradient-to-r from-green-600 to-blue-600"></div>
+        </div>
+    </div>
+</body>
+</html>

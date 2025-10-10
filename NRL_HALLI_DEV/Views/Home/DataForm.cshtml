@@ -1,0 +1,91 @@
+@model NRL_HALLI_DEV.Models.ObstacleData
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Register Obstacle</title>
+    <!-- Make sure output.css is served from wwwroot/css/output.css -->
+    <link rel="stylesheet" href="~/css/output.css" />
+</head>
+<body class="min-h-screen bg-gradient-to-b from-green-100 to-blue-100 flex items-center justify-center p-4">
+    <div class="w-full max-w-2xl">
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+            <!-- Header / Logo -->
+            <div class="flex items-center gap-3 p-6 border-b border-gray-100">
+                <img src="~/images/logo-square.png" alt="Logo" class="h-12.5 w-10 rounded-md" />
+                <div>
+                    <h1 class="text-2xl font-bold text-green-700">Obstacle Registration</h1>
+                    <p class="text-gray-500 text-sm">Please register an obstacle below.</p>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <form asp-action="DataForm" method="post" class="p-6 space-y-6">
+                @* Validation summary *@
+                <div asp-validation-summary="ModelOnly" class="text-sm text-red-600"></div>
+
+                <!-- Obstacle Name -->
+                <div>
+                    <label asp-for="ObstacleName" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Obstacle Name
+                    </label>
+                    <input asp-for="ObstacleName"
+                           class="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400
+                                  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                           placeholder="e.g., Boulder Field" />
+                    <span asp-validation-for="ObstacleName" class="mt-1 block text-sm text-red-600"></span>
+                </div>
+
+                <!-- Obstacle Height -->
+                <div>
+                    <label asp-for="ObstacleHeight" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Obstacle Height (meters)
+                    </label>
+                    <input asp-for="ObstacleHeight" type="number" step="0.01" min="0"
+                           class="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400
+                                  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="e.g., 2.5" />
+                    <span asp-validation-for="ObstacleHeight" class="mt-1 block text-sm text-red-600"></span>
+                </div>
+
+                <!-- Obstacle Description -->
+                <div>
+                    <label asp-for="ObstacleDescription" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Obstacle Description
+                    </label>
+                    <textarea asp-for="ObstacleDescription" rows="4"
+                              class="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400
+                                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Briefly describe the obstacle, terrain, hazards, etc."></textarea>
+                    <span asp-validation-for="ObstacleDescription" class="mt-1 block text-sm text-red-600"></span>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+                    <button type="submit"
+                            class="inline-flex justify-center items-center px-6 py-3 rounded-full font-semibold
+                                   bg-blue-600 text-white shadow-md hover:bg-blue-700 transition">
+                        Submit Data
+                    </button>
+                    <a href="~/" class="inline-flex justify-center items-center px-6 py-3 rounded-full font-semibold
+                                       bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+
+            <!-- Footer bar (subtle brand accent) -->
+            <div class="h-2 bg-gradient-to-r from-green-600 to-blue-600"></div>
+        </div>
+    </div>
+
+    @* Client-side validation scripts if you're using them *@
+    <partial name="_ValidationScriptsPartial" />
+</body>
+</html>
