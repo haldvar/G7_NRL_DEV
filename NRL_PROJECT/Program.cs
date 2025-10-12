@@ -26,7 +26,6 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -44,11 +43,3 @@ app.MapControllerRoute(
 
 app.Run();
 
-
-
-/*
- * Documentation NRL_PROJECT - ASP.NET Core MVC with MySQL/MariaDB by Group7
- * 
- * 
- * 
- */
