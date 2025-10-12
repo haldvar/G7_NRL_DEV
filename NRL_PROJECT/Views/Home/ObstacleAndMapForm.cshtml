@@ -1,0 +1,142 @@
+﻿@model NRL_PROJECT.Models.ObstacleReportViewModel
+
+<div class="min-h-screen bg-gradient-to-b from-slate-900 via-sky-900 to-sky-800 px-4 py-10 text-slate-100 font-sans">
+    <div class="max-w-6xl mx-auto bg-slate-800/80 rounded-3xl shadow-2xl p-10 backdrop-blur-lg border border-slate-700">
+
+        <!-- Title -->
+        <div class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-sky-400 tracking-tight">
+                🛠️ Register Obstacle with Location
+            </h1>
+            <p class="text-slate-300 mt-3 text-lg">
+                Enter obstacle details and mark the position on the map.
+            </p>
+        </div>
+
+        <form asp-action="SubmitObstacleWithLocation" asp-controller="Home" method="post" class="space-y-10">
+
+            <!-- Obstacle Info -->
+            <div class="bg-slate-700/60 rounded-2xl p-8 shadow-lg border border-slate-600">
+                <h2 class="text-2xl font-bold text-sky-300 mb-6">🧱 Obstacle Information</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-sky-200">Name</label>
+                        <input asp-for="ObstacleName" class="mt-1 block w-full bg-slate-900 border-slate-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-400 focus:outline-none" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-sky-200">Type</label>
+                        <input asp-for="ObstacleType" class="mt-1 block w-full bg-slate-900 border-slate-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-400 focus:outline-none" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-sky-200">Height (m)</label>
+                        <input asp-for="ObstacleHeight" type="number" step="0.01" class="mt-1 block w-full bg-slate-900 border-slate-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-400 focus:outline-none" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-sky-200">Width (m)</label>
+                        <input asp-for="ObstacleWidth" type="number" step="0.01" class="mt-1 block w-full bg-slate-900 border-slate-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-400 focus:outline-none" />
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <label class="block text-sm font-medium text-sky-200">Description</label>
+                    <textarea asp-for="ObstacleDescription" rows="3" class="mt-1 block w-full bg-slate-900 border-slate-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-400 focus:outline-none"></textarea>
+                </div>
+            </div>
+
+            <!-- Map Section -->
+            <div class="bg-slate-700/60 rounded-2xl p-8 shadow-lg border border-slate-600">
+                <h2 class="text-2xl md:text-3xl font-bold text-amber-400 mb-4 text-center">
+                    🗺️ Draw Obstacle Location
+                </h2>
+                <p class="text-center text-slate-300 mb-8 text-lg">
+                    Use the map tools to mark your obstacle. Only one drawing is saved.
+                </p>
+
+                <div class="bg-slate-900 rounded-2xl shadow-inner p-3">
+                    <div id="mapDraw" class="rounded-xl border border-slate-600" style="height: 600px;"></div>
+                    <p class="text-center text-slate-400 mt-4">
+                        Toolbar (top-left) lets you draw or edit. Removing replaces your drawing.
+                    </p>
+                </div>
+              
+                <input type="hidden" id="geoInput" name="GeoJsonCoordinates" />
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col md:flex-row justify-center gap-6 mt-10">
+                <button type="submit"
+                        class="bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-4 rounded-2xl font-bold text-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all">
+                    ✅ Submit Report
+                </button>
+
+                <a asp-action="Index" asp-controller="Home"
+                   class="bg-red-600 hover:bg-red-700 text-white px-10 py-4 rounded-2xl font-bold text-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all text-center">
+                    ❌ Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        /* Større Leaflet Draw toolbar knapper */
+        .leaflet-draw .leaflet-draw-toolbar {
+            top: 10px; /* litt margin fra toppen */
+            left: 10px;
+        }
+
+            .leaflet-draw .leaflet-draw-toolbar a {
+                width: 60px !important;
+                height: 60px !important;
+                line-height: 60px !important;
+                font-size: 2rem !important; /* større ikoner */
+                border-radius: 1rem !important; /* rundere hjørner */
+                margin-bottom: 4px !important;
+            }
+
+                .leaflet-draw .leaflet-draw-toolbar a span {
+                    transform: scale(1.8); /* gjør selve ikonet større */
+                }
+
+        /* Gjør hele toolbaren mer “touch friendly” */
+        .leaflet-draw-toolbar-top {
+            padding: 8px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 1rem;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script>
+    <script>
+        const map = L.map('mapDraw').setView([58.333, 8.233], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        const drawnItems = new L.FeatureGroup();
+        map.addLayer(drawnItems);
+
+        const drawControl = new L.Control.Draw({
+            edit: { featureGroup: drawnItems },
+            draw: {
+                polygon: false,
+                circle: false,
+                rectangle: false,
+                marker: true,
+                polyline: true
+            }
+        });
+        map.addControl(drawControl);
+
+        map.on('draw:created', function (e) {
+            drawnItems.clearLayers(); // Only one drawing at a time
+            drawnItems.addLayer(e.layer);
+
+            const geojson = e.layer.toGeoJSON();
+            document.getElementById('geoInput').value = JSON.stringify(geojson.geometry.coordinates);
+        });
+    </script>
+}

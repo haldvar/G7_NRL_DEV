@@ -10,6 +10,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="Controllers\ReportController.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
       <Content Remove="Views\Home\MapOverview.cshtml" />
     </ItemGroup>
 
@@ -34,6 +38,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Migrations\" />
       <Folder Include="wwwroot\lib\leaflet\" />
     </ItemGroup>
 

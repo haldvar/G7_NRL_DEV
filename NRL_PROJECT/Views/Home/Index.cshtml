@@ -3,48 +3,68 @@
     ViewData["Title"] = "Group7";
 }
 
-<div class="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 flex items-center justify-center px-4">
-    <div class="bg-white shadow-2xl rounded-2xl p-10 max-w-4xl w-full">
+<div class="min-h-screen bg-gradient-to-b from-slate-900 via-sky-900 to-sky-700 flex flex-col items-center justify-center px-4 py-10 font-sans">
 
-        <!-- Title -->
-        <h1 class="text-5xl md:text-6xl font-extrabold text-blue-800 text-center mb-4 tracking-wide">
-            Aviation Obstacle Registration
+    <!-- Title Section -->
+    <div class="text-center mb-10">
+        <h1 class="text-5xl md:text-6xl font-extrabold text-sky-100 tracking-tight drop-shadow-lg">
+            ✈️ Aviation Obstacle Registration
         </h1>
-        <p class="text-gray-600 text-center text-lg md:text-xl mb-12">
+        <p class="text-sky-200 text-lg md:text-xl mt-4 italic">
             @Model
         </p>
+    </div>
 
-        <!-- Navigation buttons -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
-            <!-- Register Obstacle -->
-            <a asp-action="ObstacleDataForm"
-               class="flex flex-col md:flex-row items-center justify-center bg-green-600 text-white px-8 py-6 rounded-2xl font-semibold text-2xl md:text-3xl shadow-lg hover:bg-green-700 hover:shadow-xl transition">
-                <span class="mr-0 md:mr-4 mb-2 md:mb-0">✈️</span> Register Obstacle
-            </a>
+   
 
-            <!-- Map -->
-            <a asp-controller="Map" asp-action="MapView"
-               class="flex flex-col md:flex-row items-center justify-center bg-blue-600 text-white px-8 py-6 rounded-2xl font-semibold text-2xl md:text-3xl shadow-lg hover:bg-blue-700 hover:shadow-xl transition">
-                <span class="mr-0 md:mr-4 mb-2 md:mb-0">🗺️</span> Go to Map
-            </a>
+    <!-- MAIN ACTION - Register with Map -->
+    <div class="w-full max-w-3xl mb-8">
+        <a asp-action="ObstacleAndMapForm" asp-controller="Home"
+           class="flex flex-col items-center justify-center bg-amber-500 hover:bg-amber-600 text-white px-10 py-12 rounded-3xl font-bold text-3xl md:text-4xl shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 hover:scale-[1.03] transition-all duration-300">
+            <span class="text-6xl mb-4">🛰️</span>
+            Register with Map
+        </a>
+    </div>
 
-            <!-- Obstacle Reports -->
-            <a asp-controller="Home" asp-action="ObstacleReportListOverview"
-               class="flex flex-col md:flex-row items-center justify-center bg-blue-600 text-white px-8 py-6 rounded-2xl font-semibold text-2xl md:text-3xl shadow-lg hover:bg-blue-700 hover:shadow-xl transition">
-                <span class="mr-0 md:mr-4 mb-2 md:mb-0">🗺️</span> View List of Obstacle Reports
-            </a>
+    <!-- SECONDARY ACTIONS -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-4xl mb-12">
 
-            <!-- Privacy -->
-            <a asp-action="Privacy"
-               class="flex flex-col md:flex-row items-center justify-center bg-gray-700 text-white px-8 py-6 rounded-2xl font-medium text-2xl md:text-3xl shadow-lg hover:bg-gray-800 hover:shadow-xl transition sm:col-span-2">
-                <span class="mr-0 md:mr-4 mb-2 md:mb-0">🔒</span> Privacy Policy
-            </a>
+        <!-- View Reports -->
+        <a asp-controller="Home" asp-action="ReportListOverview"
+           class="flex flex-col items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-10 rounded-2xl font-semibold text-2xl md:text-3xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
+            <span class="text-5xl mb-3">📋</span>
+            View Reports
+        </a>
 
-            <!-- About -->
-            <a asp-action="About"
-               class="flex flex-col md:flex-row items-center justify-center bg-gray-700 text-white px-8 py-6 rounded-2xl font-medium text-2xl md:text-3xl shadow-lg hover:bg-gray-800 hover:shadow-xl transition sm:col-span-2">
-                <span class="mr-0 md:mr-4 mb-2 md:mb-0">👥</span> About Group 7
-            </a>
-        </div>
+        <!-- Go to Map -->
+        <a asp-controller="Map" asp-action="MapView"
+           class="flex flex-col items-center justify-center bg-sky-600 hover:bg-sky-700 text-white px-8 py-10 rounded-2xl font-semibold text-2xl md:text-3xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
+            <span class="text-5xl mb-3">🗺️</span>
+            Go to Map
+        </a>
+    </div>
+
+    <!-- Info Card -->
+    <div class="bg-gradient-to-r from-sky-100 to-blue-50 border-l-8 border-sky-500 text-sky-800 p-5 rounded-xl shadow mb-10 w-full max-w-xl text-center">
+        <p class="font-semibold text-xl">
+            <span class="text-2xl mr-2">📊</span>
+            Total obstacle reports:
+            <span class="ml-2 text-2xl font-extrabold text-sky-900">@ViewBag.ReportCount</span>
+        </p>
+    </div>
+
+
+
+    <!-- FOOTER LINKS -->
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-auto text-slate-300 text-sm opacity-80">
+        <a asp-action="Privacy"
+           class="flex items-center gap-2 hover:text-white transition text-sm sm:text-base">
+            🔒 <span>Privacy Policy</span>
+        </a>
+        <span class="hidden sm:inline text-slate-500">|</span>
+        <a asp-action="About"
+           class="flex items-center gap-2 hover:text-white transition text-sm sm:text-base">
+            👨‍✈️ <span>About Group 7</span>
+        </a>
     </div>
 </div>

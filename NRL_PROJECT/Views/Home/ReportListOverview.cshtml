@@ -1,0 +1,33 @@
+﻿@model List<NRL_PROJECT.Models.ObstacleReportData>
+
+<h1 class="text-3xl font-bold text-blue-700 mb-6 text-center">📋 Obstacle Report Overview</h1>
+
+<table class="table-auto w-full border border-gray-300 rounded-lg shadow-md">
+    <thead class="bg-gray-100 text-left">
+        <tr>
+            <th class="px-4 py-2">Report ID</th>
+            <th class="px-4 py-2">Obstacle Name</th>
+            <th class="px-4 py-2">Reported Item</th>
+            <th>Type</th>
+            <th>Height</th>
+            <th>Width</th>
+            <th class="px-4 py-2">Location</th>
+            <th class="px-4 py-2">Submitted At</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var report in Model)
+        {
+            <tr class="border-t">
+                <td class="px-4 py-2">@report.Report_Id</td>
+                <td class="px-4 py-2">@report.Obstacle?.ObstacleName</td>
+                <td class="px-4 py-2">@report.Reported_Item</td>
+                <td>@report.Obstacle?.ObstacleType</td>
+                <td>@report.Obstacle?.ObstacleHeight</td>
+                <td>@report.Obstacle?.ObstacleWidth</td>
+                <td class="px-4 py-2">@report.Reported_Location</td>
+                <td class="px-4 py-2">@report.Time_of_Submitted_Report.ToString("g")</td>
+            </tr>
+        }
+    </tbody>
+</table>
