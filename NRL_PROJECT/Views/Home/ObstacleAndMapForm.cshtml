@@ -80,63 +80,61 @@
 </div>
 
 @section Styles {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
+
     <style>
-        /* Større Leaflet Draw toolbar knapper */
-        .leaflet-draw .leaflet-draw-toolbar {
-            top: 10px; /* litt margin fra toppen */
-            left: 10px;
+        /* Større Geoman toolbar knapper for tablet/pilot */
+        .leaflet-pm-toolbar {
+            padding: 12px !important;
+            background: rgba(255,255,255,0.95) !important;
+            border-radius: 1rem !important;
         }
 
-            .leaflet-draw .leaflet-draw-toolbar a {
+            .leaflet-pm-toolbar > .leaflet-pm-button {
                 width: 60px !important;
                 height: 60px !important;
-                line-height: 60px !important;
-                font-size: 2rem !important; /* større ikoner */
-                border-radius: 1rem !important; /* rundere hjørner */
-                margin-bottom: 4px !important;
+                font-size: 2rem !important;
+                border-radius: 1rem !important;
+                margin-bottom: 6px !important;
             }
-
-                .leaflet-draw .leaflet-draw-toolbar a span {
-                    transform: scale(1.8); /* gjør selve ikonet større */
-                }
-
-        /* Gjør hele toolbaren mer “touch friendly” */
-        .leaflet-draw-toolbar-top {
-            padding: 8px;
-            background: rgba(255,255,255,0.9);
-            border-radius: 1rem;
-        }
     </style>
 }
 
 @section Scripts {
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
+
     <script>
+        // Init map
         const map = L.map('mapDraw').setView([58.333, 8.233], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        const drawnItems = new L.FeatureGroup();
-        map.addLayer(drawnItems);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
+        }).addTo(map);
 
-        const drawControl = new L.Control.Draw({
-            edit: { featureGroup: drawnItems },
-            draw: {
-                polygon: false,
-                circle: false,
-                rectangle: false,
-                marker: true,
-                polyline: true
-            }
+        // Geoman controls
+        map.pm.addControls({
+            position: 'topleft',
+            drawMarker: true,
+            drawPolyline: true,
+            drawPolygon: false,
+            drawCircle: false,
+            drawRectangle: false,
+            editMode: true,
+            removalMode: true
         });
-        map.addControl(drawControl);
 
-        map.on('draw:created', function (e) {
-            drawnItems.clearLayers(); // Only one drawing at a time
-            drawnItems.addLayer(e.layer);
-
+        // Capture drawn geometry
+        map.on('pm:create', e => {
             const geojson = e.layer.toGeoJSON();
             document.getElementById('geoInput').value = JSON.stringify(geojson.geometry.coordinates);
+        });
+
+        // Clear input when object removed
+        map.on('pm:remove', () => {
+            document.getElementById('geoInput').value = '';
         });
     </script>
 }
