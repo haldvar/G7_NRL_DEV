@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/halli/RiderProjects/NRL_HALLI/NRL_HALLI_DEV/NRL_HALLI_DEV.csproj": {}
+    "/Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/NRL_HALLI_DEV.csproj": {}
   },
   "projects": {
-    "/Users/halli/RiderProjects/NRL_HALLI/NRL_HALLI_DEV/NRL_HALLI_DEV.csproj": {
+    "/Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/NRL_HALLI_DEV.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/halli/RiderProjects/NRL_HALLI/NRL_HALLI_DEV/NRL_HALLI_DEV.csproj",
+        "projectUniqueName": "/Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/NRL_HALLI_DEV.csproj",
         "projectName": "NRL_HALLI_DEV",
-        "projectPath": "/Users/halli/RiderProjects/NRL_HALLI/NRL_HALLI_DEV/NRL_HALLI_DEV.csproj",
+        "projectPath": "/Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/NRL_HALLI_DEV.csproj",
         "packagesPath": "/Users/halli/.nuget/packages/",
-        "outputPath": "/Users/halli/RiderProjects/NRL_HALLI/NRL_HALLI_DEV/obj/",
+        "outputPath": "/Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/halli/.nuget/NuGet/NuGet.Config"

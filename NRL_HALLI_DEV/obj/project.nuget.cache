@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "koNZfheh0VU=",
+  "dgSpecHash": "wqM1vmo0Usk=",
   "success": true,
-  "projectFilePath": "/Users/halli/RiderProjects/NRL_HALLI/NRL_HALLI_DEV/NRL_HALLI_DEV.csproj",
+  "projectFilePath": "/Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/NRL_HALLI_DEV.csproj",
   "expectedPackageFiles": [
     "/Users/halli/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/8.0.2/microsoft.extensions.dependencyinjection.abstractions.8.0.2.nupkg.sha512",
     "/Users/halli/.nuget/packages/microsoft.extensions.logging.abstractions/8.0.2/microsoft.extensions.logging.abstractions.8.0.2.nupkg.sha512",

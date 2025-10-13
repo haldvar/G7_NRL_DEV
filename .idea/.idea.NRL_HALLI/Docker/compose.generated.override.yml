@@ -1,0 +1,21 @@
+# This is a generated file. Not intended for manual editing.
+services:
+  nrl_halli_dev:
+    build:
+      context: "/Users/halli/RiderProjects/G7_NRL_DEV"
+      dockerfile: "NRL_HALLI_DEV/Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net9.0/NRL_HALLI_DEV.dll"
+    environment:
+      ASPNETCORE_STATICWEBASSETS: "/app/bin/Debug/net9.0/NRL_HALLI_DEV.staticwebassets.runtime.CT.json"
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "nrl_halli_dev:dev"
+    ports: []
+    volumes:
+    - "/Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV:/app:rw"
+    - "/Users/halli/RiderProjects/G7_NRL_DEV:/src:rw"
+    - "/Users/halli/.nuget/packages:/home/app/.nuget/packages"
+    working_dir: "/app"

@@ -1,0 +1,103 @@
+@{
+    ViewData["Title"] = "Register Map Location";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="max-w-6xl mx-auto px-4 py-10">
+    <!-- Title -->
+    <h1 class="text-5xl md:text-6xl font-extrabold text-purple-700 text-center mb-4 tracking-wide">
+        🗺️ Register Map Location
+    </h1>
+    <p class="text-gray-600 text-center text-lg md:text-xl mb-12">
+        Draw a point or a line on the map below and submit your obstacle.
+    </p>
+
+    <!-- Form -->
+    <form asp-action="Submit" asp-controller="Map" method="post" class="space-y-10">
+        <input type="hidden" id="geoInput" name="GeoJsonCoordinates" />
+
+        <!-- Map Card -->
+        <div class="bg-white rounded-3xl shadow-2xl p-6">
+            <h2 class="text-2xl md:text-3xl font-semibold text-purple-700 mb-4 flex items-center">
+                ✏️ Draw on Map
+            </h2>
+            <div id="mapDraw" class="rounded-2xl border border-gray-200 shadow-inner" style="height: 700px;"></div>
+            <p class="text-base md:text-lg text-gray-500 mt-3">
+                Use the toolbar in the top-left corner to add or remove markers/lines.
+            </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-8">
+            <button type="submit"
+                    class="bg-yellow-500 text-black font-semibold px-12 py-5 rounded-2xl shadow-lg text-2xl md:text-3xl hover:bg-yellow-600 hover:shadow-2xl transition">
+                ✅ Submit Drawing
+            </button>
+            <a asp-action="Index" asp-controller="Home"
+               class="bg-gray-600 text-white font-semibold px-12 py-5 rounded-2xl shadow-lg text-2xl md:text-3xl hover:bg-gray-700 hover:shadow-2xl transition">
+                ❌ Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
+
+    <style>
+        /* Større Geoman toolbar knapper for tablet/pilot */
+        .leaflet-pm-toolbar {
+            padding: 12px !important;
+            background: rgba(255,255,255,0.95) !important;
+            border-radius: 1rem !important;
+        }
+
+            .leaflet-pm-toolbar > .leaflet-pm-button {
+                width: 60px !important;
+                height: 60px !important;
+                font-size: 2rem !important;
+                border-radius: 1rem !important;
+                margin-bottom: 6px !important;
+            }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
+
+    <script>
+        // Init map
+        const map = L.map('mapDraw').setView([58.333, 8.233], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
+        }).addTo(map);
+
+        // Geoman controls
+        map.pm.addControls({
+            position: 'topleft',
+            drawMarker: true,
+            drawPolyline: true,
+            drawPolygon: false,
+            drawCircle: false,
+            drawRectangle: false,
+            editMode: true,
+            removalMode: true
+        });
+
+        // Capture drawn geometry
+        map.on('pm:create', e => {
+            const geojson = e.layer.toGeoJSON();
+            document.getElementById('geoInput').value = JSON.stringify(geojson.geometry.coordinates);
+        });
+
+        // Clear input when object removed
+        map.on('pm:remove', () => {
+            document.getElementById('geoInput').value = '';
+        });
+    </script>
+}
