@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
@@ -8,6 +8,13 @@
         <UserSecretsId>e79fda31-7ecd-4ed0-80d3-7a7a3fd69288</UserSecretsId>
         <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
     </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Remove="obj\**" />
+      <Content Remove="obj\**" />
+      <EmbeddedResource Remove="obj\**" />
+      <None Remove="obj\**" />
+    </ItemGroup>
 
     <ItemGroup>
       <Compile Remove="Controllers\ReportController.cs" />
