@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NRL_HALLI_DEV")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1bf3b58755e78366e8930a73d7665e8530b4ba88")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+093cf5bf56cdb7796cfc27011aafeb0454877dab")]
 [assembly: System.Reflection.AssemblyProductAttribute("NRL_HALLI_DEV")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NRL_HALLI_DEV")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

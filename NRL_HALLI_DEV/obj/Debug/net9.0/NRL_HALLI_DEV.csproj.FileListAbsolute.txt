@@ -133,7 +133,6 @@
 /Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/obj/Debug/net9.0/scopedcss/bundle/NRL_HALLI_DEV.styles.css
 /Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/obj/Debug/net9.0/scopedcss/projectbundle/NRL_HALLI_DEV.bundle.scp.css
 /Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/obj/Debug/net9.0/compressed/q7cltn92gt-4zq9me8yi4.gz
-/Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/obj/Debug/net9.0/compressed/tjc3yacjxz-61n19gt1b8.gz
 /Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/obj/Debug/net9.0/compressed/8fmn5ehheq-mqoc062zlc.gz
 /Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/obj/Debug/net9.0/compressed/7h2f42mzrh-fr7q2aak1r.gz
 /Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/obj/Debug/net9.0/compressed/6pkqkqr0s4-in6jj3e4kb.gz
@@ -214,4 +213,6 @@
 /Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/obj/Debug/net9.0/NRL_HALLI_DEV.pdb
 /Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/obj/Debug/net9.0/NRL_HALLI_DEV.genruntimeconfig.cache
 /Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/obj/Debug/net9.0/ref/NRL_HALLI_DEV.dll
-/Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/obj/Debug/net9.0/compressed/mlcloc3rbp-6oqqqgzwmq.gz
+/Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/obj/Debug/net9.0/compressed/tjc3yacjxz-ucew4ivxhy.gz
+/Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/obj/Debug/net9.0/compressed/k7zcvz95ud-61n19gt1b8.gz
+/Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/obj/Debug/net9.0/compressed/mlcloc3rbp-zjha3rv6vo.gz

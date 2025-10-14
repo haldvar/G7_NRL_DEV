@@ -1,14 +1,31 @@
 ﻿services:
+  db:
+    image: mariadb:11.8
+    container_name: nrldb
+    restart: always
+    environment:
+      - MARIADB_ROOT_PASSWORD=group7root
+      - MARIADB_DATABASE=mysql
+      - MARIADB_USER=nrlUSER
+      - MARIADB_PASSWORD=passord123
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db/data:/var/lib/mysql
+    networks:
+      - appnet
+      
   nrl_halli_dev:
     image: nrl_halli_dev
     build:
       context: .
       dockerfile: NRL_HALLI_DEV/Dockerfile
+    restart: always
     ports:
       - "5000:8080" # 5000 port tilhører din local host maskin (laptop/server). 8080 port tilhører kontaineren som applikasjonen hører på. Docker compose tar kontainer port 8080 og gjør den tilgjengelig fra host port 5000
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=server=mariadbcontainer;port=3306;database=NRL_DATA;user=nrlUSER;password=passord123;
+      - ConnectionStrings__DefaultConnection=server=nrldb;port=3306;database=NRL_DATA;user=root;password=group7root;
     networks:
       - appnet #Koble applikasjonen til appnet nettverket
 networks:
