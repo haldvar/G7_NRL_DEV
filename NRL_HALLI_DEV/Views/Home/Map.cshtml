@@ -8,7 +8,7 @@
 
 <div class="min-h-screen bg-gradient-to-b from-green-100 to-blue-100 flex items-center justify-center p-4">
     <!-- 80% of the viewport width -->
-    <div class="bg-white shadow-xl rounded-2xl p-8 w-[80vw]  max-w-none text-center border border-gray-200">
+    <div class="bg-white shadow-xl rounded-2xl p-8 w-[80vw] h-[87vh] max-w-none text-center border border-gray-200 flex flex-col">
         <!-- Logo -->
         <div class="mb-6 flex justify-start">
             <div class="w-auto h-20 rounded-lg overflow-hidden shadow-md flex place-items-start">
@@ -23,8 +23,8 @@
 
         <!-- Map fills the box -->
         <!-- Map (wrapped so we can position the overlay) -->
-        <div class="relative w-full">
-            <div id="map" class="w-full h-[75vh] rounded-lg shadow z-0"></div>
+        <div class="relative w-full flex-1">
+            <div id="map" class="w-full h-full rounded-lg shadow z-0"></div>
 
             <!-- Overlay (top-right) -->
             <div class="pointer-events-none absolute top-3 right-3 z-50">
@@ -40,24 +40,17 @@
                     </ul>
                 </div>
             </div>
+            <div class="pointer-events-none absolute bottom-3 w-full z-50">
+                <a asp-action="DataForm"
+                   class="pointer-events-auto inline-block px-6 py-3 bg-blue-600 text-white justify-center bottom-3 font-semibold rounded-full shadow-md hover:bg-blue-700 transition">
+                    Register Obstacle
+                </a>
+            </div>
         </div>
-        <!-- Content -->
-        <div class="p-6">
-            <dl>
-                @* @Model.Latitude *@
-                
-            </dl>
-        </div>
+    </div>    
+</div>    
 
-            <!-- Button -->
-            <a asp-action="DataForm"
-               class="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-full shadow-md hover:bg-blue-700 transition">
-                Register Obstacle
-            </a>
-        </div>
-</div>
-
-@section scripts {
+    @section scripts {
     <script>
         // Map
         var map = L.map('map').setView([51.505, -0.09], 13);
@@ -67,6 +60,8 @@
             maxZoom: 19,
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
+        
+        
 
         // Draw
         var drawnItems = new L.FeatureGroup();
