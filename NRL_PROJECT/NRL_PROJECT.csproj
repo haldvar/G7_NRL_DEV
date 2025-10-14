@@ -25,6 +25,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Remove="Dockerfile.cli" />
+    </ItemGroup>
+
+    <ItemGroup>
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
