@@ -1,52 +1,43 @@
 ﻿@model NRL_PROJECT.Models.ObstacleData
 
-<div class="max-w-4xl mx-auto px-4 py-10">
-    <!-- Title -->
-    <h1 class="text-4xl font-extrabold text-blue-700 text-center mb-3 tracking-wide">
-        🛑 Obstacle Overview
+<div class="max-w-3xl mx-auto px-4 py-10">
+    <h1 class="text-4xl font-extrabold text-green-700 text-center mb-6 tracking-wide">
+        ✅ Obstacle Registered Successfully
     </h1>
     <p class="text-gray-600 text-center mb-10">
-        Thank you for registering the following obstacle:
+        Below is a summary of the obstacle you just submitted.
     </p>
 
-    <!-- Obstacle Card -->
-    <div class="bg-white rounded-2xl shadow-lg p-8 space-y-6">
-        <!-- Name -->
-        <div>
-            <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Name</h2>
-            <p class="text-lg text-gray-800 font-medium">@Model.ObstacleName</p>
-        </div>
-
-        <!-- Type -->
-        <div>
-            <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Type</h2>
-            <p class="text-lg text-gray-800 font-medium">@Model.ObstacleType</p>
-        </div>
-
-        <!-- Height & Width -->
+    <div class="bg-white rounded-2xl shadow-lg p-8 space-y-6 border border-gray-200">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-                <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Height</h2>
-                <p class="text-lg text-gray-800 font-medium">@Model.ObstacleHeight</p>
+                <h2 class="text-sm font-semibold text-gray-500">Name</h2>
+                <p class="text-lg text-gray-800">@Model.ObstacleName</p>
             </div>
             <div>
-                <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Width</h2>
-                <p class="text-lg text-gray-800 font-medium">@Model.ObstacleWidth</p>
+                <h2 class="text-sm font-semibold text-gray-500">Type</h2>
+                <p class="text-lg text-gray-800">@Model.ObstacleType</p>
+            </div>
+            <div>
+                <h2 class="text-sm font-semibold text-gray-500">Height (m)</h2>
+                <p class="text-lg text-gray-800">@Model.ObstacleHeight</p>
+            </div>
+            <div>
+                <h2 class="text-sm font-semibold text-gray-500">Width (m)</h2>
+                <p class="text-lg text-gray-800">@Model.ObstacleWidth</p>
             </div>
         </div>
 
-        <!-- Description -->
         <div>
-            <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Description</h2>
-            <p class="text-lg text-gray-800 font-medium">@Model.ObstacleDescription</p>
+            <h2 class="text-sm font-semibold text-gray-500">Description</h2>
+            <p class="text-gray-700">@Model.ObstacleDescription</p>
         </div>
+    </div>
 
-        <!-- Back Button -->
-        <div class="mt-8 text-center">
-            <a asp-action="Index" asp-controller="Home"
-               class="inline-block bg-purple-600 text-black px-8 py-3 rounded-xl font-semibold shadow-md hover:bg-purple-700 hover:shadow-lg transition">
-                ⬅️ Back to Home
-            </a>
-        </div>
+    <div class="text-center mt-10">
+        <a asp-action="Index" asp-controller="Home"
+           class="bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold shadow-md hover:bg-blue-700 hover:shadow-lg transition">
+            🔙 Back to Home
+        </a>
     </div>
 </div>

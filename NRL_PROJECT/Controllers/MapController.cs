@@ -29,6 +29,12 @@ namespace NRL_PROJECT.Controllers
             ViewBag.Coordinates = mapdata.GeoJsonCoordinates;
             return View("MapConfirmation", mapdata);
         }
-    
-}
+
+        [HttpGet]
+        public IActionResult MapConfirmation()
+        {
+            return View();
+        }
+
+    }
 }

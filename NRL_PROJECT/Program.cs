@@ -14,11 +14,11 @@ builder.Services.AddDbContext<NRL_Db_Context>(options =>
         ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
     ));
 
-//Henter connection string fra ìappsettings.jsonî filen
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+//Henter connection string fra ‚Äúappsettings.json‚Äù filen
+//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 //Oppretter en instans av MySqlConnection 
-builder.Services.AddSingleton(new MySqlConnection(connectionString));
+//builder.Services.AddSingleton(new MySqlConnection(connectionString));
 
 var app = builder.Build();
 
@@ -26,7 +26,6 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -42,13 +41,12 @@ app.MapControllerRoute(
         pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<NRL_Db_Context>();
+    db.Database.Migrate();
+}
+
 app.Run();
 
-
-
-/*
- * Documentation NRL_PROJECT - ASP.NET Core MVC with MySQL/MariaDB by Group7
- * 
- * 
- * 
- */

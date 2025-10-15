@@ -96,4 +96,17 @@
             map.fitBounds(layer.getBounds());
         }
     </script>
+
+    <form asp-action="SubmitObstacleReport" asp-controller="Home" method="post">
+        <input type="hidden" name="GeoJsonCoordinates" value="@Model.GeoJsonCoordinates" />
+        <input type="hidden" name="ObstacleType" value="@TempData["ObstacleType"]?.ToString()" />
+        <button type="submit"
+                class="bg-green-600 text-white px-6 py-3 rounded-xl font-semibold shadow-md hover:bg-green-700 hover:shadow-lg transition">
+            📤 Submit Report
+        </button>
+    </form>
+    @{
+        ViewBag.ObstacleType = TempData["ObstacleType"]?.ToString();
+    }
+
 }

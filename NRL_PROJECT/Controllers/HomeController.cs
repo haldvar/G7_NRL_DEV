@@ -1,23 +1,19 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
 using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
+using System.Diagnostics;
+using System.Text.Json;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace NRL_PROJECT.Controllers
 {
     public class HomeController : Controller
     {
-        // Logger for diagnostics and logging
-        private readonly ILogger<HomeController> _logger;
-
-        // Entity Framework DbContext for database operations
         private readonly NRL_Db_Context _context;
-
-        // Connection string for manual MySQL access
         private readonly string _connectionString;
 
-        // Constructor: injects DbContext and configuration
         public HomeController(NRL_Db_Context context, IConfiguration config)
         {
             _context = context;
@@ -29,17 +25,16 @@ namespace NRL_PROJECT.Controllers
         {
             try
             {
-                await using var conn = new MySqlConnection(_connectionString);
-                await conn.OpenAsync();
-                //return Content("Connected to MariaDB successfully!");
-                //return View("Index","test");
+                var reportCount = await _context.ObstacleReports.CountAsync();
+                ViewBag.ReportCount = reportCount;
                 return View();
             }
             catch (Exception ex)
             {
-                return Content("Failed to connect to MariaDB: " + ex.Message);
+                return Content("Failed to connect to database via EF: " + ex.Message);
             }
         }
+
 
         // Called when clicking "Register obstacle" link in Index view
         [HttpGet]
@@ -48,19 +43,36 @@ namespace NRL_PROJECT.Controllers
             return View();
         }
 
-        // Called when submitting the "Submit data" button in ObstacleDataForm view
+        // Called when pressing the "Submit data" button in ObstacleDataForm view
+       
+        [HttpGet]
+        public async Task<IActionResult> ObstacleOverview(int id)
+        {
+            var obstacle = await _context.Obstacles.FindAsync(id);
+            if (obstacle == null)
+            {
+                return NotFound();
+            }
+
+            return View(obstacle);
+        }
+
         [HttpPost]
-        public ActionResult ObstacleDataForm(ObstacleData obstacledata)
+        public async Task<IActionResult> SubmitObstacle(ObstacleData obstacledata)
         {
             if (!ModelState.IsValid)
             {
-                return View(obstacledata); // return form with validation errors
+                return View("ObstacleDataForm", obstacledata);
             }
 
-            return View("ObstacleOverview", obstacledata);
+            _context.Obstacles.Add(obstacledata);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("ObstacleOverview", new { id = obstacledata.ObstacleId });
         }
 
-             
+
+
         // Displays the About view with disabled caching
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult About()
@@ -105,22 +117,88 @@ namespace NRL_PROJECT.Controllers
             return Json(geojson);
         }
 
-        /*
-        // Alternative constructor with logger (commented out)
-        public HomeController(ILogger<HomeController> logger)
+        [HttpPost]
+        public async Task<IActionResult> SubmitObstacleWithLocation(ObstacleReportViewModel model)
         {
-            _logger = logger;
+            if (!ModelState.IsValid || string.IsNullOrEmpty(model.GeoJsonCoordinates))
+            {
+                ModelState.AddModelError("", "Location must be selected on the map.");
+                return View("ObstacleAndMapForm", model);
+            }
+
+            var obstacle = new ObstacleData
+            {
+                ObstacleId = model.ObstacleId,
+                ObstacleName = model.ObstacleName,
+                ObstacleType = model.ObstacleType,
+                ObstacleHeight = model.ObstacleHeight,
+                ObstacleWidth = model.ObstacleWidth,
+                ObstacleDescription = model.ObstacleDescription,
+                Longitude = model.Longitude,
+                Latitude = model.Latitude
+            };
+
+            _context.Obstacles.Add(obstacle);
+            await _context.SaveChangesAsync();
+
+            var report = new ObstacleReportData
+            {
+                Reported_Item = model.ObstacleType,
+                Reported_Location = ParseCoordinates(model.GeoJsonCoordinates),
+                Time_of_Submitted_Report = DateTime.UtcNow,
+                ObstacleId = obstacle.ObstacleId // kobling!
+            };
+
+            _context.ObstacleReports.Add(report);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("ReportListOverview");
         }
 
-        // Alternative constructor with only config (commented out)
-        public HomeController(IConfiguration config)
+        
+        [HttpGet]
+        public IActionResult ObstacleAndMapForm()
         {
-            _connectionString = config.GetConnectionString("DefaultConnection")!;
+            return View();
         }
 
-        // Manual MySqlConnection registration (commented out)
-        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-        builder.Services.AddSingleton(new MySqlConnection(connectionString));
-        */
+        [HttpGet]
+        public async Task<IActionResult> ReportListOverview()
+        {
+            var reports = await _context.ObstacleReports
+                .Include(r => r.Obstacle)
+                .ToListAsync();
+
+            return View(reports);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SubmitObstacleReport(ObstacleReportViewModel model)
+        {
+            var report = new ObstacleReportData
+            {
+                Reported_Item = model.ObstacleType,
+                Reported_Location = ParseCoordinates(model.GeoJsonCoordinates),
+                Time_of_Submitted_Report = DateTime.UtcNow
+            };
+
+            _context.ObstacleReports.Add(report);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("ReportListOverview", "Home");
+        }
+
+        private string ParseCoordinates(string geoJson)
+        {
+            try
+            {
+                var coords = JsonSerializer.Deserialize<double[]>(geoJson);
+                return coords != null && coords.Length == 2 ? $"{coords[1]},{coords[0]}" : "Unknown";
+            }
+            catch
+            {
+                return "Invalid";
+            }
+        }
     }
 }
