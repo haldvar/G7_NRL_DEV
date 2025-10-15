@@ -32,8 +32,12 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9NYXAuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/Views/Home/Map_old2.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9NYXBfb2xkMi5jc2h0bWw=
+[/Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/Views/Home/MapOverview.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9NYXBPdmVydmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/Views/Home/Map_experiment.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9NYXBfZXhwZXJpbWVudC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/Views/Home/Overview.cshtml]
@@ -42,6 +46,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [/Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9Qcml2YWN5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/Views/Home/Review.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9SZXZpZXcuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/halli/RiderProjects/G7_NRL_DEV/NRL_HALLI_DEV/Views/Shared/Error.cshtml]

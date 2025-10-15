@@ -1,0 +1,138 @@
+@model NRL_HALLI_DEV.Models.MapData
+
+@{
+    ViewData["Title"] = "Map";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="min-h-screen bg-gradient-to-b from-green-100 to-blue-100 flex items-center justify-center p-4">
+    <!-- Card -->
+    <div class="bg-white shadow-xl rounded-2xl p-8 w-[80vw] h-[87vh] max-w-none text-center border border-gray-200 flex flex-col">
+        <!-- Logo -->
+        <div class="mb-6 flex justify-start shrink-0">
+            <div class="w-auto h-20 rounded-lg overflow-hidden shadow-md flex place-items-start">
+                <img src="~/images/logo-2.png" alt="Logo" class="h-full w-auto object-contain" />
+            </div>
+        </div>
+
+        <!-- Model content -->
+        <div class="text-gray-800 mb-4 shrink-0">
+            @Model
+        </div>
+
+        <!-- MAP AREA fills remaining height -->
+        <div class="relative w-full flex-1">
+            <div id="map" class="w-full h-full rounded-lg shadow z-0"></div>
+
+            <!-- Overlay (top-right) -->
+            <div class="pointer-events-none absolute top-3 right-3 z-[10000]">
+                <div class="pointer-events-auto rounded-xl bg-white/90 shadow-lg ring-1 ring-black/5 p-3 w-auto">
+                    <div class="mb-2 flex items-center justify-between">
+                        <h3 class="text-xs font-semibold text-gray-700">Markers</h3>
+                        <button id="clearMarkers" type="button" class="text-xs text-blue-600 hover:underline">Clear</button>
+                    </div>
+                    <ul id="coordsList" class="max-h-40 overflow-auto text-xs font-mono text-gray-800 space-y-1"></ul>
+                </div>
+            </div>
+
+            <!-- Bottom-centered: submit form -->
+            <div class="pointer-events-none absolute bottom-3 left-0 right-0 z-[10000] flex justify-center">
+                <form asp-action="RegisterObstacles" method="post" id="registerForm" class="pointer-events-auto">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="markersJson" name="markersJson" />
+                    <button type="submit"
+                            class="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-full shadow-md hover:bg-blue-700 transition">
+                        Register Obstacle
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+<script>
+    // --- Leaflet setup ---
+    var map = L.map('map').setView([51.505, -0.09], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Recalculate size when flex container settles / window resizes
+    setTimeout(() => map.invalidateSize(), 0);
+    window.addEventListener('resize', () => map.invalidateSize());
+
+    var drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+
+    var drawControl = new L.Control.Draw({
+        draw: {
+            marker: true,
+            polygon: false,
+            polyline: false,
+            rectangle: false,
+            circle: false,
+            circlemarker: false
+        },
+        edit: { featureGroup: drawnItems }
+    });
+    map.addControl(drawControl);
+
+    // --- Overlay + data collection ---
+    const coordsListEl = document.getElementById('coordsList');
+    const clearBtn = document.getElementById('clearMarkers');
+    const registerForm = document.getElementById('registerForm');
+    const markersInput = document.getElementById('markersJson');
+
+    let markerCount = 0;
+    // Array we’ll POST to server
+    const markers = []; // { latitude: number, longitude: number, createdUtc: string }
+
+    function addCoord(lat, lng) {
+        // Store for server
+        markers.push({
+            latitude: Number(lat.toFixed(6)),
+            longitude: Number(lng.toFixed(6)),
+            createdUtc: new Date().toISOString()
+        });
+
+        // Render nicely in overlay
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <div class="text-xs text-gray-800 leading-tight">
+              <span class="font-semibold">#${++markerCount}</span><br>
+              <span class="font-medium">Latitude:</span> ${lat.toFixed(6)}<br>
+              <span class="font-medium">Longitude:</span> ${lng.toFixed(6)}
+            </div>`;
+        coordsListEl.appendChild(li);
+        li.scrollIntoView({ block: 'nearest' });
+    }
+
+    clearBtn.addEventListener('click', function () {
+        coordsListEl.innerHTML = '';
+        markerCount = 0;
+        markers.length = 0; // clear array
+        drawnItems.clearLayers();
+    });
+
+    map.on('draw:created', function (e) {
+        var layer = e.layer;
+        drawnItems.addLayer(layer);
+        if (typeof layer.getLatLng === 'function') {
+            var ll = layer.getLatLng();
+            addCoord(ll.lat, ll.lng);
+        }
+    });
+
+    // Before submitting, put JSON into hidden input
+    registerForm.addEventListener('submit', function (ev) {
+        if (markers.length === 0) {
+            ev.preventDefault();
+            alert('Please add at least one marker before registering.');
+            return;
+        }
+        markersInput.value = JSON.stringify(markers);
+    });
+</script>
+}
