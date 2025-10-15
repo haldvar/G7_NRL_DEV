@@ -1,0 +1,7 @@
+services:
+  nrl_project:
+    volumes:
+      - ~/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
+      - ~/.microsoft/usersecrets:/home/app/.microsoft/usersecrets:ro
+      - ~/.aspnet/https:/home/app/.aspnet/https:ro
+      - ~/.aspnet/https:/root/.aspnet/https:ro

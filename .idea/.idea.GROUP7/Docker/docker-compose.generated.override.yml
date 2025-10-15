@@ -1,0 +1,21 @@
+# This is a generated file. Not intended for manual editing.
+services:
+  nrl_project:
+    build:
+      context: "/Users/milanadubkov/Desktop/GitHubUIA/G7_NRL_DEV"
+      dockerfile: "NRL_PROJECT/Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net9.0/NRL_PROJECT.dll"
+    environment:
+      ASPNETCORE_STATICWEBASSETS: "/app/bin/Debug/net9.0/NRL_PROJECT.staticwebassets.runtime.CT.json"
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "nrlproject:dev"
+    ports: []
+    volumes:
+    - "/Users/milanadubkov/Desktop/GitHubUIA/G7_NRL_DEV/NRL_PROJECT:/app:rw"
+    - "/Users/milanadubkov/Desktop/GitHubUIA/G7_NRL_DEV:/src:rw"
+    - "/Users/milanadubkov/.nuget/packages:/home/app/.nuget/packages"
+    working_dir: "/app"

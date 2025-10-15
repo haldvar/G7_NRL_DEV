@@ -9,6 +9,8 @@ services:
     environment:
         - ASPNETCORE_ENVIRONMENT=Development 
         - ConnectionStrings__DefaultConnection=server=mariadbcontainer;port=3306;database=nrl_project_db;user=root;password=Begripeligvis1214;
+    volumes:
+      - ~/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
     depends_on:
       - mariadbcontainer
     networks:
