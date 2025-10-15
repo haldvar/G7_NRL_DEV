@@ -14,11 +14,11 @@ builder.Services.AddDbContext<NRL_Db_Context>(options =>
         ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
     ));
 
-//Henter connection string fra ìappsettings.jsonî filen
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+//Henter connection string fra ‚Äúappsettings.json‚Äù filen
+//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 //Oppretter en instans av MySqlConnection 
-builder.Services.AddSingleton(new MySqlConnection(connectionString));
+//builder.Services.AddSingleton(new MySqlConnection(connectionString));
 
 var app = builder.Build();
 
