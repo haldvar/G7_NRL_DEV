@@ -29,8 +29,8 @@ services:
 
 networks:
   appnet:
-    # external: true
-    # name: appnet
+   # external: true
+   # name: appnet
 
 volumes:
   mariadb_data:
