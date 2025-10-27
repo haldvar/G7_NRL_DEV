@@ -1,11 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MySqlConnector;
 using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
 using System.Diagnostics;
 using System.Text.Json;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace NRL_PROJECT.Controllers
 {
@@ -20,102 +18,53 @@ namespace NRL_PROJECT.Controllers
             _connectionString = config.GetConnectionString("DefaultConnection")!;
         }
 
-        // Called when accessing the root page ("/")
+        // ------------------------------
+        //  INDEX / STARTPAGE
+        // ------------------------------
         public async Task<IActionResult> Index()
         {
             try
             {
-                var reportCount = await _context.ObstacleReports.CountAsync();
-                ViewBag.ReportCount = reportCount;
+                ViewBag.ReportCount = await _context.ObstacleReports.CountAsync();
                 return View();
             }
             catch (Exception ex)
             {
-                return Content("Failed to connect to database via EF: " + ex.Message);
+                return Content($"Failed to connect to database via EF: {ex.Message}");
             }
         }
 
+        // ------------------------------
+        //  OBSTACLE HANDLING
+        // ------------------------------
 
-        // Called when clicking "Register obstacle" link in Index view
         [HttpGet]
-        public ActionResult ObstacleDataForm()
+        public IActionResult ObstacleDataForm() => View();
+
+        [HttpPost]
+        public async Task<IActionResult> SubmitObstacle(ObstacleData obstacle)
         {
-            return View();
+            if (!ModelState.IsValid)
+                return View("ObstacleDataForm", obstacle);
+
+            _context.Obstacles.Add(obstacle);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(ObstacleOverview), new { id = obstacle.ObstacleId });
         }
 
-        // Called when pressing the "Submit data" button in ObstacleDataForm view
-       
         [HttpGet]
         public async Task<IActionResult> ObstacleOverview(int id)
         {
             var obstacle = await _context.Obstacles.FindAsync(id);
             if (obstacle == null)
-            {
                 return NotFound();
-            }
 
             return View(obstacle);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> SubmitObstacle(ObstacleData obstacledata)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View("ObstacleDataForm", obstacledata);
-            }
-
-            _context.Obstacles.Add(obstacledata);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction("ObstacleOverview", new { id = obstacledata.ObstacleId });
-        }
-
-
-
-        // Displays the About view with disabled caching
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult About()
-        {
-            return View();
-        }
-
-        // Displays the Privacy view 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        // Displays the Error view with request ID for diagnostics
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
-
-        // Returns test obstacle data in GeoJSON format
-        public IActionResult GetObstacles()
-        {
-            var geojson = new
-            {
-                type = "FeatureCollection",
-                features = new[]
-                {
-                    new {
-                        type = "Feature",
-                        geometry = new {
-                            type = "Point",
-                            coordinates = new[] { 8.233, 58.333 }
-                        },
-                        properties = new {
-                            name = "Test obstacle"
-                        }
-                    }
-                }
-            };
-
-            return Json(geojson);
-        }
+        [HttpGet]
+        public IActionResult ObstacleAndMapForm() => View();
 
         [HttpPost]
         public async Task<IActionResult> SubmitObstacleWithLocation(ObstacleReportViewModel model)
@@ -126,9 +75,9 @@ namespace NRL_PROJECT.Controllers
                 return View("ObstacleAndMapForm", model);
             }
 
+            // Opprett hinder
             var obstacle = new ObstacleData
             {
-                ObstacleId = model.ObstacleId,
                 ObstacleName = model.ObstacleName,
                 ObstacleType = model.ObstacleType,
                 ObstacleHeight = model.ObstacleHeight,
@@ -141,26 +90,24 @@ namespace NRL_PROJECT.Controllers
             _context.Obstacles.Add(obstacle);
             await _context.SaveChangesAsync();
 
+            // Opprett rapport koblet til hinderet
             var report = new ObstacleReportData
             {
                 Reported_Item = model.ObstacleType,
                 Reported_Location = ParseCoordinates(model.GeoJsonCoordinates),
                 Time_of_Submitted_Report = DateTime.UtcNow,
-                ObstacleId = obstacle.ObstacleId // kobling!
+                ObstacleId = obstacle.ObstacleId
             };
 
             _context.ObstacleReports.Add(report);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("ReportListOverview");
+            return RedirectToAction(nameof(ReportListOverview));
         }
 
-        
-        [HttpGet]
-        public IActionResult ObstacleAndMapForm()
-        {
-            return View();
-        }
+        // ------------------------------
+        //  REPORT HANDLING
+        // ------------------------------
 
         [HttpGet]
         public async Task<IActionResult> ReportListOverview()
@@ -175,6 +122,9 @@ namespace NRL_PROJECT.Controllers
         [HttpPost]
         public async Task<IActionResult> SubmitObstacleReport(ObstacleReportViewModel model)
         {
+            if (!ModelState.IsValid)
+                return RedirectToAction(nameof(ReportListOverview));
+
             var report = new ObstacleReportData
             {
                 Reported_Item = model.ObstacleType,
@@ -185,15 +135,69 @@ namespace NRL_PROJECT.Controllers
             _context.ObstacleReports.Add(report);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("ReportListOverview", "Home");
+            return RedirectToAction(nameof(ReportListOverview));
         }
 
-        private string ParseCoordinates(string geoJson)
+        // ------------------------------
+        //  STATIC PAGES
+        // ------------------------------
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult About() => View();
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Privacy() => View();
+
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel
+            {
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+            });
+        }
+
+        // ------------------------------
+        //  API / UTILITIES
+        // ------------------------------
+
+        [HttpGet]
+        public async Task<IActionResult> GetObstacles()
+        {
+            // 1️⃣ Hent alle hinder fra databasen
+            var obstacles = await _context.Obstacles.ToListAsync();
+
+            // 2️⃣ Bygg GeoJSON-struktur
+            var geojson = new
+            {
+                type = "FeatureCollection",
+                features = obstacles.Select(o => new
+                {
+                    type = "Feature",
+                    geometry = new
+                    {
+                        type = "Point",
+                        coordinates = new[] { o.Longitude, o.Latitude }
+                    },
+                    properties = new
+                    {
+                        id = o.ObstacleId,
+                        name = o.ObstacleName,
+                        type = o.ObstacleType,
+                        description = o.ObstacleDescription
+                    }
+                })
+            };
+
+            // 3️⃣ Returner som JSON
+            return Json(geojson);
+        }
+
+
+        private static string ParseCoordinates(string geoJson)
         {
             try
             {
                 var coords = JsonSerializer.Deserialize<double[]>(geoJson);
-                return coords != null && coords.Length == 2 ? $"{coords[1]},{coords[0]}" : "Unknown";
+                return coords is { Length: 2 } ? $"{coords[1]},{coords[0]}" : "Unknown";
             }
             catch
             {
