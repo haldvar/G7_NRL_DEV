@@ -1,70 +1,52 @@
 using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 using NRL_PROJECT.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ------------------------------------------------------------
-// KONFIGURER TJENESTER (Dependency Injection)
-// ------------------------------------------------------------
-
-// Legg til støtte for MVC (Controllers + Views)
+// Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Registrer databasekontekst (Entity Framework + MySQL)
+// Add 
 builder.Services.AddDbContext<NRL_Db_Context>(options =>
-{
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
-});
+    options.UseMySql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
+    ));
 
-// ------------------------------------------------------------
-// BYGG APPEN
-// ------------------------------------------------------------
+//Henter connection string fra “appsettings.json” filen
+//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+//Oppretter en instans av MySqlConnection 
+//builder.Services.AddSingleton(new MySqlConnection(connectionString));
+
 var app = builder.Build();
 
-// ------------------------------------------------------------
-// KONFIGURER MIDDLEWARE (HTTP request pipeline)
-// ------------------------------------------------------------
-
+// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    // Bruk en egen feilhåndteringsside i produksjon
     app.UseExceptionHandler("/Home/Error");
-
-    // Aktiver HSTS (sikkerhetsheader for HTTPS)
     app.UseHsts();
 }
 
-// Tving all trafikk til HTTPS
 app.UseHttpsRedirection();
-
-// Gjør wwwroot-innhold tilgjengelig (CSS, JS, bilder osv.)
 app.UseStaticFiles();
-
-// Aktiver ruting (slik at /Home/Index m.m. fungerer)
 app.UseRouting();
-
-// Aktiver eventuell autorisasjon (hvis prosjektet bruker det)
 app.UseAuthorization();
 
-// ------------------------------------------------------------
-// KONFIGURER STANDARD RUTE (MVC)
-// ------------------------------------------------------------
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}"
-);
+//app.MapStaticAssets();
 
-// ------------------------------------------------------------
-// AUTOMATISK DATABASEMIGRERING VED OPPSTART
-// ------------------------------------------------------------
+app.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}")
+    .WithStaticAssets();
+
+
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<NRL_Db_Context>();
-    db.Database.Migrate(); // Oppretter/oppdaterer databasen hvis nødvendig
+    db.Database.Migrate();
 }
 
-// ------------------------------------------------------------
-// KJØR APPEN
-// ------------------------------------------------------------
 app.Run();
+

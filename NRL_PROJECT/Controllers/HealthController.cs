@@ -1,6 +1,5 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using NRL_PROJECT.Data;
+﻿using Microsoft.AspNetCore.Mvc;
+using MySqlConnector;
 
 namespace NRL_PROJECT.Controllers
 {
@@ -8,20 +7,26 @@ namespace NRL_PROJECT.Controllers
     [Route("api/[controller]")]
     public class HealthController : ControllerBase
     {
-        private readonly NRL_Db_Context _context;
+        private readonly IConfiguration _config;
 
-        public HealthController(NRL_Db_Context context)
+        public HealthController(IConfiguration config)
         {
-            _context = context;
+            _config = config;
         }
 
         [HttpGet]
-        public async Task<IActionResult> CheckDatabase()
+        public IActionResult CheckDatabase()
         {
+            var connectionString = _config.GetConnectionString("DefaultConnection");
+
             try
             {
-                var test = await _context.Obstacles.AnyAsync();
-                
+                using var connection = new MySqlConnection(connectionString);
+                connection.Open();
+
+                using var cmd = new MySqlCommand("SELECT 1;", connection);
+                cmd.ExecuteScalar();
+
                 return Ok(new
                 {
                     status = "Healthy",
