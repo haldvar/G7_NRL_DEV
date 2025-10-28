@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NRL_PROJECT.Models
@@ -10,17 +10,21 @@ namespace NRL_PROJECT.Models
         public int ObstacleId { get; set; }
 
         [Required]
-        public string ObstacleName { get; set; }
-
         public string ObstacleType { get; set; }
-        public int ObstacleHeight { get; set; }
-        public int ObstacleWidth { get; set; }
-        public string ObstacleDescription { get; set; }
+        public float ObstacleHeight { get; set; }
+        public float ObstacleWidth { get; set; }
+        public decimal Coordinates1 { get; set; }
+        public decimal Coordinates2 { get; set; }
 
-        public double Longitude { get; set; }
-        public double Latitude { get; set; }
+        public string ObstacleComment { get; set; }
 
         // Relasjon til rapporter
-        public ICollection<ObstacleReportData> Reports { get; set; }
+        public ICollection<ObstacleReportData> ObstacleReports { get; set; }
+
+
+
+
+        public int ObstacleDataID { get; set; }
+
     }
 }

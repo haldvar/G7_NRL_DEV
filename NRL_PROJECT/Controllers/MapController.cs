@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using NRL_PROJECT.Models;
 
 namespace NRL_PROJECT.Controllers
@@ -7,27 +7,37 @@ namespace NRL_PROJECT.Controllers
     {
 
         // GET: /Map/MapView
-        // Displays the Leaflet map with drawing tools
+        // Viser kartet med sentrerte koordinater og zoomnivå
+
+
         [HttpGet]
         public IActionResult MapView()
         {
-            return View();
+            var defaultMapData = new MapData
+            {
+                CenterLatitude = 60.3913,   // Standard sentrering (Bergen)
+                CenterLongitude = 5.3221,
+                MapZoomLevel = 12               // Standard zoomnivå
+            };
+
+            return View(defaultMapData);
+            
         }
 
         // POST: /Map/Submit
-        // Receives GeoJSON coordinates from the map and displays them
+        // Mottar kartdata (senter og zoom) og viser bekreftelse
+
         [HttpPost]
         public IActionResult Submit(MapData mapdata)
         {
-            if (string.IsNullOrWhiteSpace(mapdata.GeoJsonCoordinates))
+            if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("GeoJsonCoordinates", "No coordinates submitted.");
                 return View("MapView", mapdata);
             }
 
-            // Pass coordinates to mapconfirmation view
-            ViewBag.Coordinates = mapdata.GeoJsonCoordinates;
-            return View("MapConfirmation", mapdata);
+            // Lagre mapdata til database i mapconfirmation view
+            
+           return View("MapConfirmation", mapdata);
         }
 
         [HttpGet]

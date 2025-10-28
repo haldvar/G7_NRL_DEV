@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NRL_PROJECT.Data;
+using NRL_PROJECT.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,3 +69,4 @@ using (var scope = app.Services.CreateScope())
 // KJØR APPEN
 // ------------------------------------------------------------
 app.Run();
+

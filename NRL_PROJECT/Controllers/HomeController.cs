@@ -67,9 +67,9 @@ namespace NRL_PROJECT.Controllers
         public IActionResult ObstacleAndMapForm() => View();
 
         [HttpPost]
-        public async Task<IActionResult> SubmitObstacleWithLocation(ObstacleReportViewModel model)
+        public async Task<IActionResult> SubmitObstacleWithLocation(ObstacleData model)
         {
-            if (!ModelState.IsValid || string.IsNullOrEmpty(model.GeoJsonCoordinates))
+            if (!(ModelState.IsValid && model.Coordinates1 != 0))
             {
                 ModelState.AddModelError("", "Location must be selected on the map.");
                 return View("ObstacleAndMapForm", model);
@@ -78,30 +78,41 @@ namespace NRL_PROJECT.Controllers
             // Opprett hinder
             var obstacle = new ObstacleData
             {
-                ObstacleName = model.ObstacleName,
+                ObstacleId = model.ObstacleId,
                 ObstacleType = model.ObstacleType,
                 ObstacleHeight = model.ObstacleHeight,
                 ObstacleWidth = model.ObstacleWidth,
-                ObstacleDescription = model.ObstacleDescription,
-                Longitude = model.Longitude,
-                Latitude = model.Latitude
+                Coordinates1 = model.Coordinates1,
+                Coordinates2 = model.Coordinates2,
+                ObstacleComment = model.ObstacleComment
             };
 
             _context.Obstacles.Add(obstacle);
             await _context.SaveChangesAsync();
 
+            
             // Opprett rapport koblet til hinderet
-            var report = new ObstacleReportData
+            var obstaclereport = new ObstacleReportData
             {
-                Reported_Item = model.ObstacleType,
-                Reported_Location = ParseCoordinates(model.GeoJsonCoordinates),
-                Time_of_Submitted_Report = DateTime.UtcNow,
-                ObstacleId = obstacle.ObstacleId
+                ObstacleReportID = model.ObstacleDataID,
+                UserID = 0,
+                ObstacleID = obstacle.ObstacleId,
+                ObstacleReportComment = "Initial report for new obstacle.",
+                ReviewedByUserID = 0,
+                ObstacleReportDate = DateTime.UtcNow,
+                ObstacleReportStatus = ObstacleReportData.EnumTypes.New,
+                ObstacleImageURL = "",
+                MapDataID = 0,
+                
+
+
             };
 
-            _context.ObstacleReports.Add(report);
+            _context.ObstacleReports.Add(obstaclereport);
             await _context.SaveChangesAsync();
 
+
+            
             return RedirectToAction(nameof(ReportListOverview));
         }
 
@@ -112,15 +123,17 @@ namespace NRL_PROJECT.Controllers
         [HttpGet]
         public async Task<IActionResult> ReportListOverview()
         {
-            var reports = await _context.ObstacleReports
+            var obstaclereports = await _context.ObstacleReports
                 .Include(r => r.Obstacle)
                 .ToListAsync();
 
-            return View(reports);
+            return View(obstaclereports);
         }
-
+        /*
+         Kommenterer ut denne for å sjekke at dette er en del av gammel løsning:
+         
         [HttpPost]
-        public async Task<IActionResult> SubmitObstacleReport(ObstacleReportViewModel model)
+        public async Task<IActionResult> SubmitObstacleReport(ObstacleData model)
         {
             if (!ModelState.IsValid)
                 return RedirectToAction(nameof(ReportListOverview));
@@ -137,6 +150,8 @@ namespace NRL_PROJECT.Controllers
 
             return RedirectToAction(nameof(ReportListOverview));
         }
+        */
+
 
         // ------------------------------
         //  STATIC PAGES
@@ -175,14 +190,15 @@ namespace NRL_PROJECT.Controllers
                     geometry = new
                     {
                         type = "Point",
-                        coordinates = new[] { o.Longitude, o.Latitude }
+                        coordinates = new[] { o.Coordinates1, o.Coordinates2 }
                     },
                     properties = new
                     {
                         id = o.ObstacleId,
-                        name = o.ObstacleName,
                         type = o.ObstacleType,
-                        description = o.ObstacleDescription
+                        height = o.ObstacleHeight,
+                        width = o.ObstacleWidth,
+                        comment = o.ObstacleComment
                     }
                 })
             };

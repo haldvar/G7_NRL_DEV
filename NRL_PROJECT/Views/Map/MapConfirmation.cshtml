@@ -1,62 +1,40 @@
-﻿@using System.Text.Json
 @model NRL_PROJECT.Models.MapData
 
 @{
     ViewData["Title"] = "Map Confirmation";
     Layout = "_Layout";
 
-    string jsCoords = "[]"; // Leaflet [lng, lat]
-    string displayLat = "";
-    string displayLng = "";
-
-    if (!string.IsNullOrEmpty(Model.GeoJsonCoordinates))
-    {
-        try
-        {
-            var arr = JsonSerializer.Deserialize<double[]>(Model.GeoJsonCoordinates);
-            if (arr?.Length >= 2)
-            {
-                jsCoords = JsonSerializer.Serialize(arr);   // [lng, lat] for Leaflet
-                displayLng = arr[0].ToString();            // GeoJSON: lng
-                displayLat = arr[1].ToString();            // GeoJSON: lat
-            }
-        }
-        catch { }
-    }
+    string displayLat = Model.CenterLatitude.ToString();
+    string displayLng = Model.CenterLongitude.ToString();
+    int zoomLevel = Model.MapZoomLevel;
 }
 
 <div class="max-w-4xl mx-auto px-4 py-10">
     <!-- Title -->
     <h1 class="text-4xl font-extrabold text-purple-700 text-center mb-4 tracking-wide">
-        ✅ Map Confirmation
+        ✅ Kartbekreftelse
     </h1>
     <p class="text-gray-600 text-center mb-8">
-        Your submitted coordinates have been received and visualized below.
+        Kartdataene du sendte inn er visualisert nedenfor.
     </p>
 
     <!-- Map Card -->
     <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
         <div id="mapConfirm" class="rounded-xl border border-gray-200 shadow-inner" style="height: 450px;"></div>
         <p class="text-sm text-gray-500 mt-3">
-            The point you submitted is displayed on the map above.
+            Kartet er sentrert på koordinatene du oppga.
         </p>
     </div>
 
     <!-- Raw Coordinates Card -->
     <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
         <h2 class="text-xl font-semibold text-purple-700 mb-3 flex items-center">
-            📍 Raw Coordinates
+            📍 Rå kartdata
         </h2>
         <div class="bg-gray-50 p-4 rounded-lg text-sm text-gray-800 space-y-1 border border-gray-200">
-            @if (!string.IsNullOrEmpty(displayLat) && !string.IsNullOrEmpty(displayLng))
-            {
-                <div><strong>Latitude (Breddegrad):</strong> @displayLat</div>
-                <div><strong>Longitude (Lengdegrad):</strong> @displayLng</div>
-            }
-            else
-            {
-                <pre>@Model.GeoJsonCoordinates</pre>
-            }
+            <div><strong>Breddegrad (Latitude):</strong> @displayLat</div>
+            <div><strong>Lengdegrad (Longitude):</strong> @displayLng</div>
+            <div><strong>Zoomnivå:</strong> @zoomLevel</div>
         </div>
     </div>
 
@@ -64,11 +42,11 @@
     <div class="flex justify-center space-x-4">
         <a asp-action="Index" asp-controller="Home"
            class="bg-gray-600 text-white px-8 py-3 rounded-xl font-medium shadow-md hover:bg-gray-700 hover:shadow-lg transition">
-            ⬅️ Back to Home
+            ⬅️ Tilbake til Hjem
         </a>
         <a asp-action="MapView" asp-controller="Map"
            class="bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold shadow-md hover:bg-blue-700 hover:shadow-lg transition">
-            🗺️ Draw Again
+            🗺️ Tegn på nytt
         </a>
     </div>
 </div>
@@ -77,36 +55,21 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        const coords = @Html.Raw(jsCoords); // [lng, lat]
+        const startLat = @Model.CenterLatitude;
+        const startLng = @Model.CenterLongitude;
+        const zoomLevel = @Model.MapZoomLevel;
 
-        // Sett startposisjon hvis koordinater finnes, ellers default
-        const startLat = coords.length === 2 ? coords[1] : 58.333;
-        const startLng = coords.length === 2 ? coords[0] : 8.233;
-
-        const map = L.map('mapConfirm').setView([startLat, startLng], 13);
+        const map = L.map('mapConfirm').setView([startLat, startLng], zoomLevel);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
         }).addTo(map);
 
-        if (coords.length === 2) {
-            const geojson = { type: "Feature", geometry: { type: "Point", coordinates: coords } };
-            const layer = L.geoJSON(geojson).addTo(map);
-            map.fitBounds(layer.getBounds());
-        }
+        // Marker for senterpunkt
+        L.marker([startLat, startLng])
+            .addTo(map)
+            .bindPopup("Senterpunkt")
+            .openPopup();
     </script>
-
-    <form asp-action="SubmitObstacleReport" asp-controller="Home" method="post">
-        <input type="hidden" name="GeoJsonCoordinates" value="@Model.GeoJsonCoordinates" />
-        <input type="hidden" name="ObstacleType" value="@TempData["ObstacleType"]?.ToString()" />
-        <button type="submit"
-                class="bg-green-600 text-white px-6 py-3 rounded-xl font-semibold shadow-md hover:bg-green-700 hover:shadow-lg transition">
-            📤 Submit Report
-        </button>
-    </form>
-    @{
-        ViewBag.ObstacleType = TempData["ObstacleType"]?.ToString();
-    }
-
 }
