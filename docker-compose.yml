@@ -18,7 +18,7 @@ services:
       start_period: 5s
     networks:
       - appnet
-        
+  
   nrl_project:
     image: ${DOCKER_REGISTRY-}nrlproject
     build:
