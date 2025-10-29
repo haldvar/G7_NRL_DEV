@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 
 namespace NRL_PROJECT.Models
 {
+    public enum ReportStatus { Ny = 0, UnderBehandling = 1, Godkjent = 2, Avvist = 3 }
     public class ObstacleReportData
     {
         [Key]
@@ -16,5 +17,7 @@ namespace NRL_PROJECT.Models
         public int ObstacleId { get; set; }
         [ForeignKey("ObstacleId")]
         public ObstacleData Obstacle { get; set; }
+
+        public ReportStatus ReportStatus { get; set; } = ReportStatus.Ny;
     }
 }

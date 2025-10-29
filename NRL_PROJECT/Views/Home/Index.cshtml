@@ -1,16 +1,16 @@
-﻿@model string
+@model string
 @{
     ViewData["Title"] = "Group7";
 }
 
-<div class="min-h-screen bg-gradient-to-b from-slate-900 via-sky-900 to-sky-700 flex flex-col items-center justify-center px-4 py-10 font-sans">
+<div class="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-slate-900 via-sky-900 to-sky-700 px-4 py-10 font-sans">
 
     <!-- Title Section -->
-    <div class="text-center mb-10">
-        <h1 class="text-5xl md:text-6xl font-extrabold text-sky-100 tracking-tight drop-shadow-lg">
+    <div class="mb-10 text-center">
+        <h1 class="text-5xl font-extrabold tracking-tight text-sky-100 drop-shadow-lg md:text-6xl">
             ✈️ Aviation Obstacle Registration
         </h1>
-        <p class="text-sky-200 text-lg md:text-xl mt-4 italic">
+        <p class="mt-4 text-lg text-sky-200 italic md:text-xl">
             @Model
         </p>
     </div>
@@ -18,36 +18,36 @@
    
 
     <!-- MAIN ACTION - Register with Map -->
-    <div class="w-full max-w-3xl mb-8">
+    <div class="mb-8 w-full max-w-3xl">
         <a asp-action="ObstacleAndMapForm" asp-controller="Home"
-           class="flex flex-col items-center justify-center bg-amber-500 hover:bg-amber-600 text-white px-10 py-12 rounded-3xl font-bold text-3xl md:text-4xl shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 hover:scale-[1.03] transition-all duration-300">
-            <span class="text-6xl mb-4">🛰️</span>
+           class="flex transform flex-col items-center justify-center rounded-3xl bg-amber-500 px-10 py-12 text-3xl font-bold text-white shadow-2xl transition-all duration-300 hover:shadow-3xl hover:-translate-y-1 hover:scale-[1.03] hover:bg-amber-600 md:text-4xl">
+            <span class="mb-4 text-6xl">🛰️</span>
             Register with Map
         </a>
     </div>
 
     <!-- SECONDARY ACTIONS -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-4xl mb-12">
+    <div class="mb-12 grid w-full max-w-4xl grid-cols-1 gap-6 sm:grid-cols-2">
 
         <!-- View Reports -->
         <a asp-controller="Home" asp-action="ReportListOverview"
-           class="flex flex-col items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-10 rounded-2xl font-semibold text-2xl md:text-3xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
-            <span class="text-5xl mb-3">📋</span>
+           class="flex transform flex-col items-center justify-center rounded-2xl bg-indigo-600 px-8 py-10 text-2xl font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:bg-indigo-700 hover:shadow-2xl md:text-3xl">
+            <span class="mb-3 text-5xl">📋</span>
             View Reports
         </a>
 
         <!-- Go to Map -->
         <a asp-controller="Map" asp-action="MapView"
-           class="flex flex-col items-center justify-center bg-sky-600 hover:bg-sky-700 text-white px-8 py-10 rounded-2xl font-semibold text-2xl md:text-3xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
-            <span class="text-5xl mb-3">🗺️</span>
+           class="flex transform flex-col items-center justify-center rounded-2xl bg-sky-600 px-8 py-10 text-2xl font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:bg-sky-700 hover:shadow-2xl md:text-3xl">
+            <span class="mb-3 text-5xl">🗺️</span>
             Go to Map
         </a>
     </div>
 
     <!-- Info Card -->
-    <div class="bg-gradient-to-r from-sky-100 to-blue-50 border-l-8 border-sky-500 text-sky-800 p-5 rounded-xl shadow mb-10 w-full max-w-xl text-center">
-        <p class="font-semibold text-xl">
-            <span class="text-2xl mr-2">📊</span>
+    <div class="mb-10 w-full max-w-xl rounded-xl border-l-8 border-sky-500 bg-gradient-to-r from-sky-100 to-blue-50 p-5 text-center text-sky-800 shadow">
+        <p class="text-xl font-semibold">
+            <span class="mr-2 text-2xl">📊</span>
             Total obstacle reports:
             <span class="ml-2 text-2xl font-extrabold text-sky-900">@ViewBag.ReportCount</span>
         </p>
@@ -56,15 +56,23 @@
 
 
     <!-- FOOTER LINKS -->
-    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-auto text-slate-300 text-sm opacity-80">
+    <div class="mt-auto flex flex-col items-center justify-center gap-4 text-sm text-slate-300 opacity-80 sm:flex-row">
         <a asp-action="Privacy"
-           class="flex items-center gap-2 hover:text-white transition text-sm sm:text-base">
+           class="flex items-center gap-2 text-sm transition hover:text-white sm:text-base">
             🔒 <span>Privacy Policy</span>
         </a>
-        <span class="hidden sm:inline text-slate-500">|</span>
+        <span class="hidden text-slate-500 sm:inline">|</span>
         <a asp-action="About"
-           class="flex items-center gap-2 hover:text-white transition text-sm sm:text-base">
+           class="flex items-center gap-2 text-sm transition hover:text-white sm:text-base">
             👨‍✈️ <span>About Group 7</span>
+        </a>
+    </div>
+
+    <div class="mt-4">
+        <a asp-controller="Registrar"
+        asp-action="RegistrarView"
+        class="btn btn-primary btn-lg">
+         Gå til registerførerside(test)
         </a>
     </div>
 </div>

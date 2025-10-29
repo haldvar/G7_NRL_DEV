@@ -1,0 +1,22 @@
+@model NRL_PROJECT.Models.ObstacleReportData
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Report detail";
+}
+
+<h2>Rapportdetaljer</h2>
+<div class="card-3">
+
+<p><strong>Rapport ID:</strong>@Model.Report_Id</p>
+<p><strong>Hindertype:</strong>@Model.Obstacle</p>
+<p><strong>Lokasjon:</strong>@Model.Reported_Location</p>
+<p><strong>Beskrivelse:</strong>@Model.Reported_Item</p>
+<p><strong>Tidspunkt registrert:</strong>@Model.Time_of_Submitted_Report</p>
+
+</div>
+
+<a asp-action="EditReport" asp-route-id="@Model.Report_Id" class="btn-primary mt-3">Rediger rapport</a>
+<a asp-action="RegistrarView" class="btn-secondary mt-3">Tilbake</a>
+

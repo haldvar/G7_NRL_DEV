@@ -1,0 +1,89 @@
+@model IEnumerable<NRL_PROJECT.Models.ObstacleReportData>
+@using System.Globalization
+
+@{
+    ViewData["Title"] = "Innrapporterte hinder";
+    var ci = CultureInfo.InvariantCulture; // brukes for koordinat-format
+}
+
+<div class="container mt-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+            <h2 class="mb-0">Innrapporterte hinder</h2>
+            <small class="text-muted">Alle rapporter sendt inn av flybesetning</small>
+        </div>
+
+        <div class="d-flex gap-2">
+            <!-- søk kan kobles på senere -->
+            <input class="form-control" style="min-width: 240px" placeholder="Søk (ID, type, lokasjon)..." />
+            <a asp-action="RegistrarView" class="btn btn-outline-secondary">Oppdater</a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            @if (Model is null || !Model.Any())
+            {
+                <div class="text-muted p-4 text-center">
+                    <div class="mb-2">Ingen rapporter ennå.</div>
+                    <small>Kom tilbake senere – eller send noen testdata.</small>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table-hover mb-0 table text-center align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 10%">Rapport-ID</th>
+                                <th style="width: 25%">Hindertype</th>
+                                <th style="width: 25%">Lokasjon (lat, lon)</th>
+                                <th style="width: 20%">Tidspunkt registrert</th>
+                                <th style="width: 10%">Status</th>
+                                <th style="width: 10%"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-group-divider">
+                            @foreach (var r in Model)
+                            {
+                                string lokasjon = "-";
+                                if (r?.Obstacle != null && r.Obstacle.Latitude != 0 && r.Obstacle.Longitude != 0)
+                                {
+                                    lokasjon = $"{r.Obstacle.Latitude:F6}, {r.Obstacle.Longitude:F6}";
+                                }
+                                else if (!string.IsNullOrWhiteSpace(r?.Reported_Location))
+                                {
+                                    lokasjon = r.Reported_Location;
+                                }
+
+                                string badge = r.ReportStatus switch
+                                {
+                                    NRL_PROJECT.Models.ReportStatus.Ny => "secondary",
+                                    NRL_PROJECT.Models.ReportStatus.UnderBehandling => "warning",
+                                    NRL_PROJECT.Models.ReportStatus.Godkjent => "success",
+                                    _ => "dark"
+                                };
+
+                                <tr>
+                                    <td class="fw-semibold">@r.Report_Id</td>
+                                    <td>@(r.Obstacle?.ObstacleType ?? "-")</td>
+                                    <td class="font-monospace">@lokasjon</td>
+                                    <td>@r.Time_of_Submitted_Report.ToString("dd.MM.yyyy HH:mm")</td>
+                                    <td><span class="badge bg-@badge">@r.ReportStatus</span></td>
+                                    <td class="fw-semibold">
+                                        <a asp-action="ReportDetails"
+                                           asp-route-id="@r.Report_Id"
+                                           class="btn btn-sm btn-outline-primary">
+                                            Detaljer
+                                        </a>
+                                    </td>
+                                </tr>
+                             }
+                        </tbody>
+                    </table>
+                </div>
+             }
+        </div>
+    </div>
+</div>
+
