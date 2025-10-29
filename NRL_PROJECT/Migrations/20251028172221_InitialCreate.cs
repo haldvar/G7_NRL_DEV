@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
@@ -58,8 +58,8 @@ namespace NRL_PROJECT.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ObstacleHeight = table.Column<float>(type: "float", nullable: false),
                     ObstacleWidth = table.Column<float>(type: "float", nullable: false),
-                    Coordinates1 = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
-                    Coordinates2 = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    Longitude = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    Latitude = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
                     ObstacleComment = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ObstacleDataID = table.Column<int>(type: "int", nullable: false)

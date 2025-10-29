@@ -12,7 +12,7 @@ namespace NRL_PROJECT.Models
         public string AccessLevelName { get; set; }
 
         [StringLength(200)]
-        public string AccessLevelDescription { get; set; }
+        public string? AccessLevelDescription { get; set; }
 
         public ICollection<UserRole> UserRoles { get; set; }
     }

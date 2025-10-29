@@ -6,7 +6,7 @@ namespace NRL_PROJECT.Models
     public class User
     {
         [Key]
-        public int UserID { get; set; }
+        public int? UserID { get; set; }
 
         [Required, StringLength(100)]
         public string FirstName { get; set; }

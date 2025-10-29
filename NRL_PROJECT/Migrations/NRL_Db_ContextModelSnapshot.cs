@@ -31,7 +31,6 @@ namespace NRL_PROJECT.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("AccessLevelID"));
 
                     b.Property<string>("AccessLevelDescription")
-                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
 
@@ -47,22 +46,26 @@ namespace NRL_PROJECT.Migrations
 
             modelBuilder.Entity("NRL_PROJECT.Models.MapData", b =>
                 {
-                    b.Property<int>("MapViewID")
+                    b.Property<int>("MapDataID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("MapViewID"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("MapDataID"));
 
-                    b.Property<double>("CenterLatitude")
+                    b.Property<string>("GeoJsonCoordinates")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<double>("Latitude")
                         .HasColumnType("double");
 
-                    b.Property<double>("CenterLongitude")
+                    b.Property<double>("Longitude")
                         .HasColumnType("double");
 
                     b.Property<int>("MapZoomLevel")
                         .HasColumnType("int");
 
-                    b.HasKey("MapViewID");
+                    b.HasKey("MapDataID");
 
                     b.ToTable("MapDatas");
                 });
@@ -75,30 +78,32 @@ namespace NRL_PROJECT.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ObstacleId"));
 
-                    b.Property<decimal>("Coordinates1")
-                        .HasColumnType("decimal(65,30)");
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double");
 
-                    b.Property<decimal>("Coordinates2")
-                        .HasColumnType("decimal(65,30)");
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double");
+
+                    b.Property<int>("MapDataID")
+                        .HasColumnType("int");
 
                     b.Property<string>("ObstacleComment")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("ObstacleDataID")
-                        .HasColumnType("int");
-
-                    b.Property<float>("ObstacleHeight")
-                        .HasColumnType("float");
+                    b.Property<double>("ObstacleHeight")
+                        .HasColumnType("double");
 
                     b.Property<string>("ObstacleType")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<float>("ObstacleWidth")
-                        .HasColumnType("float");
+                    b.Property<double>("ObstacleWidth")
+                        .HasColumnType("double");
 
                     b.HasKey("ObstacleId");
+
+                    b.HasIndex("MapDataID");
 
                     b.ToTable("Obstacles");
                 });
@@ -111,14 +116,13 @@ namespace NRL_PROJECT.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ObstacleReportID"));
 
-                    b.Property<int>("MapDataID")
+                    b.Property<int?>("MapDataID")
                         .HasColumnType("int");
 
-                    b.Property<int>("ObstacleID")
+                    b.Property<int?>("ObstacleID")
                         .HasColumnType("int");
 
                     b.Property<string>("ObstacleImageURL")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
@@ -132,10 +136,10 @@ namespace NRL_PROJECT.Migrations
                     b.Property<int>("ObstacleReportStatus")
                         .HasColumnType("int");
 
-                    b.Property<int>("ReviewedByUserID")
+                    b.Property<int?>("ReviewedByUserID")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserID")
+                    b.Property<int?>("UserID")
                         .HasColumnType("int");
 
                     b.HasKey("ObstacleReportID");
@@ -240,31 +244,36 @@ namespace NRL_PROJECT.Migrations
                     b.ToTable("UserRoles");
                 });
 
-            modelBuilder.Entity("NRL_PROJECT.Models.ObstacleReportData", b =>
+            modelBuilder.Entity("NRL_PROJECT.Models.ObstacleData", b =>
                 {
                     b.HasOne("NRL_PROJECT.Models.MapData", "MapData")
-                        .WithMany("ObstacleReports")
+                        .WithMany()
                         .HasForeignKey("MapDataID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("MapData");
+                });
+
+            modelBuilder.Entity("NRL_PROJECT.Models.ObstacleReportData", b =>
+                {
+                    b.HasOne("NRL_PROJECT.Models.MapData", "MapData")
+                        .WithMany("ObstacleReports")
+                        .HasForeignKey("MapDataID");
+
                     b.HasOne("NRL_PROJECT.Models.ObstacleData", "Obstacle")
                         .WithMany("ObstacleReports")
-                        .HasForeignKey("ObstacleID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ObstacleID");
 
                     b.HasOne("NRL_PROJECT.Models.User", "Reviewer")
                         .WithMany("ObstacleReportsReviewed")
                         .HasForeignKey("ReviewedByUserID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("NRL_PROJECT.Models.User", "User")
                         .WithMany("ObstacleReportsSubmitted")
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("MapData");
 

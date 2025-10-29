@@ -4,11 +4,10 @@
     ViewData["Title"] = "Map Confirmation";
     Layout = "_Layout";
 
-    string displayLat = Model.CenterLatitude.ToString();
-    string displayLng = Model.CenterLongitude.ToString();
+    string displayLat = Model.Latitude.ToString();
+    string displayLng = Model.Longitude.ToString();
     int zoomLevel = Model.MapZoomLevel;
 }
-
 <div class="max-w-4xl mx-auto px-4 py-10">
     <!-- Title -->
     <h1 class="text-4xl font-extrabold text-purple-700 text-center mb-4 tracking-wide">
@@ -55,8 +54,8 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        const startLat = @Model.CenterLatitude;
-        const startLng = @Model.CenterLongitude;
+        const startLat = @Model.Latitude;
+        const startLng = @Model.Longitude;
         const zoomLevel = @Model.MapZoomLevel;
 
         const map = L.map('mapConfirm').setView([startLat, startLng], zoomLevel);
@@ -73,3 +72,11 @@
             .openPopup();
     </script>
 }
+
+@if (!string.IsNullOrEmpty(Model.GeoJsonCoordinates))
+{
+    <div class="bg-gray-50 p-4 rounded-lg text-sm text-gray-800 border border-gray-200 mt-4">
+        <strong>GeoJSON-koordinater:</strong> @Model.GeoJsonCoordinates
+    </div>
+}
+

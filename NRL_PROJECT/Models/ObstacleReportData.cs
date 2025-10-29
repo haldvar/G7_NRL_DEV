@@ -2,46 +2,43 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-
 namespace NRL_PROJECT.Models
 {
     public class ObstacleReportData
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int ObstacleReportID { get; set; }  // Autogenerert primærnøkkel for rapporter
-        
-        [ForeignKey("User")]
-        public int UserID { get; set; }
-                
-        public int ReviewedByUserID { get; set; }
-        
+        public int ObstacleReportID { get; set; }
 
-        [ForeignKey("ObstacleID")]
-        public int ObstacleID { get; set; }
+        // 🔹 Hører til et hinder
+        [ForeignKey(nameof(Obstacle))]
+        public int? ObstacleID { get; set; }
+        public ObstacleData? Obstacle { get; set; }
 
-        public string ObstacleReportComment { get; set; }
+        // 🔹 Brukeren som opprettet rapporten
+        [ForeignKey(nameof(User))]
+        public int? UserID { get; set; }
+        public User? User { get; set; }
+
+        [Required]
+        public string ObstacleReportComment { get; set; } = string.Empty;
 
         public DateTime ObstacleReportDate { get; set; }
 
-        public EnumTypes ObstacleReportStatus { get; set; } 
+        public EnumTypes ObstacleReportStatus { get; set; }
+
+        // 🔹 Brukeren som har vurdert rapporten (kan være null)
+        [ForeignKey(nameof(Reviewer))]
+        public int? ReviewedByUserID { get; set; }
+        public User? Reviewer { get; set; }
 
         [StringLength(255)]
-        public string ObstacleImageURL { get; set; }
+        public string? ObstacleImageURL { get; set; }
 
-        [ForeignKey("UserID")]
-        public User User { get; set; }
-
-        [ForeignKey("ReviewedByUserID")]
-        public User Reviewer { get; set; }
-
-        [ForeignKey("ObstacleID")]
-        public ObstacleData Obstacle { get; set; }
-                
-        [ForeignKey("MapDataID")]
-        public MapData MapData { get; set; }
-        public int MapDataID { get; set; }
-
+        // 🔹 Kobling til MapData (kan være null)
+        [ForeignKey(nameof(MapData))]
+        public int? MapDataID { get; set; }
+        public MapData? MapData { get; set; }
 
         public enum EnumTypes
         {
@@ -52,7 +49,5 @@ namespace NRL_PROJECT.Models
             Closed = 4,
             Deleted = 5
         }
-
-                 
     }
 }

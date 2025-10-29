@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -11,20 +12,19 @@ namespace NRL_PROJECT.Models
 
         [Required]
         public string ObstacleType { get; set; }
-        public float ObstacleHeight { get; set; }
-        public float ObstacleWidth { get; set; }
-        public decimal Coordinates1 { get; set; }
-        public decimal Coordinates2 { get; set; }
 
+        public double ObstacleHeight { get; set; }
+        public double ObstacleWidth { get; set; }
         public string ObstacleComment { get; set; }
 
-        // Relasjon til rapporter
-        public ICollection<ObstacleReportData> ObstacleReports { get; set; }
+        public double Longitude { get; set; }
+        public double Latitude { get; set; }
 
+        public MapData MapData { get; set; } = new MapData
+        {
+            GeoJsonCoordinates = string.Empty
+        };
 
-
-
-        public int ObstacleDataID { get; set; }
-
+        public ICollection<ObstacleReportData> ObstacleReports { get; set; } = new List<ObstacleReportData>();
     }
 }

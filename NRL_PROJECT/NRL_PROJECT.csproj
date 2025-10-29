@@ -18,11 +18,14 @@
 
     <ItemGroup>
       <Compile Remove="Controllers\ReportController.cs" />
-      <Compile Remove="Models\ObstacleReportViewModel.cs" />
     </ItemGroup>
 
     <ItemGroup>
       <Content Remove="Views\Home\MapOverview.cshtml" />
+      <Content Remove="Views\Home\ObstacleDataForm.cshtml" />
+      <Content Remove="Views\Home\ObstacleOverview.cshtml" />
+      <Content Remove="Views\Home\ReportDetails.cshtml" />
+      <Content Remove="Views\Map\MapDraw.cshtml" />
     </ItemGroup>
 
     <ItemGroup>
