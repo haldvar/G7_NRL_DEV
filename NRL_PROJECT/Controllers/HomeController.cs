@@ -1,119 +1,208 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using MySqlConnector;
+using Microsoft.EntityFrameworkCore;
 using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
+using System.Diagnostics;
+using System.Text.Json;
 
 namespace NRL_PROJECT.Controllers
 {
     public class HomeController : Controller
     {
-        // Logger for diagnostics and logging
-        private readonly ILogger<HomeController> _logger;
-
-        // Entity Framework DbContext for database operations
         private readonly NRL_Db_Context _context;
-
-        // Connection string for manual MySQL access
         private readonly string _connectionString;
 
-        // Constructor: injects DbContext and configuration
         public HomeController(NRL_Db_Context context, IConfiguration config)
         {
             _context = context;
             _connectionString = config.GetConnectionString("DefaultConnection")!;
         }
 
-        // Called when accessing the root page ("/")
+        // ------------------------------
+        //  INDEX / STARTPAGE
+        // ------------------------------
         public async Task<IActionResult> Index()
         {
             try
             {
-                await using var conn = new MySqlConnection(_connectionString);
-                await conn.OpenAsync();
-                //return Content("Connected to MariaDB successfully!");
-                //return View("Index","test");
+                ViewBag.ReportCount = await _context.ObstacleReports.CountAsync();
                 return View();
             }
             catch (Exception ex)
             {
-                return Content("Failed to connect to MariaDB: " + ex.Message);
+                return Content($"Failed to connect to database via EF: {ex.Message}");
             }
         }
 
-        // Called when clicking "Register obstacle" link in Index view
-        [HttpGet]
-        public ActionResult DataForm()
-        {
-            return View();
-        }
+        // ------------------------------
+        //  OBSTACLE HANDLING
+        // ------------------------------
 
-        // Called when submitting the "Submit data" button in DataForm view
+        [HttpGet]
+        public IActionResult ObstacleDataForm() => View();
+
         [HttpPost]
-        public ActionResult DataForm(ObstacleData obstacledata)
+        public async Task<IActionResult> SubmitObstacle(ObstacleData obstacle)
         {
             if (!ModelState.IsValid)
+                return View("ObstacleDataForm", obstacle);
+
+            _context.Obstacles.Add(obstacle);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(ObstacleOverview), new { id = obstacle.ObstacleId });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ObstacleOverview(int id)
+        {
+            var obstacle = await _context.Obstacles.FindAsync(id);
+            if (obstacle == null)
+                return NotFound();
+
+            return View(obstacle);
+        }
+
+        [HttpGet]
+        public IActionResult ObstacleAndMapForm() => View();
+
+        [HttpPost]
+        public async Task<IActionResult> SubmitObstacleWithLocation(ObstacleReportViewModel model)
+        {
+            if (!ModelState.IsValid || string.IsNullOrEmpty(model.GeoJsonCoordinates))
             {
-                return View(obstacledata); // return form with validation errors
+                ModelState.AddModelError("", "Location must be selected on the map.");
+                return View("ObstacleAndMapForm", model);
             }
 
-            return View("ObstacleOverview", obstacledata);
+            // Opprett hinder
+            var obstacle = new ObstacleData
+            {
+                ObstacleName = model.ObstacleName,
+                ObstacleType = model.ObstacleType,
+                ObstacleHeight = model.ObstacleHeight,
+                ObstacleWidth = model.ObstacleWidth,
+                ObstacleDescription = model.ObstacleDescription,
+                Longitude = model.Longitude,
+                Latitude = model.Latitude
+            };
+
+            _context.Obstacles.Add(obstacle);
+            await _context.SaveChangesAsync();
+
+            // Opprett rapport koblet til hinderet
+            var report = new ObstacleReportData
+            {
+                Reported_Item = model.ObstacleType,
+                Reported_Location = ParseCoordinates(model.GeoJsonCoordinates),
+                Time_of_Submitted_Report = DateTime.UtcNow,
+                ObstacleId = obstacle.ObstacleId
+            };
+
+            _context.ObstacleReports.Add(report);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(ReportListOverview));
         }
 
-             
-        // Displays the About view with disabled caching
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult About()
+        // ------------------------------
+        //  REPORT HANDLING
+        // ------------------------------
+
+        [HttpGet]
+        public async Task<IActionResult> ReportListOverview()
         {
-            return View();
+            var reports = await _context.ObstacleReports
+                .Include(r => r.Obstacle)
+                .ToListAsync();
+
+            return View(reports);
         }
 
-        // Displays the Error view with request ID for diagnostics
+        [HttpPost]
+        public async Task<IActionResult> SubmitObstacleReport(ObstacleReportViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return RedirectToAction(nameof(ReportListOverview));
+
+            var report = new ObstacleReportData
+            {
+                Reported_Item = model.ObstacleType,
+                Reported_Location = ParseCoordinates(model.GeoJsonCoordinates),
+                Time_of_Submitted_Report = DateTime.UtcNow
+            };
+
+            _context.ObstacleReports.Add(report);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(ReportListOverview));
+        }
+
+        // ------------------------------
+        //  STATIC PAGES
+        // ------------------------------
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult About() => View();
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Privacy() => View();
+
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View(new ErrorViewModel
+            {
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+            });
         }
 
-        // Returns test obstacle data in GeoJSON format
-        public IActionResult GetObstacles()
+        // ------------------------------
+        //  API / UTILITIES
+        // ------------------------------
+
+        [HttpGet]
+        public async Task<IActionResult> GetObstacles()
         {
+            // 1️⃣ Hent alle hinder fra databasen
+            var obstacles = await _context.Obstacles.ToListAsync();
+
+            // 2️⃣ Bygg GeoJSON-struktur
             var geojson = new
             {
                 type = "FeatureCollection",
-                features = new[]
+                features = obstacles.Select(o => new
                 {
-                    new {
-                        type = "Feature",
-                        geometry = new {
-                            type = "Point",
-                            coordinates = new[] { 8.233, 58.333 }
-                        },
-                        properties = new {
-                            name = "Test obstacle"
-                        }
+                    type = "Feature",
+                    geometry = new
+                    {
+                        type = "Point",
+                        coordinates = new[] { o.Longitude, o.Latitude }
+                    },
+                    properties = new
+                    {
+                        id = o.ObstacleId,
+                        name = o.ObstacleName,
+                        type = o.ObstacleType,
+                        description = o.ObstacleDescription
                     }
-                }
+                })
             };
 
+            // 3️⃣ Returner som JSON
             return Json(geojson);
         }
 
-        /*
-        // Alternative constructor with logger (commented out)
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
 
-        // Alternative constructor with only config (commented out)
-        public HomeController(IConfiguration config)
+        private static string ParseCoordinates(string geoJson)
         {
-            _connectionString = config.GetConnectionString("DefaultConnection")!;
+            try
+            {
+                var coords = JsonSerializer.Deserialize<double[]>(geoJson);
+                return coords is { Length: 2 } ? $"{coords[1]},{coords[0]}" : "Unknown";
+            }
+            catch
+            {
+                return "Invalid";
+            }
         }
-
-        // Manual MySqlConnection registration (commented out)
-        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-        builder.Services.AddSingleton(new MySqlConnection(connectionString));
-        */
     }
 }

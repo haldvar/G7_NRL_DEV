@@ -1,0 +1,15 @@
+# .gitattributes
+
+# Automatisk håndtering av tekstfiler
+* text=auto
+
+# Windows-spesifikke linjeslutt
+*.cs text eol=crlf
+*.csproj text eol=crlf
+*.sln text eol=crlf
+*.json text eol=crlf
+*.yml text eol=crlf
+
+# Linux-skript og Docker
+*.sh text eol=lf
+Dockerfile text eol=lf

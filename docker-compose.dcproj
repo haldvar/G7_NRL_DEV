@@ -8,9 +8,17 @@
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
     <DockerServiceUrl>{Scheme}://localhost:{ServicePort}</DockerServiceUrl>
     <DockerServiceName>nrl_project</DockerServiceName>
+    <DockerfileContext>NRL_PROJECT</DockerfileContext>
+    <Dockerfile>NRL_PROJECT/Dockerfile</Dockerfile>
   </PropertyGroup>
   <ItemGroup>
     <None Include="docker-compose.override.yml">
+      <DependentUpon>docker-compose.yml</DependentUpon>
+    </None>
+    <None Include="docker-compose.vs.debug.yml">
+      <DependentUpon>docker-compose.yml</DependentUpon>
+    </None>
+    <None Include="docker-compose.vs.release.yml">
       <DependentUpon>docker-compose.yml</DependentUpon>
     </None>
     <None Include="docker-compose.yml" />

@@ -8,7 +8,7 @@
     <!-- Tailwind via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Leaflet via lokal mappe -->
+    <!-- Leaflet -->
     <link rel="stylesheet" href="/lib/leaflet/leaflet.css" />
     <script src="/lib/leaflet/leaflet.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
@@ -16,46 +16,90 @@
     @RenderSection("Styles", required: false)
 </head>
 
+<body class="min-h-screen flex flex-col bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800">
 
-<body class="min-h-screen flex flex-col bg-gray-50 text-gray-800">
     <!-- HEADER -->
-    <header class="bg-white shadow-sm">
+    <header class="bg-white shadow-md sticky top-0 z-50">
         <nav class="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
-            <!-- Logo -->
-            <a class="text-xl font-semibold text-gray-900" asp-area="" asp-controller="Home" asp-action="Index">
-                NRL_PROJECT
-            </a>
+            <!-- Left side: Logo + navigation -->
+            <div class="flex items-center space-x-8">
+                <!-- Logo -->
+                <a class="text-2xl font-bold text-blue-700 tracking-wide hover:text-blue-800 transition"
+                   asp-area="" asp-controller="Home" asp-action="Index">
+                    ✈️ NRL_PROJECT
+                </a>
 
-            <!-- Menu -->
-            <div class="hidden md:flex space-x-6">
-                <a class="text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                <a class="text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Map" asp-action="MapView">Go to Map</a>
+                <!-- Desktop menu -->
+                <div class="hidden md:flex space-x-6 font-medium">
+                    <a class="text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                    <a class="text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Map" asp-action="MapView">Map</a>
+                    <a class="text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="About">About</a>
+                    <a class="text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                </div>
+            </div>
 
+            <!-- Right side: Statusbar -->
+            <div class="hidden md:flex items-center space-x-6 text-sm font-medium">
+                <span class="text-gray-600">👤 Logged in as <strong>Pilot123</strong></span>
+                <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs">Active Obstacles: 12</span>
+                <button class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">Log out</button>
             </div>
 
             <!-- Mobile menu button -->
-            <button class="md:hidden p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <button id="menu-btn" class="md:hidden p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
             </button>
         </nav>
-    </header>
+
+        <!-- Mobile dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t shadow-sm">
+            <div class="px-6 py-4 space-y-2">
+                <a class="block text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                <a class="block text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Map" asp-action="MapView">Map</a>
+                <a class="block text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="About">About</a>
+                <a class="block text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+
+                <!-- Statusbar in mobile menu -->
+                <div class="pt-4 border-t">
+                    <span class="block text-gray-600 mb-2">👤 Logged in as <strong>Pilot123</strong></span>
+                    <span class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs mb-2">Active Obstacles: 12</span>
+                    <button class="w-full bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">Log out</button>
+                </div>
+            </div>
+        </div>
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="Home" asp-action="ReportListOverview">All Obstacle Reports</a>
+        </li>
+
+      </header>
+   
 
     <!-- MAIN CONTENT -->
-    <main role="main" class="flex-grow max-w-4xl mx-auto px-6 py-8">
+    <main role="main" class="flex-grow max-w-5xl mx-auto px-6 py-10">
         @RenderBody()
     </main>
 
     <!-- FOOTER -->
     <footer class="bg-white border-t mt-8">
-        <div class="max-w-7xl mx-auto px-6 py-4 text-sm text-gray-500 flex justify-between">
+        <div class="max-w-7xl mx-auto px-6 py-4 text-sm text-gray-500 flex justify-between items-center">
             <span>&copy; 2025 - NRL_PROJECT</span>
             <a class="hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
 
     @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- Mobile menu toggle -->
+    <script>
+        const menuBtn = document.getElementById("menu-btn");
+        const mobileMenu = document.getElementById("mobile-menu");
+
+        menuBtn.addEventListener("click", () => {
+            mobileMenu.classList.toggle("hidden");
+        });
+    </script>
 </body>
 </html>
