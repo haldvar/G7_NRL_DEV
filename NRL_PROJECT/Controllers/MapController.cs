@@ -95,6 +95,8 @@ namespace NRL_PROJECT.Controllers
         {
             var reports = await _context.ObstacleReports
                 .Include(r => r.Obstacle)
+                .Include(r => r.User)
+                .Include(r => r.Reviewer)
                 .Include(r => r.MapData)
                 .ToListAsync();
 

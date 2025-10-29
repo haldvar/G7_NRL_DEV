@@ -17,6 +17,11 @@ builder.Services.AddDbContext<NRL_Db_Context>(options =>
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
+/*
+// For testing: Bruk en in-memory database i stedet for MySQL
+    builder.Services.AddDbContext<NRL_Db_Context>(options =>
+    options.UseInMemoryDatabase("TestDb"));
+*/
 
 // ------------------------------------------------------------
 // BYGG APPEN
