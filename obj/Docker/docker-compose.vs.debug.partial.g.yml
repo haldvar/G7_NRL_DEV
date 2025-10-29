@@ -14,15 +14,15 @@ services:
       - ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true
       - NUGET_FALLBACK_PACKAGES=/.nuget/fallbackpackages
     volumes:
-      - C:\Users\karol\Koding\IS-200\NRL_PROJECT:/app:rw
-      - C:\Users\karol\Koding\IS-200:/src:rw
-      - C:\Users\karol\vsdbg\vs2017u5:/remote_debugger:rw
-      - C:\Users\karol\.nuget\packages:/.nuget/packages:ro
+      - C:\Users\user\source\GitHub\G7_NRL_DEV\NRL_PROJECT:/app:rw
+      - C:\Users\user\source\GitHub\G7_NRL_DEV:/src:rw
+      - C:\Users\user\vsdbg\vs2017u5:/remote_debugger:rw
+      - C:\Users\user\.nuget\packages:/.nuget/packages:ro
       - C:\Program Files (x86)\Microsoft Visual Studio\Shared\NuGetPackages:/.nuget/fallbackpackages:ro
-      - C:\Users\karol\AppData\Roaming\ASP.NET\Https:/root/.aspnet/https:ro
-      - C:\Users\karol\AppData\Roaming\ASP.NET\Https:/home/app/.aspnet/https:ro
-      - C:\Users\karol\AppData\Roaming\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro
-      - C:\Users\karol\AppData\Roaming\Microsoft\UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - C:\Users\user\AppData\Roaming\ASP.NET\Https:/root/.aspnet/https:ro
+      - C:\Users\user\AppData\Roaming\ASP.NET\Https:/home/app/.aspnet/https:ro
+      - C:\Users\user\AppData\Roaming\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro
+      - C:\Users\user\AppData\Roaming\Microsoft\UserSecrets:/home/app/.microsoft/usersecrets:ro
       - C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Sdks\Microsoft.Docker.Sdk\tools\linux-x64\net6.0:/VSTools:ro
       - C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\HotReload:/HotReloadAgent:ro
 
