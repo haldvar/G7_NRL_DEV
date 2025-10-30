@@ -17,8 +17,9 @@ builder.Services.AddControllersWithViews();
 // Registrer databasekontekst (Entity Framework + MySQL)
 
 // KOMMENTERES UT UNDER TESTING:
+
 /*
-builder.Services.AddDbContext<NRL_Db_Context>(options =>
+ builder.Services.AddDbContext<NRL_Db_Context>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
@@ -27,23 +28,17 @@ builder.Services.AddDbContext<NRL_Db_Context>(options =>
 */
 
 
-// FOR TESTING: Bruk en in-memory database i stedet for MySQL
-    builder.Services.AddDbContext<NRL_Db_Context>(options =>
-    options.UseInMemoryDatabase("TestDb"));
+// BRUK DENNE (in-memory database i stedet for MySQL) VED TESTING: 
+
+builder.Services.AddDbContext<NRL_Db_Context>(options =>
+   options.UseInMemoryDatabase("TestDb"));
+
 
 
 // ------------------------------------------------------------
-// AUTOMATISK DATABASEMIGRERING VED OPPSTART
-// - DENNE KOMMENTERES OGSÅ UT VED TESTING
+// BYGG APPEN
 // ------------------------------------------------------------
-/*
- * using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<NRL_Db_Context>();
-    db.Database.Migrate(); // Oppretter/oppdaterer databasen hvis nødvendig
-}
-*/
-
+var app = builder.Build();
 
 
 // ------------------------------------------------------------
@@ -186,14 +181,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 
-
-// ------------------------------------------------------------
-// BYGG APPEN
-// ------------------------------------------------------------
-var app = builder.Build();
-
-
-
 // ------------------------------------------------------------
 // KONFIGURER MIDDLEWARE (HTTP request pipeline)
 // ------------------------------------------------------------
@@ -228,6 +215,18 @@ app.MapControllerRoute(
 );
 
 
+// ------------------------------------------------------------
+// AUTOMATISK DATABASEMIGRERING VED OPPSTART
+// - DENNE KOMMENTERES OGSÅ UT VED TESTING
+// ------------------------------------------------------------
+
+/*
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<NRL_Db_Context>();
+    db.Database.Migrate(); // Oppretter/oppdaterer databasen hvis nødvendig
+}
+*/
 
 // ------------------------------------------------------------
 // KJØR APPEN
