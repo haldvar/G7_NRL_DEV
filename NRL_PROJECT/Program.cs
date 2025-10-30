@@ -1,8 +1,19 @@
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+
+// --- Lagrer nøklene på disk slik at antiforgery ikke brytes etter restart ---
+
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(@"C:\Temp-Keys"))
+    .SetApplicationName("NRL_PROJECT");
+
 
 // ------------------------------------------------------------
 // KONFIGURER TJENESTER (Dependency Injection)

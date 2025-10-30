@@ -34,6 +34,7 @@ namespace NRL_PROJECT.Controllers
         public async Task<IActionResult> SubmitObstacleWithLocation(ObstacleData model)
         {
             // 1️⃣ Sjekk kartdata først
+            model.MapData ??= new MapData();
             if (model.MapData == null)
                 model.MapData = new MapData();
 

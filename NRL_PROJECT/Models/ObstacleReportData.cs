@@ -1,6 +1,8 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Http;
+
 
 namespace NRL_PROJECT.Models
 {
@@ -49,5 +51,11 @@ namespace NRL_PROJECT.Models
             Closed = 4,
             Deleted = 5
         }
+        // Håndterer opplasting og lagring av bilde
+        [NotMapped]
+        public IFormFile? ImageFile { get; set; }  // mottar bilde fra form
+
+        
+
     }
 }
