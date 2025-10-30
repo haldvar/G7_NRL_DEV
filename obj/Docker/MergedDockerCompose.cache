@@ -1,17 +1,44 @@
-name: dockercompose9066445481273808976
+name: dockercompose17120683136645204868
 services:
+  mariadbcontainer:
+    environment:
+      MYSQL_DATABASE: nrl_project_db
+      MYSQL_ROOT_PASSWORD: Begripeligvis1214
+    image: mariadb:11.8
+    networks:
+      appnet: null
+    ports:
+      - mode: ingress
+        target: 3306
+        published: "3306"
+        protocol: tcp
+    restart: always
+    volumes:
+      - type: volume
+        source: mariadb_data
+        target: /var/lib/mysql
+        volume: {}
   nrl_project:
     build:
-      context: C:\Users\karol\Koding\IS-200
+      context: C:\Users\user\Downloads\G7_NRL_DEV-Karoline4\G7_NRL_DEV-Karoline4
       dockerfile: NRL_PROJECT/Dockerfile
+    depends_on:
+      mariadbcontainer:
+        condition: service_started
+        required: true
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_HTTP_PORTS: "8080"
       ASPNETCORE_HTTPS_PORTS: "8081"
+      ConnectionStrings__DefaultConnection: server=mariadbcontainer;port=3306;database=nrl_project_db;user=root;password=Begripeligvis1214;
     image: nrlproject
     networks:
-      default: null
+      appnet: null
     ports:
+      - mode: ingress
+        target: 8080
+        published: "5001"
+        protocol: tcp
       - mode: ingress
         target: 8080
         protocol: tcp
@@ -20,29 +47,32 @@ services:
         protocol: tcp
     volumes:
       - type: bind
-        source: C:\Users\karol\AppData\Roaming/Microsoft/UserSecrets
+        source: C:\Users\user\AppData\Roaming/Microsoft/UserSecrets
         target: /home/app/.microsoft/usersecrets
         read_only: true
         bind:
           create_host_path: true
       - type: bind
-        source: C:\Users\karol\AppData\Roaming/Microsoft/UserSecrets
+        source: C:\Users\user\AppData\Roaming/Microsoft/UserSecrets
         target: /root/.microsoft/usersecrets
         read_only: true
         bind:
           create_host_path: true
       - type: bind
-        source: C:\Users\karol\AppData\Roaming/ASP.NET/Https
+        source: C:\Users\user\AppData\Roaming/ASP.NET/Https
         target: /home/app/.aspnet/https
         read_only: true
         bind:
           create_host_path: true
       - type: bind
-        source: C:\Users\karol\AppData\Roaming/ASP.NET/Https
+        source: C:\Users\user\AppData\Roaming/ASP.NET/Https
         target: /root/.aspnet/https
         read_only: true
         bind:
           create_host_path: true
 networks:
-  default:
-    name: dockercompose9066445481273808976_default
+  appnet:
+    name: dockercompose17120683136645204868_appnet
+volumes:
+  mariadb_data:
+    name: dockercompose17120683136645204868_mariadb_data

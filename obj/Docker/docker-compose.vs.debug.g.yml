@@ -14,8 +14,8 @@ services:
       - ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true
       - NUGET_FALLBACK_PACKAGES=/.nuget/fallbackpackages
     volumes:
-      - C:\Users\user\source\GitHub\G7_NRL_DEV\NRL_PROJECT:/app:rw
-      - C:\Users\user\source\GitHub\G7_NRL_DEV:/src:rw
+      - C:\Users\user\Downloads\G7_NRL_DEV-Karoline4\G7_NRL_DEV-Karoline4\NRL_PROJECT:/app:rw
+      - C:\Users\user\Downloads\G7_NRL_DEV-Karoline4\G7_NRL_DEV-Karoline4:/src:rw
       - C:\Users\user\vsdbg\vs2017u5:/remote_debugger:rw
       - C:\Users\user\.nuget\packages:/.nuget/packages:ro
       - C:\Program Files (x86)\Microsoft Visual Studio\Shared\NuGetPackages:/.nuget/fallbackpackages:ro
