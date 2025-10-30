@@ -4,6 +4,9 @@ using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
 using System.Diagnostics;
 using System.Text.Json;
+using System.IO;
+using Microsoft.AspNetCore.Http;
+
 
 namespace NRL_PROJECT.Controllers
 {
@@ -38,7 +41,7 @@ namespace NRL_PROJECT.Controllers
         //  OBSTACLE HANDLING
         // ------------------------------
 
-        /*[HttpGet]
+        [HttpGet]
         public IActionResult ObstacleDataForm() => View();
 
         [HttpPost]
@@ -62,8 +65,55 @@ namespace NRL_PROJECT.Controllers
 
             return View(obstacle);
         }
-        */
-       
+        
+        [HttpGet]
+        public IActionResult ObstacleAndMapForm() => View();
+
+        [HttpPost]
+        public async Task<IActionResult> SubmitObstacleWithLocation(ObstacleReportData model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("ObstacleAndMapForm", model);
+            }
+
+            // ------------------------------
+            //  LAGRING AV BILDE
+            // ------------------------------
+            if (model.ImageFile != null && model.ImageFile.Length > 0)
+            {
+                // Opprett mappe for opplastede bilder hvis den ikke finnes
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                // Gi bildet et unikt filnavn
+                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(model.ImageFile.FileName);
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                // Lagre bildet fysisk på serveren
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.ImageFile.CopyToAsync(stream);
+                }
+
+                // Lagre sti til bildet i databasen
+                model.ObstacleImageURL = "/uploads/" + uniqueFileName;
+            }
+
+            // ------------------------------
+            //  LAGRING AV RAPPORT
+            // ------------------------------
+            model.ObstacleReportDate = DateTime.UtcNow;
+            model.ObstacleReportStatus = ObstacleReportData.EnumTypes.New;
+
+            _context.ObstacleReports.Add(model);
+            await _context.SaveChangesAsync();
+
+            // Etter lagring: tilbake til forsiden
+            return RedirectToAction("Index");
+        }
+
 
         // ------------------------------
         //  STATIC PAGES
