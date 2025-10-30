@@ -19,11 +19,11 @@
         <input type="hidden" id="geoInput" name="GeoJsonCoordinates" />
 
         <!-- Map Card -->
-        <div class="bg-white rounded-3xl shadow-2xl p-6">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 -z-20">
             <h2 class="text-2xl md:text-3xl font-semibold text-purple-700 mb-4 flex items-center">
                 ✏️ Draw on Map
             </h2>
-            <div id="mapDraw" class="rounded-2xl border border-gray-200 shadow-inner" style="height: 700px;"></div>
+            <div id="mapDraw" class="rounded-2xl border border-gray-200 shadow-inner z-10" style="height: 700px;"></div>
             <p class="text-base md:text-lg text-gray-500 mt-3">
                 Use the toolbar in the top-left corner to add or remove markers/lines.
             </p>
@@ -72,11 +72,36 @@
     <script>
         // Init map
         const map = L.map('mapDraw').setView([58.333, 8.233], 13);
+        const input = document.getElementById('geoInput');
+        const markerGroup = L.featureGroup().addTo(map);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
+        function refreshInput() {
+            const features = [];
+            markerGroup.eachLayer(m => {
+                const { lat, lng } = m.getLatLng();
+                features.push({
+                    type: "Feature",
+                    geometry: { type: "Point", coordinates: [lng, lat] },
+                    properties: {}
+                });
+            });
+            input.value = JSON.stringify({ type: "FeatureCollection", features });
+        }
+        
+        // Add topographic map layer from GeoNorge
+        L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo?', {
+            layers: 'topo',
+            format: 'image/png',
+            transparent: false,
+            attribution: '© Kartverket'
         }).addTo(map);
+
+        // L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo?', {
+        //     layers: 'topo',
+        //     format: 'image/png',
+        //     transparent: false,
+        //     attribution: '© Kartverket'
+        // }).addTo(map);
 
         // Geoman controls
         map.pm.addControls({
@@ -92,13 +117,21 @@
 
         // Capture drawn geometry
         map.on('pm:create', e => {
-            const geojson = e.layer.toGeoJSON();
-            document.getElementById('geoInput').value = JSON.stringify(geojson.geometry.coordinates);
-        });
+            if (e.layer.getLatLng) {
+                markerGroup.addLayer(e.layer);
+                refreshInput();
 
-        // Clear input when object removed
-        map.on('pm:remove', () => {
-            document.getElementById('geoInput').value = '';
-        });
+                e.layer.on('dragend', refreshInput);
+                e.layer.on('pm:remove', () => {
+                    markerGroup.removeLayer(e.layer);
+                    refreshInput();
+                });
+            }
+});
+
+        // // Clear input when object removed
+        // map.on('pm:remove', () => {
+        //     document.getElementById('geoInput').value = '';
+        // });
     </script>
 }
