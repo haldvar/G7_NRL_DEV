@@ -22,6 +22,10 @@
 
     <ItemGroup>
       <Content Remove="Views\Home\MapOverview.cshtml" />
+      <Content Remove="Views\Home\ObstacleDataForm.cshtml" />
+      <Content Remove="Views\Home\ObstacleOverview.cshtml" />
+      <Content Remove="Views\Home\ReportDetails.cshtml" />
+      <Content Remove="Views\Map\MapDraw.cshtml" />
     </ItemGroup>
 
     <ItemGroup>
@@ -39,6 +43,7 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
+      <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.10" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.9">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
