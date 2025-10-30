@@ -14,6 +14,21 @@
     Draw a point or a line on the map below and submit your obstacle.
 </p>
 
+<!-- Form with buttons -->
+<form method="post" asp-action="Submit" asp-controller="Map" class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-6">
+    <input type="hidden" id="geoInput" name="GeoJsonCoordinates" />
+
+    <button type="submit"
+            class="bg-green-600 text-white px-12 py-5 rounded-2xl font-semibold text-2xl md:text-3xl shadow-xl hover:bg-green-700 hover:shadow-2xl transition">
+        ✅ Submit Drawing
+    </button>
+
+    <a asp-action="Index" asp-controller="Home"
+       class="bg-gray-600 text-white px-12 py-5 rounded-2xl font-semibold text-2xl md:text-3xl shadow-xl hover:bg-gray-700 hover:shadow-2xl transition">
+        ❌ Cancel
+    </a>
+</form>
+</div>
 
   
 @section Styles {
