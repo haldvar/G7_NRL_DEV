@@ -4,6 +4,8 @@ using NRL_PROJECT.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+
 // ------------------------------------------------------------
 // KONFIGURER TJENESTER (Dependency Injection)
 // ------------------------------------------------------------
@@ -30,12 +32,18 @@ builder.Services.AddDbContext<NRL_Db_Context>(options =>
     options.UseInMemoryDatabase("TestDb"));
 
 
-
-
 // ------------------------------------------------------------
-// BYGG APPEN
+// AUTOMATISK DATABASEMIGRERING VED OPPSTART
+// - DENNE KOMMENTERES OGSÅ UT VED TESTING
 // ------------------------------------------------------------
-var app = builder.Build();
+/*
+ * using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<NRL_Db_Context>();
+    db.Database.Migrate(); // Oppretter/oppdaterer databasen hvis nødvendig
+}
+*/
+
 
 
 // ------------------------------------------------------------
@@ -178,6 +186,14 @@ using (var scope = app.Services.CreateScope())
 }
 
 
+
+// ------------------------------------------------------------
+// BYGG APPEN
+// ------------------------------------------------------------
+var app = builder.Build();
+
+
+
 // ------------------------------------------------------------
 // KONFIGURER MIDDLEWARE (HTTP request pipeline)
 // ------------------------------------------------------------
@@ -211,17 +227,7 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}"
 );
 
-// ------------------------------------------------------------
-// AUTOMATISK DATABASEMIGRERING VED OPPSTART
-// - DENNE KOMMENTERES OGSÅ UT VED TESTING
-// ------------------------------------------------------------
-/*
- * using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<NRL_Db_Context>();
-    db.Database.Migrate(); // Oppretter/oppdaterer databasen hvis nødvendig
-}
-*/
+
 
 // ------------------------------------------------------------
 // KJØR APPEN
