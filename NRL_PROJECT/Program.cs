@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
@@ -25,6 +26,16 @@ builder.Services.AddControllersWithViews();
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
 
+// Legger til IdentityContext
+ builder.Services.AddDbContext<IdentityContext>(options =>
+ {
+     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+ });
+
+ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+     .AddEntityFrameworkStores<IdentityContext>()
+     .AddDefaultTokenProviders();
 
 
 
@@ -203,6 +214,8 @@ app.UseStaticFiles();
 // Aktiver ruting (slik at /Home/Index m.m. fungerer)
 app.UseRouting();
 
+//Legger til autentisering for Identity-funksjoner
+app.UseAuthentication();
 // Aktiver eventuell autorisasjon (hvis prosjektet bruker det)
 app.UseAuthorization();
 
