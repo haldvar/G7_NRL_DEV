@@ -1,9 +1,18 @@
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+
+// --- Lagrer nøklene på disk slik at antiforgery ikke brytes etter restart ---
+
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(@"C:\Temp-Keys"))
+    .SetApplicationName("NRL_PROJECT");
 
 
 // ------------------------------------------------------------
@@ -17,9 +26,8 @@ builder.Services.AddControllersWithViews();
 // Registrer databasekontekst (Entity Framework + MySQL)
 
 // KOMMENTERES UT UNDER TESTING:
-
 /*
- builder.Services.AddDbContext<NRL_Db_Context>(options =>
+builder.Services.AddDbContext<NRL_Db_Context>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
@@ -28,10 +36,10 @@ builder.Services.AddControllersWithViews();
 */
 
 
-// BRUK DENNE (in-memory database i stedet for MySQL) VED TESTING: 
+// FOR TESTING: Bruk en in-memory database i stedet for MySQL
+    builder.Services.AddDbContext<NRL_Db_Context>(options =>
+    options.UseInMemoryDatabase("TestDb"));
 
-builder.Services.AddDbContext<NRL_Db_Context>(options =>
-   options.UseInMemoryDatabase("TestDb"));
 
 
 
@@ -214,14 +222,12 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}"
 );
 
-
 // ------------------------------------------------------------
 // AUTOMATISK DATABASEMIGRERING VED OPPSTART
 // - DENNE KOMMENTERES OGSÅ UT VED TESTING
 // ------------------------------------------------------------
-
 /*
-using (var scope = app.Services.CreateScope())
+ * using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<NRL_Db_Context>();
     db.Database.Migrate(); // Oppretter/oppdaterer databasen hvis nødvendig
