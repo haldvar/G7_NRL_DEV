@@ -1,22 +1,169 @@
-@model NRL_PROJECT.Models.ObstacleReportData
-@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model NRL_PROJECT.Models.ObstacleReportData
+@using System.Globalization
+
 @{
-    ViewData["Title"] = "Report detail";
+    ViewData["Title"] = "Rapportdetaljer";
+
+    // --- Finn koordinater i C# ---
+    var inv = CultureInfo.InvariantCulture;
+    var nb = CultureInfo.GetCultureInfo("nb-NO");
+
+    string? latJs = null;
+    string? lonJs = null;
+
+    // 1) Forsøk fra Obstacle-feltene (anbefalt)
+    if (Model?.Obstacle != null && Model.Obstacle.Latitude != 0 && Model.Obstacle.Longitude != 0)
+    {
+        latJs = Model.Obstacle.Latitude.ToString("F6", inv);
+        lonJs = Model.Obstacle.Longitude.ToString("F6", inv);
+    }
+    // 2) Fallback: parse Reported_Location (kan være "58,268795,8,374899" eller "58.268795, 8.374899")
+    else if (!string.IsNullOrWhiteSpace(Model?.Reported_Location))
+    {
+        var raw = Model.Reported_Location.Trim().Replace(" ", "").Replace(";", ",");
+        var parts = raw.Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+        // Case A: "58,268795,8,374899" -> 4 deler
+        if (parts.Length >= 4)
+        {
+            var latStr = parts[0] + "," + parts[1];
+            var lonStr = parts[2] + "," + parts[3];
+
+            if (double.TryParse(latStr, nb, out var lat) && double.TryParse(lonStr, nb, out var lon))
+            {
+                latJs = lat.ToString("F6", inv);
+                lonJs = lon.ToString("F6", inv);
+            }
+        }
+        // Case B: "58.268795,8.374899" -> 2 deler
+        else if (parts.Length >= 2)
+        {
+            if (double.TryParse(parts[0], nb, out var lat) && double.TryParse(parts[1], nb, out var lon))
+            {
+                latJs = lat.ToString("F6", inv);
+                lonJs = lon.ToString("F6", inv);
+            }
+        }
+    }
+
+    bool hasCoords = !string.IsNullOrWhiteSpace(latJs) && !string.IsNullOrWhiteSpace(lonJs);
 }
 
-<h2>Rapportdetaljer</h2>
-<div class="card-3">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<p><strong>Rapport ID:</strong>@Model.Report_Id</p>
-<p><strong>Hindertype:</strong>@Model.Obstacle</p>
-<p><strong>Lokasjon:</strong>@Model.Reported_Location</p>
-<p><strong>Beskrivelse:</strong>@Model.Reported_Item</p>
-<p><strong>Tidspunkt registrert:</strong>@Model.Time_of_Submitted_Report</p>
+<div class="container mt-4">
+    <div class="row g-4">
+        <!-- Venstre: detaljer -->
+        <div class="col-lg-6 col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="fw-semibold mb-3">Rapportdetaljer</h3>
+
+                    <p><strong>Rapport ID:</strong> @Model.Report_Id</p>
+                    <p><strong>Hindertype:</strong> @(Model.Obstacle?.ObstacleType ?? "-")</p>
+                    <p>
+                        <strong>Lokasjon:</strong>
+                        @if (hasCoords)
+                        {
+                            <span class="font-monospace">@latJs, @lonJs</span>
+                        }
+                        else
+                        {
+                            @Model.Reported_Location
+                        }
+                    </p>
+                    <p><strong>Beskrivelse:</strong> @(Model.Obstacle?.ObstacleDescription ?? Model.Reported_Item ?? "-")</p>
+                    <p><strong>Tidspunkt registrert:</strong> @Model.Time_of_Submitted_Report.ToString("dd.MM.yyyy HH:mm")</p>
+
+                    <div class="d-flex mt-3 gap-2">
+                        <a asp-action="EditReport" asp-route-id="@Model.Report_Id" class="btn btn-primary">Rediger rapport</a>
+                        <a asp-action="RegistrarView" class="btn btn-outline-secondary">Tilbake</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Høyre: kart -->
+        <div class="col-lg-6 col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Kart</h5>
+                    @if (hasCoords)
+                    {
+                        <div id="map" style="height: 380px; border-radius:.5rem;"></div>
+                    }
+                    else
+                    {
+                        <div class="text-muted">Ingen gyldige koordinater i rapporten.</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Saksbehandling -->
+    <div class="card mt-4 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Saksbehandling</h5>
+
+            <form asp-action="UpdateStatus" asp-controller="Registrar" method="post" class="row g-2">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Report_Id" />
+
+                <div class="col-lg-6 col-12">
+                    <input name="comment" class="form-control" placeholder="Kommentar (valgfritt)" />
+                </div>
+
+                <div class="col-lg-auto d-flex col-12 gap-2">
+                    <button name="status" value="@NRL_PROJECT.Models.ReportStatus.UnderBehandling"
+                            class="btn btn-warning">
+                        Sett «Under behandling»
+                    </button>
+
+                    <button name="status" value="@NRL_PROJECT.Models.ReportStatus.Godkjent"
+                            class="btn btn-success">
+                        Godkjenn
+                    </button>
+
+                    <button name="status" value="@NRL_PROJECT.Models.ReportStatus.Avvist"
+                            class="btn btn-danger"
+                            onclick="return confirm('Er du sikker på at du vil avvise?');">
+                        Avvis
+                    </button>
+                </div>
+            </form>
+
+            @if (Model.StatusChangedAt.HasValue || !string.IsNullOrWhiteSpace(Model.StatusComment))
+            {
+                <div class="text-muted mt-3">
+                    Sist endret: @(Model.StatusChangedAt?.ToLocalTime().ToString("dd.MM.yyyy HH:mm") ?? "-")
+                    @if (!string.IsNullOrWhiteSpace(Model.StatusComment))
+                    {
+                        <span> • Kommentar: “@Model.StatusComment”</span>
+                    }
+                </div>
+            }
+        </div>
+    </div>
 
 </div>
 
-<a asp-action="EditReport" asp-route-id="@Model.Report_Id" class="btn-primary mt-3">Rediger rapport</a>
-<a asp-action="RegistrarView" class="btn-secondary mt-3">Tilbake</a>
+@if (hasCoords)
+{
+    <script>
+        const lat = @latJs;   // allerede med . som desimal
+        const lon = @lonJs;
+
+        const map = L.map('map', { zoomControl: true }).setView([lat, lon], 15);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+
+        L.marker([lat, lon]).addTo(map)
+            .bindPopup(`<strong>@(Model.Obstacle?.ObstacleType ?? "Hinder")</strong><br/>Lat: ${lat}, Lon: ${lon}`)
+            .openPopup();
+    </script>
+}
 

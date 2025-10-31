@@ -19,5 +19,9 @@ namespace NRL_PROJECT.Models
         public ObstacleData Obstacle { get; set; }
 
         public ReportStatus ReportStatus { get; set; } = ReportStatus.Ny;
+
+        public string? StatusComment { get; set; }
+        public DateTime? StatusChangedAt { get; set; }
+        public string? HandledBy { get; set; }
     }
 }
