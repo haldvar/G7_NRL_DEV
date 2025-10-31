@@ -2,19 +2,27 @@ namespace NRL_PROJECT.Models
 {
     public class ObstacleReportViewModel
     {
-        public int ObstacleId { get; set; } // kobling til hindring
+        public int ReportId { get; set; }                 // ID til rapporten
+        public DateTime TimeOfSubmittedReport { get; set; } // tidspunkt
 
-        public string ObstacleType { get; set; }
-        public double ObstacleHeight { get; set; }
-        public double ObstacleWidth { get; set; }
-        public string ObstacleComment { get; set; }
+        // Kobling til hindring
+        public int ObstacleId { get; set; }
+        public string? ObstacleName { get; set; }
+        public string? ObstacleType { get; set; }
+        public int ObstacleHeight { get; set; }
+        public int ObstacleWidth { get; set; }
+        public string? ObstacleDescription { get; set; }
 
-        public string GeoJsonCoordinates { get; set; } // brukes til karttegning
-        public double Longitude { get; set; }           // brukes til database
-        public double Latitude { get; set; }            // brukes til database
+        // Kart / koordinater
+        public string? GeoJsonCoordinates { get; set; }   
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
 
-        public int ObstacleDataID { get; set; }
+        // Statusfelt (valgfritt, for registerførervisning)
+        public ReportStatus ReportStatus { get; set; } = ReportStatus.Ny;
+
+        // For enkel sjekk i view
+        public bool HasCoordinates => Latitude != 0 && Longitude != 0;
     }
 }
-
 

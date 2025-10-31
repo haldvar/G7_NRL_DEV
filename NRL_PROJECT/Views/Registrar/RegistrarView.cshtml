@@ -1,0 +1,248 @@
+@model IEnumerable<NRL_PROJECT.Models.ObstacleReportData>
+@using System.Globalization
+@{
+    // Bruk bred layout bare her (fjern hvis du valgte globalt i _Layout.cshtml)
+    Layout = "~/Views/Shared/_LayoutWide.cshtml";
+
+    var ci = CultureInfo.InvariantCulture;
+    var list = (Model ?? Enumerable.Empty<NRL_PROJECT.Models.ObstacleReportData>()).ToList();
+
+    int cNy = list.Count(x => x.ReportStatus == NRL_PROJECT.Models.ReportStatus.Ny);
+    int cUnder = list.Count(x => x.ReportStatus == NRL_PROJECT.Models.ReportStatus.UnderBehandling);
+    int cGodkjent = list.Count(x => x.ReportStatus == NRL_PROJECT.Models.ReportStatus.Godkjent);
+    int cAvvist = list.Count(x => x.ReportStatus.ToString() == "Avvist"); // hvis du har enum-verdi Avvist
+}
+@{
+    Layout = null;
+}
+
+<style>
+   
+
+    /* Sideoppsett */
+    .app-shell {
+        min-height: 100vh;
+    }
+
+    .sidebar {
+        background: #f8f9fa;
+        border-right: 1px solid #dee2e6;
+    }
+
+        .sidebar .link {
+            display: block;
+            padding: .65rem .9rem;
+            border-radius: .5rem;
+            color: #16324f;
+        }
+
+            .sidebar .link.active, .sidebar .link:hover {
+                background: #e9f2ff;
+                color: #0d6efd;
+                text-decoration: none;
+            }
+
+    .counter-badge {
+        float: right;
+        background: #edf2f7;
+        border-radius: 1rem;
+        padding: .1rem .45rem;
+        font-size: .85em;
+    }
+
+    .main-header {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: #fff;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .main-body {
+        height: calc(100vh - 140px);
+        overflow: auto;
+    }
+
+    .list-card {
+        border-bottom: 1px solid #eef1f4;
+    }
+
+        .list-card:hover {
+            background: #f7fbff;
+        }
+
+    /* Statusmerker */
+    .badge-ny {
+        background: lightblue; 
+    }
+
+    .badge-under {
+        background: #ffc107;
+        color: #111;
+    }
+
+    .badge-godkjent {
+        background: #198754;
+    }
+
+    .badge-avvist {
+        background: #842029;
+    }
+</style>
+
+<div class="container-fluid app-shell">
+    <div class="row">
+        <!-- VENSTRE: meny -->
+        <aside class="col-md-3 col-lg-2 sidebar col-12 p-3">
+            <h5 class="mb-3">Registerfører</h5>
+
+            <div class="fw-semibold text-uppercase text-muted mb-1" style="font-size:.8rem;">Filtre</div>
+            <a href="#" class="link active" data-filter="alle">
+                Alle <span class="counter-badge">@list.Count</span>
+            </a>
+            <a href="#" class="link" data-filter="ny">
+                Venter på behandling <span class="counter-badge">@cNy</span>
+            </a>
+            <a href="#" class="link" data-filter="under">
+                Behandles <span class="counter-badge">@cUnder</span>
+            </a>
+            <a href="#" class="link" data-filter="godkjent">
+                Godkjent <span class="counter-badge">@cGodkjent</span>
+            </a>
+            <a href="#" class="link" data-filter="avvist">
+                Avvist <span class="counter-badge">@cAvvist</span>
+            </a>
+
+            <div class="fw-semibold text-uppercase text-muted mt-4 mb-1" style="font-size:.8rem;">Koblinger</div>
+            <a asp-controller="Home" asp-action="Index" class="link">Hjem</a>
+            <a asp-controller="Registrar" asp-action="RegistrarView" class="link">Oppdater</a>
+        </aside>
+
+        <!-- MIDTEN: liste -->
+        <main class="col-md-9 col-lg-10 col-12 p-0">
+            <!-- Topp: tittel + søk -->
+            <div class="main-header p-3">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div>
+                        <h3 class="mb-0">Innrapporterte hinder</h3>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <input id="searchBox" class="form-control" style="min-width: 320px"
+                               placeholder="Søk (ID, type, lokasjon)..." />
+                        <a asp-action="RegistrarView" class="btn btn-outline-secondary">Oppdater</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selve listen -->
+            <div id="list" class="main-body">
+                @if (!list.Any())
+                {
+                    <div class="text-muted p-4">Ingen rapporter ennå.</div>
+                }
+                else
+                {
+                    foreach (var r in list.OrderByDescending(x => x.Time_of_Submitted_Report))
+                    {
+                        var type = r.Obstacle?.ObstacleType ?? "-";
+                        var loc = (r.Obstacle != null && r.Obstacle.Latitude != 0 && r.Obstacle.Longitude != 0)
+                        ? $"{r.Obstacle.Latitude.ToString("F6", ci)}, {r.Obstacle.Longitude.ToString("F6", ci)}"
+                        : (string.IsNullOrWhiteSpace(r.Reported_Location) ? "-" : r.Reported_Location);
+
+                        string statusKey = r.ReportStatus switch
+                        {
+                            NRL_PROJECT.Models.ReportStatus.Ny => "ny",
+                            NRL_PROJECT.Models.ReportStatus.UnderBehandling => "under",
+                            NRL_PROJECT.Models.ReportStatus.Godkjent => "godkjent",
+                            _ => "avvist"
+                        };
+                        string badgeCls = r.ReportStatus switch
+                        {
+                            NRL_PROJECT.Models.ReportStatus.Ny => "badge-ny",
+                            NRL_PROJECT.Models.ReportStatus.UnderBehandling => "badge-under",
+                            NRL_PROJECT.Models.ReportStatus.Godkjent => "badge-godkjent",
+                            _ => "badge-avvist"
+                        };
+                        string badgeText = r.ReportStatus switch
+                        {
+                            NRL_PROJECT.Models.ReportStatus.Ny => "Venter",
+                            NRL_PROJECT.Models.ReportStatus.UnderBehandling => "Behandles",
+                            NRL_PROJECT.Models.ReportStatus.Godkjent => "Godkjent",
+                            _ => "Avvist"
+                        };
+
+                        <a class="text-decoration-none text-reset"
+                           asp-action="ReportDetails"
+                           asp-route-id="@r.Report_Id"
+                           data-status="@statusKey"
+                           data-search="@($"{r.Report_Id} {type} {loc}".ToLower())">
+                            <div class="list-card p-3">
+                                <div class="d-flex align-items-start justify-content-between">
+                                    <div class="pe-3">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="rounded-3 bg-light text-secondary d-flex align-items-center justify-content-center border"
+                                                 style="width:44px;height:44px;">
+                                                <!-- enkel pin-ikon -->
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16">
+                                                    <path d="M12.166 8.94C11.465 10.698 9.386 13.23 8 14.5c-1.386-1.27-3.465-3.802-4.166-5.56C3.28 7.04 4.918 5.5 8 5.5s4.72 1.54 4.166 3.44Z" />
+                                                    <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z" />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <div class="h5 mb-1">Rapport-ID: @r.Report_Id</div>
+                                                <div class="text-muted text-truncate">@type • @loc</div>
+                                                <div class="text-muted">Innmeldt: @r.Time_of_Submitted_Report.ToString("yyyy-MM-dd")</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span class="badge @badgeCls">@badgeText</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    }
+                }
+            </div>
+
+            <!-- teller nederst -->
+            <div class="small text-muted border-top p-2" id="counter">
+                Viser @list.Count av @list.Count rapporter
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+    (() => {
+        const links   = document.querySelectorAll('.sidebar .link[data-filter]');
+        const items   = document.querySelectorAll('#list > a');
+        const search  = document.getElementById('searchBox');
+        const counter = document.getElementById('counter');
+        let filter = 'alle';
+
+        function apply() {
+            const q = (search.value || '').trim().toLowerCase();
+            let shown = 0;
+            items.forEach(a => {
+                const okStatus = filter === 'alle' || a.dataset.status === filter;
+                const okSearch = !q || a.dataset.search.includes(q);
+                const show = okStatus && okSearch;
+                a.style.display = show ? '' : 'none';
+                if (show) shown++;
+            });
+            counter.textContent = `Viser ${shown} av ${items.length} rapporter`;
+        }
+
+        links.forEach(l => l.addEventListener('click', e => {
+            e.preventDefault();
+            links.forEach(x => x.classList.remove('active'));
+            l.classList.add('active');
+            filter = l.dataset.filter;
+            apply();
+        }));
+
+        search.addEventListener('input', apply);
+    })();
+</script>
+
