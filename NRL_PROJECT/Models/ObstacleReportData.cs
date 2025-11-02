@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NRL_PROJECT.Models
 {
-    public enum ReportStatus { Ny = 0, UnderBehandling = 1, Godkjent = 2, Avvist = 3 }
+    public enum ReportStatus { Ny = 0, UnderBehandling = 1, Godkjent = 2, Avvist = 3, Venter = 4 }
     public class ObstacleReportData
     {
         [Key]

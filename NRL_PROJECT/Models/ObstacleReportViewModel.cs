@@ -2,6 +2,10 @@ namespace NRL_PROJECT.Models
 {
     public class ObstacleReportViewModel
     {
+        //innsender
+        public int UserId { get; set; }
+        public string? UserName { get; set; }
+
         public int ReportId { get; set; }                 // ID til rapporten
         public DateTime TimeOfSubmittedReport { get; set; } // tidspunkt
 
@@ -19,7 +23,7 @@ namespace NRL_PROJECT.Models
         public double Longitude { get; set; }
 
         // Statusfelt (valgfritt, for registerførervisning)
-        public ReportStatus ReportStatus { get; set; } = ReportStatus.Ny;
+        public ReportStatus ReportStatus { get; set; }
 
         // For enkel sjekk i view
         public bool HasCoordinates => Latitude != 0 && Longitude != 0;

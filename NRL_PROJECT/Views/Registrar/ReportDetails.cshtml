@@ -1,4 +1,5 @@
 @model NRL_PROJECT.Models.ObstacleReportData
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @using System.Globalization
 
 @{
@@ -54,6 +55,28 @@
 
 <div class="container mt-4">
     <div class="row g-4">
+        <div class="mt-6">
+            <form asp-action="UpdateStatus" method="post" class="space-y-3">
+                <input type="hidden" name="id" value="@Model.Report_Id" />
+                <textarea name="comment" rows="3" class="w-full rounded-xl border px-3 py-2 text-sm" placeholder="Kommentar (valgfritt)"></textarea>
+
+                <div class="flex flex-wrap gap-3">
+                    <button name="status" value="Behandles" type="submit"
+                            class="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2 text-white hover:bg-amber-600">
+                        Under behandling
+                    </button>
+                    <button name="status" value="Godkjent" type="submit"
+                            class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700">
+                        Godkjenn
+                    </button>
+                    <button name="status" value="Avvist" type="submit"
+                            class="inline-flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-white hover:bg-rose-700">
+                        Avvis
+                    </button>
+                </div>
+            </form>
+        </div>
+
         <!-- Venstre: detaljer -->
         <div class="col-lg-6 col-12">
             <div class="card shadow-sm">

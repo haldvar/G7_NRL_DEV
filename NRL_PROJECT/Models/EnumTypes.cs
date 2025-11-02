@@ -20,6 +20,4 @@ namespace NRL_PROJECT.Models
 
 
 
-
-
 }
