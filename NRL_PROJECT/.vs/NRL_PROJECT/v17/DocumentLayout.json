@@ -1,13 +1,9 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\user\\source\\GitHub\\G7_NRL_DEV\\NRL_PROJECT\\",
+  "WorkspaceRootPath": "C:\\Users\\karol\\Koding\\Karoline2\\NRL_PROJECT\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{6208EA5C-8F99-1A43-50EF-683E7CE0DDD0}|NRL_PROJECT.csproj|c:\\users\\user\\source\\github\\g7_nrl_dev\\nrl_project\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6208EA5C-8F99-1A43-50EF-683E7CE0DDD0}|NRL_PROJECT.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6208EA5C-8F99-1A43-50EF-683E7CE0DDD0}|NRL_PROJECT.csproj|c:\\users\\user\\source\\github\\g7_nrl_dev\\nrl_project\\nrl_project.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "AbsoluteMoniker": "D:0:0:{6208EA5C-8F99-1A43-50EF-683E7CE0DDD0}|NRL_PROJECT.csproj|c:\\users\\karol\\koding\\karoline2\\nrl_project\\nrl_project.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
       "RelativeMoniker": "D:0:0:{6208EA5C-8F99-1A43-50EF-683E7CE0DDD0}|NRL_PROJECT.csproj|solutionrelative:nrl_project.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     }
   ],
@@ -23,27 +19,10 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\user\\source\\GitHub\\G7_NRL_DEV\\NRL_PROJECT\\Program.cs",
-              "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "C:\\Users\\user\\source\\GitHub\\G7_NRL_DEV\\NRL_PROJECT\\Program.cs",
-              "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAN0AAAAAAAAAAAAIwPMAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-01T17:03:07.36Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "NRL_PROJECT.csproj",
-              "DocumentMoniker": "C:\\Users\\user\\source\\GitHub\\G7_NRL_DEV\\NRL_PROJECT\\NRL_PROJECT.csproj",
+              "Title": "NRL_PROJECT",
+              "DocumentMoniker": "C:\\Users\\karol\\Koding\\Karoline2\\NRL_PROJECT\\NRL_PROJECT.csproj",
               "RelativeDocumentMoniker": "NRL_PROJECT.csproj",
-              "ToolTip": "C:\\Users\\user\\source\\GitHub\\G7_NRL_DEV\\NRL_PROJECT\\NRL_PROJECT.csproj",
+              "ToolTip": "C:\\Users\\karol\\Koding\\Karoline2\\NRL_PROJECT\\NRL_PROJECT.csproj",
               "RelativeToolTip": "NRL_PROJECT.csproj",
               "ViewState": "AgIAADAAAAAAAAAAAAAAADcAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
