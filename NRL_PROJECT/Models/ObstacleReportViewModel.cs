@@ -12,12 +12,13 @@ namespace NRL_PROJECT.Models
         // Kobling til hindring
         public string? ObstacleName { get; set; }
         public string? ObstacleType { get; set; }
-        public int ObstacleHeight { get; set; }
-        public int ObstacleWidth { get; set; }
+        public double? ObstacleHeight { get; set; }
+        public double? ObstacleWidth { get; set; }
         public string? ObstacleDescription { get; set; }
         public int ObstacleID { get; set; }
 
         // Kart / koordinater
+        public string? Reported_Location { get; set; }
         public string? GeoJsonCoordinates { get; set; }   
         public double Latitude { get; set; }
         public double Longitude { get; set; }

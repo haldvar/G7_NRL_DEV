@@ -34,6 +34,7 @@ namespace NRL_PROJECT.Controllers
             TempData["StatusMsg"] = $"Status satt til «{status}».";
             return RedirectToAction(nameof(ReportDetails), new { id });
         }
+
         [HttpGet]
         public async Task<IActionResult> ReportDetails(int id)
         {
@@ -46,20 +47,32 @@ namespace NRL_PROJECT.Controllers
 
             var vm = new ObstacleReportViewModel
             {
+                // innsending
                 ReportId = report.Report_Id,
                 TimeOfSubmittedReport = report.Time_of_Submitted_Report,
+
+                // hinder
                 ObstacleID = report.ObstacleReportID,
-                ObstacleType = report.Obstacle?.ObstacleType ?? "",
-                ObstacleDescription = report.Obstacle?.ObstacleComment ?? "",
+                ObstacleType = report.Obstacle?.ObstacleType,
+                ObstacleDescription = report.Obstacle?.ObstacleComment,
+                ObstacleHeight = report.Obstacle?.ObstacleHeight,
+                ObstacleWidth = report.Obstacle?.ObstacleWidth,
+
+                // lokasjon – bruk tall om de finnes, ellers la Reported_Location være med
                 Latitude = report.Obstacle?.Latitude ?? 0,
                 Longitude = report.Obstacle?.Longitude ?? 0,
-                ReportStatus = report.ReportStatus,   // enum
-                UserId = report.User.RoleID,    // eller .Id hvis det er det du bruker
-                UserName = $"{report.User.FirstName ?? ""} {report.User.LastName ?? ""}".Trim(),
-                GeoJsonCoordinates = report.Reported_Location
+                Reported_Location = report.Reported_Location,         // ← denne kan du vise/parse i view
+                GeoJsonCoordinates = report.Reported_Location,         // hvis du vil gjenbruke navnet
+
+                // status
+                ReportStatus = report.ReportStatus,
+
+                // innsender
+                UserId = report.User.RoleID,               // eller .Id hvis det er det du bruker
+                UserName = $"{report.User.FirstName ?? ""} {report.User.LastName ?? ""}".Trim()
             };
 
-            return View(vm); // Views/Registrar/ReportDetails.cshtml (model: ObstacleReportViewModel)
+            return View(vm); // Views/Registrar/ReportDetails.cshtml
         }
 
         // Henter alle rapporter
