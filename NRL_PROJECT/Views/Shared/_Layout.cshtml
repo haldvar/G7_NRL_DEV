@@ -35,7 +35,11 @@
                 <!-- Desktop menu -->
                 <div class="hidden md:flex space-x-6 font-medium">
                     <a class="text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+<<<<<<< Updated upstream
                    
+=======
+                    
+>>>>>>> Stashed changes
                     <a class="text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="About">About</a>
                     <a class="text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                 </div>
@@ -91,7 +95,7 @@
         </div>
     </footer>
 
-    @await RenderSectionAsync("Scripts", required: false)
+	@await RenderSectionAsync("Scripts", required: false)
 
     <!-- Mobile menu toggle -->
     <script>
@@ -102,5 +106,7 @@
             mobileMenu.classList.toggle("hidden");
         });
     </script>
+	
+
 </body>
 </html>
