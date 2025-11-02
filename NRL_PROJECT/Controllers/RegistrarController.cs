@@ -60,11 +60,9 @@ namespace NRL_PROJECT.Controllers
             {
                 ReportId = report.Report_Id,
                 TimeOfSubmittedReport = report.Time_of_Submitted_Report,
-                ObstacleId = report.ObstacleId,
-                ObstacleName = report.Obstacle?.ObstacleName,
+                ObstacleID = report.ObstacleReportID,
                 ObstacleType = report.Obstacle?.ObstacleType,
-                ObstacleWidth = report.Obstacle?.ObstacleWidth ?? 0,
-                ObstacleDescription = report.Obstacle?.ObstacleDescription,
+                ObstacleDescription = report.Obstacle?.ObstacleComment,
                 Latitude = report.Obstacle?.Latitude ?? 0,
                 Longitude = report.Obstacle?.Longitude ?? 0,
                 ReportStatus = report.ReportStatus

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
+using NRL_PROJECT.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,8 +12,10 @@ var builder = WebApplication.CreateBuilder(args);
 // ------------------------------------------------------------
 
 // Legg til støtte for MVC (Controllers + Views)
-builder.Services.AddControllersWithViews();
-
+builder.Services.AddControllersWithViews(options =>
+{
+    options.ModelBinderProviders.Insert(0, new InvariantDoubleModelBinderProvider());
+});
 
 // Registrer databasekontekst (Entity Framework + MySQL)
 
@@ -213,7 +216,6 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}"
 );
-
 
 // ------------------------------------------------------------
 // AUTOMATISK DATABASEMIGRERING VED OPPSTART

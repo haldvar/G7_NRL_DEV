@@ -1,4 +1,4 @@
-﻿@model NRL_PROJECT.Models.ObstacleReportData
+@model NRL_PROJECT.Models.ObstacleReportData
 @using System.Globalization
 
 @{
@@ -73,7 +73,7 @@
                             @Model.Reported_Location
                         }
                     </p>
-                    <p><strong>Beskrivelse:</strong> @(Model.Obstacle?.ObstacleDescription ?? Model.Reported_Item ?? "-")</p>
+                    <p><strong>Beskrivelse:</strong> @(Model.Obstacle?.ObstacleComment ?? Model.Reported_Item ?? "-")</p>
                     <p><strong>Tidspunkt registrert:</strong> @Model.Time_of_Submitted_Report.ToString("dd.MM.yyyy HH:mm")</p>
 
                     <div class="d-flex mt-3 gap-2">

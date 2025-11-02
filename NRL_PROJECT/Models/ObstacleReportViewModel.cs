@@ -6,12 +6,12 @@ namespace NRL_PROJECT.Models
         public DateTime TimeOfSubmittedReport { get; set; } // tidspunkt
 
         // Kobling til hindring
-        public int ObstacleId { get; set; }
         public string? ObstacleName { get; set; }
         public string? ObstacleType { get; set; }
         public int ObstacleHeight { get; set; }
         public int ObstacleWidth { get; set; }
         public string? ObstacleDescription { get; set; }
+        public int ObstacleID { get; set; }
 
         // Kart / koordinater
         public string? GeoJsonCoordinates { get; set; }   

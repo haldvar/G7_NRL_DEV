@@ -35,7 +35,11 @@ namespace NRL_PROJECT.Controllers
         {
             // 1️⃣ Sjekk kartdata først
             if (model.MapData == null)
+            { 
                 model.MapData = new MapData();
+                return View("ObstacleAndMapForm", model);
+            }
+            model.MapData ??= new MapData();
 
             if (model.Longitude == 0 || model.Latitude == 0 || string.IsNullOrWhiteSpace(model.MapData.GeoJsonCoordinates))
             {
