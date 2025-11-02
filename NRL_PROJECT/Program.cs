@@ -40,7 +40,12 @@ builder.Services.AddDbContext<NRL_Db_Context>(options =>
     builder.Services.AddDbContext<NRL_Db_Context>(options =>
     options.UseInMemoryDatabase("TestDb"));
 
+<<<<<<< Updated upstream
 
+
+=======
+*/
+>>>>>>> Stashed changes
 
 
 // ------------------------------------------------------------
@@ -226,8 +231,13 @@ app.MapControllerRoute(
 // AUTOMATISK DATABASEMIGRERING VED OPPSTART
 // - DENNE KOMMENTERES OGSÅ UT VED TESTING
 // ------------------------------------------------------------
+<<<<<<< Updated upstream
 /*
  * using (var scope = app.Services.CreateScope())
+=======
+
+using (var scope = app.Services.CreateScope())
+>>>>>>> Stashed changes
 {
     var db = scope.ServiceProvider.GetRequiredService<NRL_Db_Context>();
     db.Database.Migrate(); // Oppretter/oppdaterer databasen hvis nødvendig
