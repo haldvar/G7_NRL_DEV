@@ -18,20 +18,22 @@ builder.Services.AddControllersWithViews();
 
 // KOMMENTERES UT UNDER TESTING:
 
-/*
+
+ 
  builder.Services.AddDbContext<NRL_Db_Context>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
 
-*/
+
+
 
 
 // BRUK DENNE (in-memory database i stedet for MySQL) VED TESTING: 
-
-builder.Services.AddDbContext<NRL_Db_Context>(options =>
-   options.UseInMemoryDatabase("TestDb"));
+//
+// builder.Services.AddDbContext<NRL_Db_Context>(options =>
+//    options.UseInMemoryDatabase("TestDb"));
 
 
 
@@ -220,13 +222,15 @@ app.MapControllerRoute(
 // - DENNE KOMMENTERES OGSÅ UT VED TESTING
 // ------------------------------------------------------------
 
-/*
+
+
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<NRL_Db_Context>();
     db.Database.Migrate(); // Oppretter/oppdaterer databasen hvis nødvendig
 }
-*/
+
+
 
 // ------------------------------------------------------------
 // KJØR APPEN

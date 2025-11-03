@@ -28,8 +28,6 @@
         ❌ Cancel
     </a>
 </form>
-</div>
-
   
 @section Styles {
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -42,8 +40,13 @@
     <script src="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
     <script>
         const map = L.map('mapDraw').setView([@Model.Latitude, @Model.Longitude], @Model.MapZoomLevel);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
+        L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo?service=wms&request=getcapabilities', {
+            layers: 'topo',
+            format: 'image/png',
+            transparent: false,
+            attribution: '© Kartverket / Norge i bilder'
+        }).addTo(map);
+        
         map.pm.addControls({
             position: 'topleft',
             drawMarker: true,

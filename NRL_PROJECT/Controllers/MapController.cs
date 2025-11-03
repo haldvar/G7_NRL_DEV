@@ -29,63 +29,112 @@ namespace NRL_PROJECT.Controllers
             return View(model);
         }
 
-        // POST: /Map/SubmitObstacleWithLocation
-        [HttpPost]
-        public async Task<IActionResult> SubmitObstacleWithLocation(ObstacleData model)
+    // POST: /Map/SubmitObstacleWithLocation
+    [HttpPost]
+    public async Task<IActionResult> SubmitObstacleWithLocation(ObstacleData model)
+    {
+        // 1️⃣ Validate map input
+        if (model.MapData == null)
+            model.MapData = new MapData();
+
+        if (model.Longitude == 0 || model.Latitude == 0 || string.IsNullOrWhiteSpace(model.MapData.GeoJsonCoordinates))
         {
-            // 1️⃣ Sjekk kartdata først
-            if (model.MapData == null)
-                model.MapData = new MapData();
-
-            if (model.Longitude == 0 || model.Latitude == 0 || string.IsNullOrWhiteSpace(model.MapData.GeoJsonCoordinates))
-            {
-                ModelState.AddModelError("", "Location must be selected and drawn on the map.");
-                return View("ObstacleAndMapForm", model);
-            }
-
-            // 2️⃣ Lagre kartdata først
-            var mapData = new MapData
-            {
-                Latitude = model.Latitude,
-                Longitude = model.Longitude,
-                MapZoomLevel = model.MapData.MapZoomLevel != 0 ? model.MapData.MapZoomLevel : 13,
-                GeoJsonCoordinates = model.MapData.GeoJsonCoordinates
-            };
-            _context.MapDatas.Add(mapData);
-            await _context.SaveChangesAsync();
-
-            // 3️⃣ Lagre hinder (Obstacle)
-            var obstacle = new ObstacleData
-            {
-                ObstacleType = model.ObstacleType,
-                ObstacleHeight = model.ObstacleHeight,
-                ObstacleWidth = model.ObstacleWidth,
-                Longitude = model.Longitude,
-                Latitude = model.Latitude,
-                ObstacleComment = model.ObstacleComment,
-                MapData = mapData
-            };
-            _context.Obstacles.Add(obstacle);
-            await _context.SaveChangesAsync();
-
-            // 4️⃣ Opprett en tilknyttet rapport
-            var report = new ObstacleReportData
-            {
-                ObstacleID = obstacle.ObstacleId,
-                UserID = null, // ingen bruker koblet enda
-                ReviewedByUserID = null,
-                ObstacleReportComment = "Her skal Registerfører kunne skrive inn kommentar.",
-                ObstacleReportDate = DateTime.UtcNow,
-                ObstacleReportStatus = ObstacleReportData.EnumTypes.New,
-                MapDataID = mapData.MapDataID,
-                ObstacleImageURL = "" // kan være tom
-            };
-            _context.ObstacleReports.Add(report);
-            await _context.SaveChangesAsync();
-
-            // 5️⃣ Ferdig! Send bruker til oversikt
-            return RedirectToAction(nameof(ReportListOverview));
+            ModelState.AddModelError("", "Location must be selected and drawn on the map.");
+            return View("ObstacleAndMapForm", model);
         }
+
+        // 2️⃣ Save MapData
+        var mapData = new MapData
+        {
+            Latitude = model.Latitude,
+            Longitude = model.Longitude,
+            MapZoomLevel = model.MapData.MapZoomLevel != 0 ? model.MapData.MapZoomLevel : 13,
+            GeoJsonCoordinates = model.MapData.GeoJsonCoordinates
+        };
+        _context.MapDatas.Add(mapData);
+        await _context.SaveChangesAsync();
+
+        // 3️⃣ Save Obstacle
+        var obstacle = new ObstacleData
+        {
+            ObstacleType = model.ObstacleType,
+            ObstacleHeight = model.ObstacleHeight,
+            ObstacleWidth = model.ObstacleWidth,
+            Longitude = model.Longitude,
+            Latitude = model.Latitude,
+            ObstacleComment = model.ObstacleComment,
+            MapData = mapData
+        };
+        _context.Obstacles.Add(obstacle);
+        await _context.SaveChangesAsync();
+
+        // 4️⃣ Parse GeoJSON and create 1–2 markers
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(model.MapData.GeoJsonCoordinates))
+            {
+                var geo = JsonDocument.Parse(model.MapData.GeoJsonCoordinates);
+                var type = geo.RootElement.GetProperty("type").GetString();
+
+                if (type == "Point")
+                {
+                    // Single marker obstacle
+                    var coords = geo.RootElement.GetProperty("coordinates").EnumerateArray().ToList();
+                    var marker = new ObstacleMarkerData
+                    {
+                        ObstacleID = obstacle.ObstacleId,
+                        MarkerNo = 1,
+                        Latitude = (decimal)coords[1].GetDouble(),
+                        Longitude = (decimal)coords[0].GetDouble()
+                    };
+                    _context.ObstacleMarkers.Add(marker);
+                }
+                else if (type == "LineString")
+                {
+                    // Two markers connected by a line
+                    var coords = geo.RootElement.GetProperty("coordinates").EnumerateArray().ToList();
+
+                    for (int i = 0; i < coords.Count && i < 2; i++)
+                    {
+                        var markerCoords = coords[i].EnumerateArray().ToList();
+                        var marker = new ObstacleMarkerData
+                        {
+                            ObstacleID = obstacle.ObstacleId,
+                            MarkerNo = (byte)(i + 1),
+                            Latitude = (decimal)markerCoords[1].GetDouble(),
+                            Longitude = (decimal)markerCoords[0].GetDouble()
+                        };
+                        _context.ObstacleMarkers.Add(marker);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            // Optional: log or show validation issue (bad GeoJSON etc.)
+            Console.WriteLine("Error parsing GeoJSON for markers: " + ex.Message);
+        }
+
+        // 5️⃣ Create ObstacleReport
+        var report = new ObstacleReportData
+        {
+            ObstacleID = obstacle.ObstacleId,
+            UserID = null,
+            ReviewedByUserID = null,
+            ObstacleReportComment = "Her skal Registerfører kunne skrive inn kommentar.",
+            ObstacleReportDate = DateTime.UtcNow,
+            ObstacleReportStatus = ObstacleReportData.EnumTypes.New,
+            MapDataID = mapData.MapDataID,
+            ObstacleImageURL = ""
+        };
+        _context.ObstacleReports.Add(report);
+        await _context.SaveChangesAsync();
+
+        // 6️⃣ Done
+        return View("MapConfirmation", mapData);
+    }
 
 
 

@@ -8,6 +8,7 @@
     string displayLng = Model.Longitude.ToString();
     int zoomLevel = Model.MapZoomLevel;
 }
+
 <div class="max-w-4xl mx-auto px-4 py-10">
     <!-- Title -->
     <h1 class="text-4xl font-extrabold text-purple-700 text-center mb-4 tracking-wide">
@@ -30,10 +31,9 @@
         <h2 class="text-xl font-semibold text-purple-700 mb-3 flex items-center">
             📍 Rå kartdata
         </h2>
-        <div class="bg-gray-50 p-4 rounded-lg text-sm text-gray-800 space-y-1 border border-gray-200">
-            <div><strong>Breddegrad (Latitude):</strong> @displayLat</div>
-            <div><strong>Lengdegrad (Longitude):</strong> @displayLng</div>
-            <div><strong>Zoomnivå:</strong> @zoomLevel</div>
+        <div id="rawDataContainer"
+             class="bg-gray-50 p-4 rounded-lg text-sm text-gray-800 space-y-1 border border-gray-200">
+            <div><em>Laster inn kartdata...</em></div>
         </div>
     </div>
 
@@ -60,23 +60,90 @@
 
         const map = L.map('mapConfirm').setView([startLat, startLng], zoomLevel);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
+        L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo?service=wms&request=getcapabilities', {
+            layers: 'topo',
+            format: 'image/png',
+            transparent: false,
+            attribution: '© Kartverket'
         }).addTo(map);
 
-        // Marker for senterpunkt
-        L.marker([startLat, startLng])
-            .addTo(map)
-            .bindPopup("Senterpunkt")
-            .openPopup();
+        // 🔹 Parse the GeoJSON from the model
+        const geoJsonRaw = '@Html.Raw(Model.GeoJsonCoordinates?.Replace("'", "\\'"))';
+
+        if (geoJsonRaw && geoJsonRaw.length > 0) {
+            try {
+                const geometry = JSON.parse(geoJsonRaw);
+
+                if (geometry.type === "Point") {
+                    const [lng, lat] = geometry.coordinates;
+
+                    L.marker([lat, lng])
+                        .addTo(map)
+                        .bindPopup("Hinderpunkt")
+                        .openPopup();
+
+                    updateRawData([{ lat, lng }]);
+
+                } else if (geometry.type === "LineString") {
+                    const coords = geometry.coordinates;
+                    const markerList = [];
+
+                    // Draw both markers
+                    coords.forEach((coord, i) => {
+                        const [lng, lat] = coord;
+                        markerList.push({ lat, lng });
+                        L.marker([lat, lng])
+                            .addTo(map)
+                            .bindPopup(`Markør ${i + 1}`);
+                    });
+
+                    // Draw connecting line
+                    const latlngs = coords.map(c => [c[1], c[0]]);
+                    const line = L.polyline(latlngs, { color: 'orange', weight: 4 }).addTo(map);
+                    map.fitBounds(line.getBounds());
+
+                    updateRawData(markerList);
+                } else {
+                    console.warn("Unknown geometry type:", geometry.type);
+                }
+
+            } catch (err) {
+                console.error("Failed to parse GeoJSON:", err);
+            }
+        } else {
+            // fallback single center marker
+            L.marker([startLat, startLng])
+                .addTo(map)
+                .bindPopup("Senterpunkt")
+                .openPopup();
+
+            updateRawData([{ lat: startLat, lng: startLng }]);
+        }
+
+        // 🧠 Helper: updates the "Rå kartdata" section dynamically
+        function updateRawData(markers) {
+            const container = document.querySelector("#rawDataContainer");
+            if (!container) return;
+
+            let html = "";
+
+            if (markers.length === 1) {
+                html += `
+                    <div><strong>Breddegrad (Latitude):</strong> ${markers[0].lat.toFixed(6)}</div>
+                    <div><strong>Lengdegrad (Longitude):</strong> ${markers[0].lng.toFixed(6)}</div>
+                    <div><strong>Type:</strong> Punkt</div>
+                `;
+            } else if (markers.length === 2) {
+                html += `
+                    <div><strong>Markør 1 Latitude:</strong> ${markers[0].lat.toFixed(6)}</div>
+                    <div><strong>Markør 1 Longitude:</strong> ${markers[0].lng.toFixed(6)}</div>
+                    <div><strong>Markør 2 Latitude:</strong> ${markers[1].lat.toFixed(6)}</div>
+                    <div><strong>Markør 2 Longitude:</strong> ${markers[1].lng.toFixed(6)}</div>
+                    <div><strong>Type:</strong> Linje (mellom 2 markører)</div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
     </script>
 }
-
-@if (!string.IsNullOrEmpty(Model.GeoJsonCoordinates))
-{
-    <div class="bg-gray-50 p-4 rounded-lg text-sm text-gray-800 border border-gray-200 mt-4">
-        <strong>GeoJSON-koordinater:</strong> @Model.GeoJsonCoordinates
-    </div>
-}
-
