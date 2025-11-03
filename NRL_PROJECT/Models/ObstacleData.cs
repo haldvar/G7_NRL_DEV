@@ -11,10 +11,10 @@ namespace NRL_PROJECT.Models
         public int ObstacleId { get; set; }
 
         [Required]
-        public string ObstacleType { get; set; }
+       // public string ObstacleType { get; set; }
 
-        public double ObstacleHeight { get; set; }
-        public double ObstacleWidth { get; set; }
+       // public double ObstacleHeight { get; set; }
+       // public double ObstacleWidth { get; set; }
         public string ObstacleComment { get; set; }
 
         public double Longitude { get; set; }
@@ -24,6 +24,10 @@ namespace NRL_PROJECT.Models
         {
             GeoJsonCoordinates = string.Empty
         };
+        [NotMapped]
+        public IFormFile? ImageFile { get; set; } // brukes til opplasting fra skjema
+
+        public string? ImagePath { get; set; } // lagres i databasen
 
         public ICollection<ObstacleReportData> ObstacleReports { get; set; } = new List<ObstacleReportData>();
     }

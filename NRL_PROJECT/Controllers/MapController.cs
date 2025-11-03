@@ -8,12 +8,17 @@ namespace NRL_PROJECT.Controllers
 {
     public class MapController : Controller
     {
-        private readonly NRL_Db_Context _context;
+        private readonly IWebHostEnvironment _environment;
 
-        public MapController(NRL_Db_Context context)
+        public MapController(NRL_Db_Context context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
         }
+
+        private readonly NRL_Db_Context _context;
+
+       
 
         // GET: /Map/ObstacleAndMapForm
         [HttpGet]
@@ -57,9 +62,10 @@ namespace NRL_PROJECT.Controllers
             // 3️⃣ Lagre hinder (Obstacle)
             var obstacle = new ObstacleData
             {
-                ObstacleType = model.ObstacleType,
+               /* ObstacleType = model.ObstacleType,
                 ObstacleHeight = model.ObstacleHeight,
                 ObstacleWidth = model.ObstacleWidth,
+               */
                 Longitude = model.Longitude,
                 Latitude = model.Latitude,
                 ObstacleComment = model.ObstacleComment,
@@ -80,6 +86,23 @@ namespace NRL_PROJECT.Controllers
                 MapDataID = mapData.MapDataID,
                 ObstacleImageURL = "" // kan være tom
             };
+            if (model.ImageFile != null && model.ImageFile.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(model.ImageFile.FileName);
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.ImageFile.CopyToAsync(stream);
+                }
+
+                model.ImagePath = "/uploads/" + uniqueFileName;
+            }
+
             _context.ObstacleReports.Add(report);
             await _context.SaveChangesAsync();
 
@@ -161,9 +184,11 @@ namespace NRL_PROJECT.Controllers
                     properties = new
                     {
                         id = o.ObstacleId,
+                        /*
                         type = o.ObstacleType,
                         height = o.ObstacleHeight,
                         width = o.ObstacleWidth,
+                        */
                         comment = o.ObstacleComment
                     }
                 })

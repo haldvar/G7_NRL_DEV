@@ -121,9 +121,11 @@ using (var scope = app.Services.CreateScope())
         context.Obstacles.AddRange(
     new ObstacleData
     {
+        /*
         ObstacleType = "Tree",
         ObstacleHeight = 5,
         ObstacleWidth = 2,
+        */
         Latitude = 60.3913,
         Longitude = 5.3221,
         ObstacleComment = "Fallen tree near path",
@@ -131,9 +133,11 @@ using (var scope = app.Services.CreateScope())
     },
     new ObstacleData
     {
+        /*
         ObstacleType = "Fence",
         ObstacleHeight = 1.5,
         ObstacleWidth = 10,
+        */
         Latitude = 59.9139,
         Longitude = 10.7522,
         ObstacleComment = "New fence blocking small road",
