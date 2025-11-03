@@ -3,16 +3,19 @@ using Microsoft.EntityFrameworkCore;
 using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
 using System.Text.Json;
+using Microsoft.AspNetCore.Hosting;
 
 namespace NRL_PROJECT.Controllers
 {
     public class MapController : Controller
     {
         private readonly NRL_Db_Context _context;
+        private readonly IWebHostEnvironment _environment;
 
-        public MapController(NRL_Db_Context context)
+        public MapController(NRL_Db_Context context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
         }
 
         // GET: /Map/ObstacleAndMapForm
@@ -26,65 +29,83 @@ namespace NRL_PROJECT.Controllers
                 MapData = new MapData()
             };
 
-            return View(model);
+            return View(new ObstacleReportData());
         }
 
         // POST: /Map/SubmitObstacleWithLocation
         [HttpPost]
-        public async Task<IActionResult> SubmitObstacleWithLocation(ObstacleData model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SubmitObstacleWithLocation(ObstacleReportData model)
         {
-            // 1️⃣ Sjekk kartdata først
-            if (model.MapData == null)
-                model.MapData = new MapData();
-
-            if (model.Longitude == 0 || model.Latitude == 0 || string.IsNullOrWhiteSpace(model.MapData.GeoJsonCoordinates))
+            //  Validering av input
+            if (string.IsNullOrWhiteSpace(model.ObstacleReportComment))
             {
-                ModelState.AddModelError("", "Location must be selected and drawn on the map.");
+                ModelState.AddModelError("ObstacleReportComment", "Du må skrive en kommentar.");
+            }
+
+            if (model.MapData == null || string.IsNullOrWhiteSpace(model.MapData.GeoJsonCoordinates))
+            {
+                ModelState.AddModelError("MapData", "Du må plassere et punkt på kartet.");
+            }
+
+            if (!ModelState.IsValid)
+            {
                 return View("ObstacleAndMapForm", model);
             }
 
-            // 2️⃣ Lagre kartdata først
-            var mapData = new MapData
-            {
-                Latitude = model.Latitude,
-                Longitude = model.Longitude,
-                MapZoomLevel = model.MapData.MapZoomLevel != 0 ? model.MapData.MapZoomLevel : 13,
-                GeoJsonCoordinates = model.MapData.GeoJsonCoordinates
-            };
-            _context.MapDatas.Add(mapData);
-            await _context.SaveChangesAsync();
-
-            // 3️⃣ Lagre hinder (Obstacle)
+            //  Opprett og lagre hinder (ObstacleData)
             var obstacle = new ObstacleData
             {
-                ObstacleType = model.ObstacleType,
-                ObstacleHeight = model.ObstacleHeight,
-                ObstacleWidth = model.ObstacleWidth,
-                Longitude = model.Longitude,
-                Latitude = model.Latitude,
-                ObstacleComment = model.ObstacleComment,
-                MapData = mapData
+                ObstacleType = "Ukjent", // evt. hent fra ViewModel
+                ObstacleHeight = 0,
+                ObstacleWidth = 0,
+                Latitude = model.MapData?.Latitude ?? 0,
+                Longitude = model.MapData?.Longitude ?? 0,
+                ObstacleComment = model.ObstacleReportComment,
+                MapData = model.MapData ?? new MapData { GeoJsonCoordinates = "" }
             };
+
             _context.Obstacles.Add(obstacle);
             await _context.SaveChangesAsync();
 
-            // 4️⃣ Opprett en tilknyttet rapport
+            //  Håndter bildeopplasting
+            string? imagePath = null;
+            if (model.ImageFile != null && model.ImageFile.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(model.ImageFile.FileName);
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.ImageFile.CopyToAsync(stream);
+                }
+
+                imagePath = "/uploads/" + uniqueFileName;
+            }
+
+            //  Opprett rapport-oppføring
             var report = new ObstacleReportData
             {
                 ObstacleID = obstacle.ObstacleId,
-                UserID = null, // ingen bruker koblet enda
+                UserID = null, // kan fylles inn senere hvis dere har innlogging
                 ReviewedByUserID = null,
-                ObstacleReportComment = "Her skal Registerfører kunne skrive inn kommentar.",
+                ObstacleReportComment = model.ObstacleReportComment,
                 ObstacleReportDate = DateTime.UtcNow,
                 ObstacleReportStatus = ObstacleReportData.EnumTypes.New,
-                MapDataID = mapData.MapDataID,
-                ObstacleImageURL = "" // kan være tom
+                MapDataID = obstacle.MapData.MapDataID,
+                ObstacleImageURL = imagePath
             };
+
             _context.ObstacleReports.Add(report);
             await _context.SaveChangesAsync();
 
-            // 5️⃣ Ferdig! Send bruker til oversikt
-            return RedirectToAction(nameof(ReportListOverview));
+            // ✅ Ferdig
+            TempData["Success"] = "Rapporten ble sendt inn!";
+            return RedirectToAction("Index", "Home");
         }
 
 
