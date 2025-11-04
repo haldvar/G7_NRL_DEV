@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,22 +14,28 @@ var builder = WebApplication.CreateBuilder(args);
 // Legg til støtte for MVC (Controllers + Views)
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+    });
+
 
 // Registrer databasekontekst (Entity Framework + MySQL)
 
 // KOMMENTERES UT UNDER TESTING:
-
 /*
  builder.Services.AddDbContext<NRL_Db_Context>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
-
 */
 
 
 // BRUK DENNE (in-memory database i stedet for MySQL) VED TESTING: 
+
 
 builder.Services.AddDbContext<NRL_Db_Context>(options =>
    options.UseInMemoryDatabase("TestDb"));
@@ -202,6 +209,9 @@ app.UseStaticFiles();
 
 // Aktiver ruting (slik at /Home/Index m.m. fungerer)
 app.UseRouting();
+
+// Activate authenticating
+app.UseAuthentication();
 
 // Aktiver eventuell autorisasjon (hvis prosjektet bruker det)
 app.UseAuthorization();
