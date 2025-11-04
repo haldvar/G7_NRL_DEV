@@ -14,7 +14,7 @@ namespace NRL_PROJECT.Controllers
 
         // Viser opplastingsskjemaet
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult UploadReportImage()
         {
             return View();
         }
