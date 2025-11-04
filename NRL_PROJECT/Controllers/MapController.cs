@@ -103,9 +103,9 @@ namespace NRL_PROJECT.Controllers
             _context.ObstacleReports.Add(report);
             await _context.SaveChangesAsync();
 
-            // ✅ Ferdig
+            //  Ferdig
             TempData["Success"] = "Rapporten ble sendt inn!";
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("ReportListOverview", "Map");
         }
 
 
@@ -159,7 +159,7 @@ namespace NRL_PROJECT.Controllers
             _context.ObstacleReports.Add(report);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(ReportListOverview));
+           return RedirectToAction(nameof(ReportListOverview));
         }
 
         // GET: /Map/GetObstacles
