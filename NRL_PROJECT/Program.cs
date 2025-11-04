@@ -26,13 +26,11 @@ builder.Services.AddControllersWithViews(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
-});
-
 */
 
 
-// BRUK DENNE (in-memory database i stedet for MySQL) VED TESTING: 
 
+// BRUK DENNE (in-memory database i stedet for MySQL) VED TESTING: 
 builder.Services.AddDbContext<NRL_Db_Context>(options =>
    options.UseInMemoryDatabase("TestDb"));
 

@@ -54,7 +54,7 @@ namespace NRL_PROJECT.Controllers
                 // hinder
                 ObstacleID = report.ObstacleReportID,
                 ObstacleType = report.Obstacle?.ObstacleType,
-                ObstacleDescription = report.Obstacle?.ObstacleComment,
+                ObstacleComment = report.Obstacle?.ObstacleComment,
                 ObstacleHeight = report.Obstacle?.ObstacleHeight,
                 ObstacleWidth = report.Obstacle?.ObstacleWidth,
 
@@ -68,7 +68,7 @@ namespace NRL_PROJECT.Controllers
                 ReportStatus = report.ReportStatus,
 
                 // innsender
-                UserId = report.User.RoleID,               // eller .Id hvis det er det du bruker
+                UserId = report.User.RoleID,              
                 UserName = $"{report.User.FirstName ?? ""} {report.User.LastName ?? ""}".Trim()
             };
 
@@ -77,22 +77,29 @@ namespace NRL_PROJECT.Controllers
 
         // Henter alle rapporter
         [HttpGet]
-        public async Task<IActionResult> RegistrarView(string? status = null, string? q = null)
+        public async Task<IActionResult> RegistrarView(string? status = "Alle", string? q = null)
         {
             var query = _context.ObstacleReports
-                .Include(r => r.Obstacle)   // hinderdetaljer
-                .Include(r => r.User)       // innsender
+                .Include(r => r.Obstacle)
+                .Include(r => r.User)
                 .AsQueryable();
 
-            // --------- Filter på status (querystring) ----------
-            // status kommer som string (f.eks. "Godkjent") -> parse til enum én gang
+            // Rens eventuelle "Alle (2)" -> "Alle"
             if (!string.IsNullOrWhiteSpace(status) &&
-                Enum.TryParse<ReportStatus>(status, ignoreCase: true, out var parsedStatus))
+                status.StartsWith("Alle", StringComparison.OrdinalIgnoreCase))
             {
-                query = query.Where(r => r.ReportStatus == parsedStatus);
+                status = "Alle";
             }
 
-            // --------- Fritekstsøk ----------
+            // Bare filtrer hvis status er IKKE "Alle" og faktisk matcher enum
+            if (!string.IsNullOrWhiteSpace(status) &&
+                !string.Equals(status, "Alle", StringComparison.OrdinalIgnoreCase) &&
+                Enum.TryParse<ReportStatus>(status, ignoreCase: true, out var parsed))
+            {
+                query = query.Where(r => r.ReportStatus == parsed);
+            }
+
+            // (valgfritt) fritekstsøk
             if (!string.IsNullOrWhiteSpace(q))
             {
                 q = q.Trim();
@@ -100,11 +107,9 @@ namespace NRL_PROJECT.Controllers
                     r.Report_Id.ToString().Contains(q) ||
                     (r.Obstacle.ObstacleType ?? "").Contains(q) ||
                     ((r.User.FirstName ?? "") + " " + (r.User.LastName ?? "")).Contains(q) ||
-                    (r.User.FirstName?? "").Contains(q)
-                );
+                    (r.User.FirstName ?? "").Contains(q));
             }
 
-            // --------- Projiser til ViewModel ----------
             var model = await query
                 .OrderByDescending(r => r.Time_of_Submitted_Report)
                 .Select(r => new ObstacleReportViewModel
@@ -113,20 +118,24 @@ namespace NRL_PROJECT.Controllers
                     TimeOfSubmittedReport = r.Time_of_Submitted_Report,
                     ObstacleID = r.ObstacleReportID,
                     ObstacleType = r.Obstacle != null ? r.Obstacle.ObstacleType : "",
-                    ObstacleDescription = r.Obstacle != null ? r.Obstacle.ObstacleComment : "",
+                    ObstacleComment = r.Obstacle != null ? r.Obstacle.ObstacleComment : "",
                     Latitude = r.Obstacle != null ? r.Obstacle.Latitude : 0,
                     Longitude = r.Obstacle != null ? r.Obstacle.Longitude : 0,
-
-                    // Entitetens status er enum -> ViewModelens enum (direkte)
                     ReportStatus = r.ReportStatus,
-
+                    StatusComment = r.StatusComment,
+                    StatusChangedAt = r.StatusChangedAt,
+                    HandledBy = r.HandledBy,
                     UserId = r.User.RoleID,
                     UserName = $"{r.User.FirstName ?? ""} {r.User.LastName ?? ""}".Trim()
                 })
                 .ToListAsync();
 
-            return View(model); // List<ObstacleReportViewModel>
+            ViewBag.SelectedStatus = status ?? "Alle";
+            return View(model);
         }
 
+
     }
+
 }
+

@@ -14,8 +14,13 @@ namespace NRL_PROJECT.Models
         public string? ObstacleType { get; set; }
         public double? ObstacleHeight { get; set; }
         public double? ObstacleWidth { get; set; }
-        public string? ObstacleDescription { get; set; }
+        public string? ObstacleComment { get; set; }
         public int ObstacleID { get; set; }
+
+
+        public string? StatusComment { get; set; }      // kommentaren du skriver i ReportDetails
+        public DateTime? StatusChangedAt { get; set; }  // valgfritt: når status/kommentar ble endret
+        public string? HandledBy { get; set; }
 
         // Kart / koordinater
         public string? Reported_Location { get; set; }

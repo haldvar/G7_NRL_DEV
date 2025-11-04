@@ -1,4 +1,4 @@
-﻿@model NRL_PROJECT.Models.ObstacleReportViewModel
+@model NRL_PROJECT.Models.ObstacleReportViewModel
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @using System.Globalization
 @{
@@ -45,6 +45,7 @@
                     <textarea name="comment" rows="3"
                               class="w-full rounded-xl border px-3 py-2 text-sm"
                               placeholder="Kommentar (valgfritt)"></textarea>
+                              
 
                     <div class="flex flex-wrap gap-3 pt-1">
                         <!-- GUL: Under behandling -->
@@ -100,7 +101,7 @@
 
                     <div class="sm:col-span-2">
                         <dt class="font-semibold text-slate-700">Beskrivelse</dt>
-                        <dd>@(Model.ObstacleDescription ?? "-")</dd>
+                        <dd>@(Model.ObstacleComment ?? "-")</dd>
                     </div>
 
                     <div>

@@ -1,10 +1,11 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
 
 namespace NRL_PROJECT.Models
 {
-    public enum ReportStatus { Ny = 0, UnderBehandling = 1, Godkjent = 2, Avvist = 3, Venter = 4 }
+    
     public class ObstacleReportData
     {
         [Key]
