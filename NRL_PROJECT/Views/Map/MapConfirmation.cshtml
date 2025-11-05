@@ -3,10 +3,7 @@
 @{
     ViewData["Title"] = "Map Confirmation";
     Layout = "_Layout";
-
-    string displayLat = Model.Latitude.ToString();
-    string displayLng = Model.Longitude.ToString();
-    int zoomLevel = Model.MapZoomLevel;
+    int zoomLevel = Model.MapZoomLevel != 0 ? Model.MapZoomLevel : 12;
 }
 
 <div class="max-w-4xl mx-auto px-4 py-10">
@@ -54,20 +51,17 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        const startLat = @Model.Latitude;
-        const startLng = @Model.Longitude;
-        const zoomLevel = @Model.MapZoomLevel;
+        const map = L.map('mapConfirm').setView([@Model.Latitude1, @Model.Longitude1], @zoomLevel);
 
-        const map = L.map('mapConfirm').setView([startLat, startLng], zoomLevel);
-
-        L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo?service=wms&request=getcapabilities', {
+        // Bakgrunnskart (Kartverket WMS)
+        L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {
             layers: 'topo',
             format: 'image/png',
             transparent: false,
             attribution: '© Kartverket'
         }).addTo(map);
 
-        // 🔹 Parse the GeoJSON from the model
+        // GeoJSON fra modellen
         const geoJsonRaw = '@Html.Raw(Model.GeoJsonCoordinates?.Replace("'", "\\'"))';
 
         if (geoJsonRaw && geoJsonRaw.length > 0) {
@@ -76,7 +70,6 @@
 
                 if (geometry.type === "Point") {
                     const [lng, lat] = geometry.coordinates;
-
                     L.marker([lat, lng])
                         .addTo(map)
                         .bindPopup("Hinderpunkt")
@@ -88,7 +81,6 @@
                     const coords = geometry.coordinates;
                     const markerList = [];
 
-                    // Draw both markers
                     coords.forEach((coord, i) => {
                         const [lng, lat] = coord;
                         markerList.push({ lat, lng });
@@ -97,30 +89,25 @@
                             .bindPopup(`Markør ${i + 1}`);
                     });
 
-                    // Draw connecting line
                     const latlngs = coords.map(c => [c[1], c[0]]);
                     const line = L.polyline(latlngs, { color: 'orange', weight: 4 }).addTo(map);
                     map.fitBounds(line.getBounds());
 
                     updateRawData(markerList);
-                } else {
-                    console.warn("Unknown geometry type:", geometry.type);
                 }
-
             } catch (err) {
                 console.error("Failed to parse GeoJSON:", err);
             }
         } else {
-            // fallback single center marker
-            L.marker([startLat, startLng])
+            // fallback: vis første punkt
+            L.marker([@Model.Latitude1, @Model.Longitude1])
                 .addTo(map)
                 .bindPopup("Senterpunkt")
                 .openPopup();
 
-            updateRawData([{ lat: startLat, lng: startLng }]);
+            updateRawData([{ lat: @Model.Latitude1, lng: @Model.Longitude1 }]);
         }
 
-        // 🧠 Helper: updates the "Rå kartdata" section dynamically
         function updateRawData(markers) {
             const container = document.querySelector("#rawDataContainer");
             if (!container) return;

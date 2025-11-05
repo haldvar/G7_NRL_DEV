@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NRL_PROJECT.Models
 {
+    /*
     public class ObstacleMarkerData
     {
         [Key]
@@ -24,4 +25,5 @@ namespace NRL_PROJECT.Models
         [Range(-180, 180)]
         public decimal Longitude { get; set; }
     }
+    */
 }

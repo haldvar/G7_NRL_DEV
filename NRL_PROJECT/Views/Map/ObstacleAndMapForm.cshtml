@@ -1,8 +1,8 @@
 @model NRL_PROJECT.Models.ObstacleData
 
 @section Styles {
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
 }
 
 <div class="text-center mb-10">
@@ -10,18 +10,14 @@
     <p class="text-slate-300 mt-3 text-lg">Enter obstacle details and mark the position on the map.</p>
 </div>
 
-
 <form asp-action="SubmitObstacleWithLocation" asp-controller="Map" method="post" class="space-y-10">
     @Html.AntiForgeryToken()
-    
-    
+
     <!-- Map Section -->
     <div class="bg-slate-700/60 rounded-2xl p-8 shadow-lg border border-slate-600 z-10">
         <h2 class="text-2xl md:text-3xl font-bold text-amber-400 mb-4 text-center">🗺️ Draw Obstacle Location</h2>
         <p class="text-center text-slate-300 mb-8 text-lg">Use the map tools to mark your obstacle. Only one drawing is saved.</p>
-        <div class="z-10">
-            <div id="mapDraw" class="relative z-10" style="height: 400px;"></div>
-        </div>
+        <div id="mapDraw" style="height: 500px;" class="rounded-xl border border-slate-500"></div>
     </div>
 
     <!-- Obstacle Info -->
@@ -53,10 +49,11 @@
         </div>
 
         <!-- 📍 Hidden map data -->
-        <input type="hidden" asp-for="Longitude" id="Longitude" />
-        <input type="hidden" asp-for="Latitude" id="Latitude" />
+        <input type="hidden" asp-for="Latitude1" id="Latitude1" />
+        <input type="hidden" asp-for="Longitude1" id="Longitude1" />
+        <input type="hidden" asp-for="Latitude2" id="Latitude2" />
+        <input type="hidden" asp-for="Longitude2" id="Longitude2" />
         <input type="hidden" asp-for="MapData.GeoJsonCoordinates" id="GeoJsonCoordinates" />
-
     </div>
 
     <!-- Buttons -->
@@ -85,90 +82,59 @@
 }
 
 @section Scripts {
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
     <script>
-        const startLat = @Model.Latitude != 0 ? @Model.Latitude : 58.333;
-        const startLng = @Model.Longitude != 0 ? @Model.Longitude : 8.233;
+        const map = L.map('mapDraw').setView([@Model.Latitude1 != 0 ? @Model.Latitude1 : 58.333,
+                                              @Model.Longitude1 != 0 ? @Model.Longitude1 : 8.233], 13);
 
-        const map = L.map('mapDraw', { zoomControl: false }).setView([startLat, startLng], 13);
-
-        L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo?service=wms&request=getcapabilities', {
+        // Bakgrunnskart (Kartverket WMS)
+        L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {
             layers: 'topo',
             format: 'image/png',
             transparent: false,
             attribution: '© Kartverket'
         }).addTo(map);
 
-        // Zoom control (already created at bottom-right)
-        const zoomCtl = L.control.zoom({ position: 'bottomright' }).addTo(map);
-        // add a scoping class so our CSS only hits this control
-        L.DomUtil.addClass(zoomCtl._container, 'tw-zoom');
-        
-        const drawnItems = new L.FeatureGroup();
-        map.addLayer(drawnItems);
-
-        const drawControl = new L.Control.Draw({
-            position: 'bottomright',
-            edit: { featureGroup: drawnItems },
-            draw: { polygon:false, circle:false, rectangle:false, marker:true, polyline:false }});
-        
-        map.addControl(drawControl);
-
-        let markers = [];
-        let lineLayer = null;
-
-        map.on('draw:created', function (e) {
-            const layer = e.layer;
-
-            if (markers.length >= 2) {
-                // If already two markers, reset
-                drawnItems.clearLayers();
-                markers = [];
-                if (lineLayer) {
-                    map.removeLayer(lineLayer);
-                    lineLayer = null;
-                }
-            }
-
-            drawnItems.addLayer(layer);
-            markers.push(layer.getLatLng());
-
-            // If two markers, draw line between them
-            if (markers.length === 2) {
-                lineLayer = L.polyline(markers, { color: 'orange', weight: 3 }).addTo(map);
-            }
-
-            updateHiddenFields();
-        });
-        
-        map.on('draw:deleted', function () {
-            markers = [];
-            if (lineLayer) {
-                map.removeLayer(lineLayer);
-                lineLayer = null;
-            }
-            updateHiddenFields();
+        // Aktiver Geoman tegneverktøy
+        map.pm.addControls({
+            position: 'topleft',
+            drawMarker: true,
+            drawPolyline: true,
+            drawPolygon: false,
+            drawCircle: false,
+            drawRectangle: false,
+            editMode: true,
+            removalMode: true
         });
 
-        function updateHiddenFields() {
-            const markerCount = markers.length;
+        // Når bruker tegner nytt objekt
+        map.on('pm:create', e => {
+            const geojson = e.layer.toGeoJSON();
+            document.getElementById('GeoJsonCoordinates').value = JSON.stringify(geojson.geometry);
 
-            // You can store first and second marker in hidden inputs
-            const lat1 = markers[0]?.lat ?? 0;
-            const lng1 = markers[0]?.lng ?? 0;
-            const lat2 = markers[1]?.lat ?? 0;
-            const lng2 = markers[1]?.lng ?? 0;
+            if (geojson.geometry.type === "Point") {
+                const [lng, lat] = geojson.geometry.coordinates;
+                document.getElementById('Latitude1').value = lat;
+                document.getElementById('Longitude1').value = lng;
+                document.getElementById('Latitude2').value = 0;
+                document.getElementById('Longitude2').value = 0;
+            } else if (geojson.geometry.type === "LineString") {
+                const [[lng1, lat1], [lng2, lat2]] = geojson.geometry.coordinates;
+                document.getElementById('Latitude1').value = lat1;
+                document.getElementById('Longitude1').value = lng1;
+                document.getElementById('Latitude2').value = lat2;
+                document.getElementById('Longitude2').value = lng2;
+            }
+        });
 
-            document.getElementById('Latitude').value = lat1;
-            document.getElementById('Longitude').value = lng1;
-
-            // Store both as GeoJSON for flexibility
-            const geoJson = {
-                type: markerCount === 2 ? "LineString" : "Point",
-                coordinates: markerCount === 2 ? [[lng1, lat1], [lng2, lat2]] : [lng1, lat1]
-            };
-            document.getElementById('GeoJsonCoordinates').value = JSON.stringify(geoJson);
-        }
+        // Når bruker fjerner tegning
+        map.on('pm:remove', () => {
+            document.getElementById('GeoJsonCoordinates').value = '';
+            document.getElementById('Latitude1').value = 0;
+            document.getElementById('Longitude1').value = 0;
+            document.getElementById('Latitude2').value = 0;
+            document.getElementById('Longitude2').value = 0;
+        });
     </script>
 }

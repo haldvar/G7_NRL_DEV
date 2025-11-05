@@ -108,8 +108,8 @@ using (var scope = app.Services.CreateScope())
     if (!context.MapDatas.Any())
     {
         context.MapDatas.AddRange(
-            new MapData { Latitude = 60.3913, Longitude = 5.3221, MapZoomLevel = 12, GeoJsonCoordinates = "[5.3221,60.3913]" },
-            new MapData { Latitude = 59.9139, Longitude = 10.7522, MapZoomLevel = 12, GeoJsonCoordinates = "[10.7522,59.9139]" }
+            new MapData { Latitude1 = 60.3913, Longitude1 = 5.3221, MapZoomLevel = 12, GeoJsonCoordinates = "[5.3221,60.3913]" },
+            new MapData { Latitude2 = 59.9139, Longitude2 = 10.7522, MapZoomLevel = 12, GeoJsonCoordinates = "[10.7522,59.9139]" }
         );
         context.SaveChanges();
     }
@@ -126,8 +126,8 @@ using (var scope = app.Services.CreateScope())
         ObstacleType = "Tree",
         ObstacleHeight = 5,
         ObstacleWidth = 2,
-        Latitude = 60.3913,
-        Longitude = 5.3221,
+        Latitude1 = 60.3913,
+        Longitude1 = 5.3221,
         ObstacleComment = "Fallen tree near path",
         MapData = map1              // ✔ navigasjonsegenskap
     },
@@ -136,8 +136,10 @@ using (var scope = app.Services.CreateScope())
         ObstacleType = "Fence",
         ObstacleHeight = 1.5,
         ObstacleWidth = 10,
-        Latitude = 59.9139,
-        Longitude = 10.7522,
+        Latitude1 = 59.9139,
+        Longitude1 = 10.7522,
+        Latitude2 = 58.9139,
+        Longitude2 = 11.7522,
         ObstacleComment = "New fence blocking small road",
         MapData = map2               // ✔ navigasjonsegenskap
     }

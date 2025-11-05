@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
-using System.Text.Json;
 
 namespace NRL_PROJECT.Controllers
 {
@@ -21,122 +20,90 @@ namespace NRL_PROJECT.Controllers
         {
             var model = new ObstacleData
             {
-                Longitude = 0,
-                Latitude = 0,
+                Longitude1 = 0,
+                Latitude1 = 0,
+                Longitude2 = 0,
+                Latitude2 = 0,
                 MapData = new MapData()
             };
 
             return View(model);
         }
 
-    // POST: /Map/SubmitObstacleWithLocation
-    [HttpPost]
-    public async Task<IActionResult> SubmitObstacleWithLocation(ObstacleData model)
-    {
-        // 1️⃣ Validate map input
-        if (model.MapData == null)
-            model.MapData = new MapData();
-
-        if (model.Longitude == 0 || model.Latitude == 0 || string.IsNullOrWhiteSpace(model.MapData.GeoJsonCoordinates))
+        // POST: /Map/SubmitObstacleWithLocation
+        [HttpPost]
+        public async Task<IActionResult> SubmitObstacleWithLocation(ObstacleData model)
         {
-            ModelState.AddModelError("", "Location must be selected and drawn on the map.");
-            return View("ObstacleAndMapForm", model);
-        }
+            if (model.MapData == null)
+                model.MapData = new MapData();
 
-        // 2️⃣ Save MapData
-        var mapData = new MapData
-        {
-            Latitude = model.Latitude,
-            Longitude = model.Longitude,
-            MapZoomLevel = model.MapData.MapZoomLevel != 0 ? model.MapData.MapZoomLevel : 13,
-            GeoJsonCoordinates = model.MapData.GeoJsonCoordinates
-        };
-        _context.MapDatas.Add(mapData);
-        await _context.SaveChangesAsync();
-
-        // 3️⃣ Save Obstacle
-        var obstacle = new ObstacleData
-        {
-            ObstacleType = model.ObstacleType,
-            ObstacleHeight = model.ObstacleHeight,
-            ObstacleWidth = model.ObstacleWidth,
-            Longitude = model.Longitude,
-            Latitude = model.Latitude,
-            ObstacleComment = model.ObstacleComment,
-            MapData = mapData
-        };
-        _context.Obstacles.Add(obstacle);
-        await _context.SaveChangesAsync();
-
-        // 4️⃣ Parse GeoJSON and create 1–2 markers
-        try
-        {
-            if (!string.IsNullOrWhiteSpace(model.MapData.GeoJsonCoordinates))
+            // ✅ Minst ett punkt må være angitt
+            if (model.Longitude1 == 0 || model.Latitude1 == 0)
             {
-                var geo = JsonDocument.Parse(model.MapData.GeoJsonCoordinates);
-                var type = geo.RootElement.GetProperty("type").GetString();
-
-                if (type == "Point")
-                {
-                    // Single marker obstacle
-                    var coords = geo.RootElement.GetProperty("coordinates").EnumerateArray().ToList();
-                    var marker = new ObstacleMarkerData
-                    {
-                        ObstacleID = obstacle.ObstacleId,
-                        MarkerNo = 1,
-                        Latitude = (decimal)coords[1].GetDouble(),
-                        Longitude = (decimal)coords[0].GetDouble()
-                    };
-                    _context.ObstacleMarkers.Add(marker);
-                }
-                else if (type == "LineString")
-                {
-                    // Two markers connected by a line
-                    var coords = geo.RootElement.GetProperty("coordinates").EnumerateArray().ToList();
-
-                    for (int i = 0; i < coords.Count && i < 2; i++)
-                    {
-                        var markerCoords = coords[i].EnumerateArray().ToList();
-                        var marker = new ObstacleMarkerData
-                        {
-                            ObstacleID = obstacle.ObstacleId,
-                            MarkerNo = (byte)(i + 1),
-                            Latitude = (decimal)markerCoords[1].GetDouble(),
-                            Longitude = (decimal)markerCoords[0].GetDouble()
-                        };
-                        _context.ObstacleMarkers.Add(marker);
-                    }
-                }
-
-                await _context.SaveChangesAsync();
+                ModelState.AddModelError("", "Du må minst angi ett punkt på kartet.");
+                return View("ObstacleAndMapForm", model);
             }
+
+            // ✅ Bygg GeoJSON dynamisk
+            string geoJson;
+            if (model.Latitude2 != 0 && model.Longitude2 != 0)
+            {
+                geoJson = $@"{{ ""type"": ""LineString"", ""coordinates"": [
+                    [{model.Longitude1}, {model.Latitude1}],
+                    [{model.Longitude2}, {model.Latitude2}]
+                ]}}";
+            }
+            else
+            {
+                geoJson = $@"{{ ""type"": ""Point"", ""coordinates"": [{model.Longitude1}, {model.Latitude1}] }}";
+            }
+
+            // ✅ Lagre MapData
+            var mapData = new MapData
+            {
+                Latitude1 = model.Latitude1,
+                Longitude1 = model.Longitude1,
+                Latitude2 = model.Latitude2,
+                Longitude2 = model.Longitude2,
+                MapZoomLevel = model.MapData.MapZoomLevel != 0 ? model.MapData.MapZoomLevel : 13,
+                GeoJsonCoordinates = geoJson
+            };
+            _context.MapDatas.Add(mapData);
+            await _context.SaveChangesAsync();
+
+            // ✅ Lagre Obstacle
+            var obstacle = new ObstacleData
+            {
+                ObstacleType = model.ObstacleType,
+                ObstacleHeight = model.ObstacleHeight,
+                ObstacleWidth = model.ObstacleWidth,
+                Latitude1 = model.Latitude1,
+                Longitude1 = model.Longitude1,
+                Latitude2 = model.Latitude2,
+                Longitude2 = model.Longitude2,
+                ObstacleComment = model.ObstacleComment,
+                MapData = mapData
+            };
+            _context.Obstacles.Add(obstacle);
+            await _context.SaveChangesAsync();
+
+            // ✅ Lag en første rapport
+            var report = new ObstacleReportData
+            {
+                ObstacleID = obstacle.ObstacleId,
+                UserID = null,
+                ReviewedByUserID = null,
+                ObstacleReportComment = "Her skal Registerfører kunne skrive inn kommentar.",
+                ObstacleReportDate = DateTime.UtcNow,
+                ObstacleReportStatus = ObstacleReportData.EnumTypes.New,
+                MapDataID = mapData.MapDataID,
+                ObstacleImageURL = ""
+            };
+            _context.ObstacleReports.Add(report);
+            await _context.SaveChangesAsync();
+
+            return View("MapConfirmation", mapData);
         }
-        catch (Exception ex)
-        {
-            // Optional: log or show validation issue (bad GeoJSON etc.)
-            Console.WriteLine("Error parsing GeoJSON for markers: " + ex.Message);
-        }
-
-        // 5️⃣ Create ObstacleReport
-        var report = new ObstacleReportData
-        {
-            ObstacleID = obstacle.ObstacleId,
-            UserID = null,
-            ReviewedByUserID = null,
-            ObstacleReportComment = "Her skal Registerfører kunne skrive inn kommentar.",
-            ObstacleReportDate = DateTime.UtcNow,
-            ObstacleReportStatus = ObstacleReportData.EnumTypes.New,
-            MapDataID = mapData.MapDataID,
-            ObstacleImageURL = ""
-        };
-        _context.ObstacleReports.Add(report);
-        await _context.SaveChangesAsync();
-
-        // 6️⃣ Done
-        return View("MapConfirmation", mapData);
-    }
-
-
 
         // GET: /Map/ReportListOverview
         [HttpGet]
@@ -163,8 +130,10 @@ namespace NRL_PROJECT.Controllers
             var mapData = new MapData
             {
                 GeoJsonCoordinates = geoJson,
-                Latitude = obstacle.Latitude,
-                Longitude = obstacle.Longitude,
+                Latitude1 = obstacle.Latitude1,
+                Longitude1 = obstacle.Longitude1,
+                Latitude2 = obstacle.Latitude2,
+                Longitude2 = obstacle.Longitude2,
                 MapZoomLevel = 13
             };
 
@@ -183,7 +152,6 @@ namespace NRL_PROJECT.Controllers
                 ObstacleImageURL = ""
             };
 
-
             _context.ObstacleReports.Add(report);
             await _context.SaveChangesAsync();
 
@@ -196,17 +164,34 @@ namespace NRL_PROJECT.Controllers
         {
             var obstacles = await _context.Obstacles.ToListAsync();
 
-            var geojson = new
+            var features = obstacles.Select(o =>
             {
-                type = "FeatureCollection",
-                features = obstacles.Select(o => new
+                object geometry;
+                if (o.Latitude2 != 0 && o.Longitude2 != 0)
                 {
-                    type = "Feature",
+                    geometry = new
+                    {
+                        type = "LineString",
+                        coordinates = new[]
+                        {
+                            new[] { o.Longitude1, o.Latitude1 },
+                            new[] { o.Longitude2.Value, o.Latitude2.Value }
+                        }
+                    };
+                }
+                else
+                {
                     geometry = new
                     {
                         type = "Point",
-                        coordinates = new[] { o.Longitude, o.Latitude }
-                    },
+                        coordinates = new[] { o.Longitude1, o.Latitude1 }
+                    };
+                }
+
+                return new
+                {
+                    type = "Feature",
+                    geometry,
                     properties = new
                     {
                         id = o.ObstacleId,
@@ -215,7 +200,13 @@ namespace NRL_PROJECT.Controllers
                         width = o.ObstacleWidth,
                         comment = o.ObstacleComment
                     }
-                })
+                };
+            });
+
+            var geojson = new
+            {
+                type = "FeatureCollection",
+                features
             };
 
             return Json(geojson);
@@ -227,8 +218,10 @@ namespace NRL_PROJECT.Controllers
         {
             var defaultMapData = new MapData
             {
-                Latitude = 60.3913,
-                Longitude = 5.3221,
+                Latitude1 = 60.3913,
+                Longitude1 = 5.3221,
+                Latitude2 = 61.3913,
+                Longitude2 = 4.3221,
                 MapZoomLevel = 12
             };
 

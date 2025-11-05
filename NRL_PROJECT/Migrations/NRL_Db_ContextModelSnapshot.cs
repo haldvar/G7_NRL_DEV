@@ -56,10 +56,16 @@ namespace NRL_PROJECT.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<double>("Latitude")
+                    b.Property<double>("Latitude1")
                         .HasColumnType("double");
 
-                    b.Property<double>("Longitude")
+                    b.Property<double>("Latitude2")
+                        .HasColumnType("double");
+
+                    b.Property<double>("Longitude1")
+                        .HasColumnType("double");
+
+                    b.Property<double>("Longitude2")
                         .HasColumnType("double");
 
                     b.Property<int>("MapZoomLevel")
@@ -78,10 +84,16 @@ namespace NRL_PROJECT.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ObstacleId"));
 
-                    b.Property<double>("Latitude")
+                    b.Property<double>("Latitude1")
                         .HasColumnType("double");
 
-                    b.Property<double>("Longitude")
+                    b.Property<double>("Latitude2")
+                        .HasColumnType("double");
+
+                    b.Property<double>("Longitude1")
+                        .HasColumnType("double");
+
+                    b.Property<double>("Longitude2")
                         .HasColumnType("double");
 
                     b.Property<int>("MapDataID")
@@ -106,33 +118,6 @@ namespace NRL_PROJECT.Migrations
                     b.HasIndex("MapDataID");
 
                     b.ToTable("Obstacles");
-                });
-
-            modelBuilder.Entity("NRL_PROJECT.Models.ObstacleMarkerData", b =>
-                {
-                    b.Property<int>("ObstacleMarkerID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ObstacleMarkerID"));
-
-                    b.Property<decimal>("Latitude")
-                        .HasColumnType("decimal(9,6)");
-
-                    b.Property<decimal>("Longitude")
-                        .HasColumnType("decimal(9,6)");
-
-                    b.Property<byte>("MarkerNo")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.Property<int>("ObstacleID")
-                        .HasColumnType("int");
-
-                    b.HasKey("ObstacleMarkerID");
-
-                    b.HasIndex("ObstacleID");
-
-                    b.ToTable("ObstacleMarkers");
                 });
 
             modelBuilder.Entity("NRL_PROJECT.Models.ObstacleReportData", b =>
@@ -280,17 +265,6 @@ namespace NRL_PROJECT.Migrations
                         .IsRequired();
 
                     b.Navigation("MapData");
-                });
-
-            modelBuilder.Entity("NRL_PROJECT.Models.ObstacleMarkerData", b =>
-                {
-                    b.HasOne("NRL_PROJECT.Models.ObstacleData", "Obstacle")
-                        .WithMany()
-                        .HasForeignKey("ObstacleID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Obstacle");
                 });
 
             modelBuilder.Entity("NRL_PROJECT.Models.ObstacleReportData", b =>

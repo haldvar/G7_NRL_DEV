@@ -9,7 +9,7 @@ namespace NRL_PROJECT.Data
         public NRL_Db_Context(DbContextOptions<NRL_Db_Context> options) : base(options) { }
 
         public DbSet<ObstacleData> Obstacles { get; set; }
-        public DbSet<ObstacleMarkerData> ObstacleMarkers { get; set; }
+        // public DbSet<ObstacleMarkerData> ObstacleMarkers { get; set; }
         public DbSet<ObstacleReportData> ObstacleReports { get; set; }
         public DbSet<AccessLevel> AccessLevels { get; set; }
         public DbSet<Organisation> Organisations { get; set; }
