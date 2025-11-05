@@ -5,65 +5,68 @@
     <link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
 }
 
-<div class="text-center mb-10">
+<div class="min-h-screen bg-gradient-to-b from-slate-900 via-sky-900 to-sky-700 flex flex-col items-center justify-center px-4 py-10 font-sans">
     <h1 class="text-4xl md:text-5xl font-extrabold text-sky-400 tracking-tight">🛠️ Register Obstacle with Location</h1>
     <p class="text-slate-300 mt-3 text-lg">Enter obstacle details and mark the position on the map.</p>
+    
+    
+    <form asp-action="SubmitObstacleWithLocation" asp-controller="Map" method="post" class="space-y-10">
+        @Html.AntiForgeryToken()
+
+        <!-- Map Section -->
+        <div class="bg-slate-700/60 rounded-2xl p-8 shadow-lg border border-slate-600 z-10">
+            <h2 class="text-2xl md:text-3xl font-bold text-amber-400 mb-4 text-center">🗺️ Draw Obstacle Location</h2>
+            <p class="text-center text-slate-300 mb-8 text-lg">Use the map tools to mark your obstacle. Only one drawing is saved.</p>
+            <div id="mapDraw" style="height: 500px;" class="rounded-xl border border-slate-500 z-10"></div>
+        </div>
+
+        <!-- Obstacle Info -->
+        <div class="bg-slate-700/60 rounded-2xl p-8 shadow-lg border border-slate-600">
+            <h2 class="text-2xl font-bold text-sky-300 mb-6">🧱 Obstacle Information</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label asp-for="ObstacleType" class="block text-sm font-medium text-sky-200">Obstacle Type</label>
+                    <input asp-for="ObstacleType" class="mt-1 block w-full bg-slate-900 border-slate-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-400 focus:outline-none" />
+                    <span asp-validation-for="ObstacleType" class="text-red-500 text-sm"></span>
+                </div>
+                <div>
+                    <label asp-for="ObstacleHeight" class="block text-sm font-medium text-sky-200">Height (m)</label>
+                    <input asp-for="ObstacleHeight" type="number" step="0.01" class="mt-1 block w-full bg-slate-900 border-slate-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-400 focus:outline-none" />
+                    <span asp-validation-for="ObstacleHeight" class="text-red-500 text-sm"></span>
+                </div>
+                <div>
+                    <label asp-for="ObstacleWidth" class="block text-sm font-medium text-sky-200">Width (m)</label>
+                    <input asp-for="ObstacleWidth" type="number" step="0.01" class="mt-1 block w-full bg-slate-900 border-slate-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-400 focus:outline-none" />
+                    <span asp-validation-for="ObstacleWidth" class="text-red-500 text-sm"></span>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <label asp-for="ObstacleComment" class="block text-sm font-medium text-sky-200">Comment</label>
+                <textarea asp-for="ObstacleComment" rows="3" class="mt-1 block w-full bg-slate-900 border-slate-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-400 focus:outline-none"></textarea>
+                <span asp-validation-for="ObstacleComment" class="text-red-500 text-sm"></span>
+            </div>
+
+            <!-- 📍 Hidden map data -->
+            <input type="hidden" asp-for="MapData.GeoJsonCoordinates" id="GeoJsonCoordinates" />
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex flex-col md:flex-row justify-center gap-6 mt-10">
+            <button type="submit"
+                    class="bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-4 rounded-2xl font-bold text-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all">
+                ✅ Submit Report
+            </button>
+            <a asp-action="Index" asp-controller="Home"
+               class="bg-red-600 hover:bg-red-700 text-white px-10 py-4 rounded-2xl font-bold text-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all text-center">
+                ❌ Cancel
+            </a>
+        </div>
+    </form>
+
+    
 </div>
-
-<form asp-action="SubmitObstacleWithLocation" asp-controller="Map" method="post" class="space-y-10">
-    @Html.AntiForgeryToken()
-
-    <!-- Map Section -->
-    <div class="bg-slate-700/60 rounded-2xl p-8 shadow-lg border border-slate-600 z-10">
-        <h2 class="text-2xl md:text-3xl font-bold text-amber-400 mb-4 text-center">🗺️ Draw Obstacle Location</h2>
-        <p class="text-center text-slate-300 mb-8 text-lg">Use the map tools to mark your obstacle. Only one drawing is saved.</p>
-        <div id="mapDraw" style="height: 500px;" class="rounded-xl border border-slate-500"></div>
-    </div>
-
-    <!-- Obstacle Info -->
-    <div class="bg-slate-700/60 rounded-2xl p-8 shadow-lg border border-slate-600">
-        <h2 class="text-2xl font-bold text-sky-300 mb-6">🧱 Obstacle Information</h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-                <label asp-for="ObstacleType" class="block text-sm font-medium text-sky-200">Obstacle Type</label>
-                <input asp-for="ObstacleType" class="mt-1 block w-full bg-slate-900 border-slate-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-400 focus:outline-none" />
-                <span asp-validation-for="ObstacleType" class="text-red-500 text-sm"></span>
-            </div>
-            <div>
-                <label asp-for="ObstacleHeight" class="block text-sm font-medium text-sky-200">Height (m)</label>
-                <input asp-for="ObstacleHeight" type="number" step="0.01" class="mt-1 block w-full bg-slate-900 border-slate-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-400 focus:outline-none" />
-                <span asp-validation-for="ObstacleHeight" class="text-red-500 text-sm"></span>
-            </div>
-            <div>
-                <label asp-for="ObstacleWidth" class="block text-sm font-medium text-sky-200">Width (m)</label>
-                <input asp-for="ObstacleWidth" type="number" step="0.01" class="mt-1 block w-full bg-slate-900 border-slate-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-400 focus:outline-none" />
-                <span asp-validation-for="ObstacleWidth" class="text-red-500 text-sm"></span>
-            </div>
-        </div>
-
-        <div class="mt-6">
-            <label asp-for="ObstacleComment" class="block text-sm font-medium text-sky-200">Comment</label>
-            <textarea asp-for="ObstacleComment" rows="3" class="mt-1 block w-full bg-slate-900 border-slate-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-400 focus:outline-none"></textarea>
-            <span asp-validation-for="ObstacleComment" class="text-red-500 text-sm"></span>
-        </div>
-
-        <!-- 📍 Hidden map data -->
-        <input type="hidden" asp-for="MapData.GeoJsonCoordinates" id="GeoJsonCoordinates" />
-    </div>
-
-    <!-- Buttons -->
-    <div class="flex flex-col md:flex-row justify-center gap-6 mt-10">
-        <button type="submit"
-                class="bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-4 rounded-2xl font-bold text-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all">
-            ✅ Submit Report
-        </button>
-        <a asp-action="Index" asp-controller="Home"
-           class="bg-red-600 hover:bg-red-700 text-white px-10 py-4 rounded-2xl font-bold text-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all text-center">
-            ❌ Cancel
-        </a>
-    </div>
-</form>
 
 @if (!ViewData.ModelState.IsValid)
 {
@@ -82,7 +85,7 @@
     <script src="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
     <script>
         // Init kartet med fallback til et standardpunkt
-        const map = L.map('mapDraw').setView([58.333, 8.233], 13);
+        const map = L.map('mapDraw', {zoomControl: false }).setView([58.333, 8.233], 13);
 
         L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {
             layers: 'topo',
@@ -91,25 +94,92 @@
             attribution: '© Kartverket'
         }).addTo(map);
 
+        // Zoom control (already created at bottom-right)
+        const zoomCtl = L.control.zoom({ position: 'bottomright' }).addTo(map);
+
         map.pm.addControls({
-            position: 'topleft',
+            position: 'bottomright',
+            drawText: false,
             drawMarker: true,
             drawPolyline: true,
             drawPolygon: false,
             drawCircle: false,
+            drawCircleMarker: false,
             drawRectangle: false,
-            editMode: true,
-            removalMode: true
+            editMode: false,
+            removalMode: false,
+            cutPolygon: false,
+            dragMode: false,
+            rotateMode: false,
         });
 
-        // Når bruker tegner nytt objekt
-        map.on('pm:create', e => {
-            const geojson = e.layer.toGeoJSON();
+        // A feature group to track user-drawn layers (so we can enforce "one at a time")
+        const drawn = L.featureGroup().addTo(map);
+
+        // 1) Limit Polyline to TWO points (finish draw on second click)
+        map.on('pm:drawstart', ({ shape, workingLayer }) => {
+            if (shape === 'Line') {
+                workingLayer.on('pm:vertexadded', () => {
+                    const pts = workingLayer.getLatLngs();
+                    if (pts.length >= 2) {
+                        // finish current line immediately after the 2nd point
+                        if (map.pm?.Draw?.Line?._finishShape) {
+                            map.pm.Draw.Line._finishShape(); // adds the finished layer to the map
+                        } else {
+                            // Fallback: stop draw mode; the second click will have created the layer already
+                            map.pm.disableDraw();
+                        }
+                    }
+                });
+            }
+});
+
+        // 2) Allow only ONE Marker total (replace previous or disable the button)
+        let currentMarker = null;
+
+        map.on('pm:create', (e) => {
+            const { layer, shape } = e;
+
+            // Put new layers into our tracking group
+            drawn.addLayer(layer);
+
+            if (shape === 'Marker') {
+                // If there's already a marker, remove it (keeping only the newest)
+                if (currentMarker && map.hasLayer(currentMarker)) {
+                    map.removeLayer(currentMarker);
+                }
+                currentMarker = layer;
+
+                // Optionally disable the "drawMarker" button after one is placed
+                if (map.pm?.Toolbar?.setButtonDisabled) {
+                    map.pm.Toolbar.setButtonDisabled('drawMarker', true);
+                }
+            }
+
+            if (shape === 'Line') {
+                // Ensure any existing polylines are removed so only one line is kept
+                drawn.eachLayer((l) => {
+                    if (l !== layer && l instanceof L.Polyline && !(l instanceof L.Polygon)) {
+                        map.removeLayer(l);
+                    }
+                });
+            }
+
+            // Update your hidden input (keep your existing logic)
+            const geojson = layer.toGeoJSON();
             document.getElementById('GeoJsonCoordinates').value = JSON.stringify(geojson.geometry);
         });
 
-        // Når bruker fjerner tegning
-        map.on('pm:remove', () => {
+        // Re-enable marker drawing if the marker gets removed
+        map.on('pm:remove', (e) => {
+            if (e.layer === currentMarker) {
+                currentMarker = null;
+                if (map.pm?.Toolbar?.setButtonDisabled) {
+                    map.pm.Toolbar.setButtonDisabled('drawMarker', false);
+                }
+            }
+
+            // Clear hidden field if everything was removed (keep your existing logic)
             document.getElementById('GeoJsonCoordinates').value = '';
         });
     </script>
