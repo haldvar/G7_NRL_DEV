@@ -81,11 +81,12 @@ namespace NRL_PROJECT.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        [HttpGet]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Login", "Account");
         }
 
         public IActionResult AccessDenied()

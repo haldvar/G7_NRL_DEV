@@ -4,9 +4,11 @@ using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
 using System.Diagnostics;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 
 namespace NRL_PROJECT.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly NRL_Db_Context _context;

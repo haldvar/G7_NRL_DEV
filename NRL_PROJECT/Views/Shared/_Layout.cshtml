@@ -43,9 +43,25 @@
 
             <!-- Right side: Statusbar -->
             <div class="hidden md:flex items-center space-x-6 text-sm font-medium">
-                <span class="text-gray-600">👤 Logged in as <strong>Pilot123</strong></span>
-                <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs">Active Obstacles: 12</span>
-                <button class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">Log out</button>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <span class="text-gray-600">👤 Logged in as <strong>@User.Identity.Name</strong></span>
+                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs">Active Obstacles: 12</span>
+
+                    <form asp-controller="Account" asp-action="Logout" method="post" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
+                            Log out
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login"
+                       class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+                        Log in
+                    </a>
+                }
             </div>
 
             <!-- Mobile menu button -->
@@ -67,10 +83,27 @@
 
                 <!-- Statusbar in mobile menu -->
                 <div class="pt-4 border-t">
-                    <span class="block text-gray-600 mb-2">👤 Logged in as <strong>Pilot123</strong></span>
-                    <span class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs mb-2">Active Obstacles: 12</span>
-                    <button class="w-full bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">Log out</button>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <span class="block text-gray-600 mb-2">👤 Logged in as <strong>@User.Identity.Name</strong></span>
+                        <span class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs mb-2">Active Obstacles: 12</span>
+
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="mt-2">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="w-full bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
+                                Log out
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Login"
+                           class="block w-full text-center bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+                            Log in
+                        </a>
+                    }
                 </div>
+
             </div>
         </div>
        
