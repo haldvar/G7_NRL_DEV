@@ -11,7 +11,7 @@ namespace NRL_PROJECT.Models
         public int ObstacleId { get; set; }
 
         [Required]
-        public string ObstacleType { get; set; }
+        public string ObstacleType { get; set; } = "Ukjent";
 
         public double ObstacleHeight { get; set; }
         public double ObstacleWidth { get; set; }
