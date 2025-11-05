@@ -93,7 +93,7 @@ namespace NRL_PROJECT.Controllers
                 ObstacleID = obstacle.ObstacleId,
                 UserID = null, // kan fylles inn senere hvis dere har innlogging
                 ReviewedByUserID = null,
-                ObstacleReportComment = model.ObstacleReportComment,
+                ObstacleReportComment = "Her skal Registerfører kunne skrive inn kommentar.",
                 ObstacleReportDate = DateTime.UtcNow,
                 ObstacleReportStatus = ObstacleReportData.EnumTypes.New,
                 MapDataID = obstacle.MapData.MapDataID,
