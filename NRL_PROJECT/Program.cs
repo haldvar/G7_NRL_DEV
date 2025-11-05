@@ -107,81 +107,64 @@ using (var scope = app.Services.CreateScope())
     // --- 5️⃣ Seed MapData ---
     if (!context.MapDatas.Any())
     {
-        context.MapDatas.AddRange(
-            new MapData { Latitude1 = 60.3913, Longitude1 = 5.3221, MapZoomLevel = 12, GeoJsonCoordinates = "[5.3221,60.3913]" },
-            new MapData { Latitude2 = 59.9139, Longitude2 = 10.7522, MapZoomLevel = 12, GeoJsonCoordinates = "[10.7522,59.9139]" }
-        );
+        var map1 = new MapData
+        {
+            GeometryType = "Point",
+            MapZoomLevel = 12,
+            GeoJsonCoordinates = @"{ ""type"": ""Point"", ""coordinates"": [5.3221, 60.3913] }",
+            Coordinates = new List<MapCoordinate>
+        {
+            new MapCoordinate { Latitude = 60.3913, Longitude = 5.3221, OrderIndex = 0 }
+        }
+        };
+
+        var map2 = new MapData
+        {
+            GeometryType = "LineString",
+            MapZoomLevel = 12,
+            GeoJsonCoordinates = @"{ ""type"": ""LineString"", ""coordinates"": [
+            [10.7522, 59.9139],
+            [11.7522, 58.9139]
+        ]}",
+            Coordinates = new List<MapCoordinate>
+        {
+            new MapCoordinate { Latitude = 59.9139, Longitude = 10.7522, OrderIndex = 0 },
+            new MapCoordinate { Latitude = 58.9139, Longitude = 11.7522, OrderIndex = 1 }
+        }
+        };
+
+        context.MapDatas.AddRange(map1, map2);
         context.SaveChanges();
     }
-
-    var map1 = context.MapDatas.First();
-    var map2 = context.MapDatas.Skip(1).First();
 
     // --- 6️⃣ Seed ObstacleData ---
     if (!context.Obstacles.Any())
     {
+        var map1 = context.MapDatas.Include(m => m.Coordinates).First();
+        var map2 = context.MapDatas.Include(m => m.Coordinates).Skip(1).First();
+
         context.Obstacles.AddRange(
-    new ObstacleData
-    {
-        ObstacleType = "Tree",
-        ObstacleHeight = 5,
-        ObstacleWidth = 2,
-        Latitude1 = 60.3913,
-        Longitude1 = 5.3221,
-        ObstacleComment = "Fallen tree near path",
-        MapData = map1              // ✔ navigasjonsegenskap
-    },
-    new ObstacleData
-    {
-        ObstacleType = "Fence",
-        ObstacleHeight = 1.5,
-        ObstacleWidth = 10,
-        Latitude1 = 59.9139,
-        Longitude1 = 10.7522,
-        Latitude2 = 58.9139,
-        Longitude2 = 11.7522,
-        ObstacleComment = "New fence blocking small road",
-        MapData = map2               // ✔ navigasjonsegenskap
-    }
-);
-        context.SaveChanges();
-    }
-
-    var obstacle1 = context.Obstacles.First();
-    var obstacle2 = context.Obstacles.Skip(1).First();
-
-    // --- 7️⃣ Seed ObstacleReportData ---
-    if (!context.ObstacleReports.Any())
-    {
-        var user1 = context.Users.First(u => u.Email == "john.doe@example.com");
-        var user2 = context.Users.First(u => u.Email == "jane.smith@example.com");
-
-        context.ObstacleReports.AddRange(
-            new ObstacleReportData
+            new ObstacleData
             {
-                ObstacleID = obstacle1.ObstacleId,
-                UserID = user1.UserID,
-                ReviewedByUserID = user2.UserID,
-                ObstacleReportComment = "Initial report for tree",
-                ObstacleReportDate = DateTime.UtcNow,
-                ObstacleReportStatus = ObstacleReportData.EnumTypes.New,
-                MapDataID = map1.MapDataID,
-                ObstacleImageURL = ""
+                ObstacleType = "Tree",
+                ObstacleHeight = 5,
+                ObstacleWidth = 2,
+                ObstacleComment = "Fallen tree near path",
+                MapData = map1
             },
-            new ObstacleReportData
+            new ObstacleData
             {
-                ObstacleID = obstacle2.ObstacleId,
-                UserID = user2.UserID,
-                ReviewedByUserID = user1.UserID,
-                ObstacleReportComment = "Initial report for fence",
-                ObstacleReportDate = DateTime.UtcNow,
-                ObstacleReportStatus = ObstacleReportData.EnumTypes.New,
-                MapDataID = map2.MapDataID,
-                ObstacleImageURL = ""
+                ObstacleType = "Fence",
+                ObstacleHeight = 1.5,
+                ObstacleWidth = 10,
+                ObstacleComment = "New fence blocking small road",
+                MapData = map2
             }
         );
+
         context.SaveChanges();
     }
+
 }
 
 

@@ -9,7 +9,7 @@ namespace NRL_PROJECT.Data
         public NRL_Db_Context(DbContextOptions<NRL_Db_Context> options) : base(options) { }
 
         public DbSet<ObstacleData> Obstacles { get; set; }
-        // public DbSet<ObstacleMarkerData> ObstacleMarkers { get; set; }
+        public DbSet<MapCoordinate> MapCoordinates { get; set; }
         public DbSet<ObstacleReportData> ObstacleReports { get; set; }
         public DbSet<AccessLevel> AccessLevels { get; set; }
         public DbSet<Organisation> Organisations { get; set; }
@@ -20,13 +20,13 @@ namespace NRL_PROJECT.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // ObstacleReportData-relasjoner
             modelBuilder.Entity<ObstacleReportData>()
                 .HasOne(r => r.Obstacle)
                 .WithMany(o => o.ObstacleReports)
                 .HasForeignKey(r => r.ObstacleID);
 
-
-           modelBuilder.Entity<ObstacleReportData>()
+            modelBuilder.Entity<ObstacleReportData>()
                 .HasOne(r => r.User)
                 .WithMany(u => u.ObstacleReportsSubmitted)
                 .HasForeignKey(r => r.UserID)
@@ -37,17 +37,23 @@ namespace NRL_PROJECT.Data
                 .WithMany(u => u.ObstacleReportsReviewed)
                 .HasForeignKey(r => r.ReviewedByUserID)
                 .OnDelete(DeleteBehavior.Restrict);
-            
+
             modelBuilder.Entity<ObstacleReportData>()
                 .HasOne(r => r.MapData)
                 .WithMany(m => m.ObstacleReports)
                 .HasForeignKey(r => r.MapDataID);
 
+            // UserRole enum til string
             modelBuilder.Entity<UserRole>()
                 .Property(r => r.RoleName)
                 .HasConversion<string>();
 
-
+            // ✅ MapData ↔ MapCoordinate
+            modelBuilder.Entity<MapCoordinate>()
+                .HasOne(mc => mc.MapData)
+                .WithMany(md => md.Coordinates)
+                .HasForeignKey(mc => mc.MapDataID)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
     }

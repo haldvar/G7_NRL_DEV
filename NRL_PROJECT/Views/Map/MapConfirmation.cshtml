@@ -4,10 +4,14 @@
     ViewData["Title"] = "Map Confirmation";
     Layout = "_Layout";
     int zoomLevel = Model.MapZoomLevel != 0 ? Model.MapZoomLevel : 12;
+
+    // Fallback til første koordinat hvis GeoJSON mangler
+    var firstCoord = Model.Coordinates?.OrderBy(c => c.OrderIndex).FirstOrDefault();
+    double fallbackLat = firstCoord?.Latitude ?? 60.0;
+    double fallbackLng = firstCoord?.Longitude ?? 10.0;
 }
 
 <div class="max-w-4xl mx-auto px-4 py-10">
-    <!-- Title -->
     <h1 class="text-4xl font-extrabold text-purple-700 text-center mb-4 tracking-wide">
         ✅ Kartbekreftelse
     </h1>
@@ -15,7 +19,6 @@
         Kartdataene du sendte inn er visualisert nedenfor.
     </p>
 
-    <!-- Map Card -->
     <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
         <div id="mapConfirm" class="rounded-xl border border-gray-200 shadow-inner z-10" style="height: 450px;"></div>
         <p class="text-sm text-gray-500 mt-3">
@@ -23,7 +26,6 @@
         </p>
     </div>
 
-    <!-- Raw Coordinates Card -->
     <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
         <h2 class="text-xl font-semibold text-purple-700 mb-3 flex items-center">
             📍 Rå kartdata
@@ -34,7 +36,6 @@
         </div>
     </div>
 
-    <!-- Action Buttons -->
     <div class="flex justify-center space-x-4">
         <a asp-action="Index" asp-controller="Home"
            class="bg-gray-600 text-white px-8 py-3 rounded-xl font-medium shadow-md hover:bg-gray-700 hover:shadow-lg transition">
@@ -51,9 +52,8 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        const map = L.map('mapConfirm').setView([@Model.Latitude1, @Model.Longitude1], @zoomLevel);
+        const map = L.map('mapConfirm').setView([@fallbackLat, @fallbackLng], @zoomLevel);
 
-        // Bakgrunnskart (Kartverket WMS)
         L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {
             layers: 'topo',
             format: 'image/png',
@@ -61,7 +61,6 @@
             attribution: '© Kartverket'
         }).addTo(map);
 
-        // GeoJSON fra modellen
         const geoJsonRaw = '@Html.Raw(Model.GeoJsonCoordinates?.Replace("'", "\\'"))';
 
         if (geoJsonRaw && geoJsonRaw.length > 0) {
@@ -70,11 +69,7 @@
 
                 if (geometry.type === "Point") {
                     const [lng, lat] = geometry.coordinates;
-                    L.marker([lat, lng])
-                        .addTo(map)
-                        .bindPopup("Hinderpunkt")
-                        .openPopup();
-
+                    L.marker([lat, lng]).addTo(map).bindPopup("Hinderpunkt").openPopup();
                     updateRawData([{ lat, lng }]);
 
                 } else if (geometry.type === "LineString") {
@@ -84,9 +79,7 @@
                     coords.forEach((coord, i) => {
                         const [lng, lat] = coord;
                         markerList.push({ lat, lng });
-                        L.marker([lat, lng])
-                            .addTo(map)
-                            .bindPopup(`Markør ${i + 1}`);
+                        L.marker([lat, lng]).addTo(map).bindPopup(`Markør ${i + 1}`);
                     });
 
                     const latlngs = coords.map(c => [c[1], c[0]]);
@@ -99,13 +92,13 @@
                 console.error("Failed to parse GeoJSON:", err);
             }
         } else {
-            // fallback: vis første punkt
-            L.marker([@Model.Latitude1, @Model.Longitude1])
+            // fallback: vis første koordinat
+            L.marker([@fallbackLat, @fallbackLng])
                 .addTo(map)
                 .bindPopup("Senterpunkt")
                 .openPopup();
 
-            updateRawData([{ lat: @Model.Latitude1, lng: @Model.Longitude1 }]);
+            updateRawData([{ lat: @fallbackLat, lng: @fallbackLng }]);
         }
 
         function updateRawData(markers) {

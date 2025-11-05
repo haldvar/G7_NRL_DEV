@@ -49,10 +49,6 @@
         </div>
 
         <!-- 📍 Hidden map data -->
-        <input type="hidden" asp-for="Latitude1" id="Latitude1" />
-        <input type="hidden" asp-for="Longitude1" id="Longitude1" />
-        <input type="hidden" asp-for="Latitude2" id="Latitude2" />
-        <input type="hidden" asp-for="Longitude2" id="Longitude2" />
         <input type="hidden" asp-for="MapData.GeoJsonCoordinates" id="GeoJsonCoordinates" />
     </div>
 
@@ -85,10 +81,9 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
     <script>
-        const map = L.map('mapDraw').setView([@Model.Latitude1 != 0 ? @Model.Latitude1 : 58.333,
-                                              @Model.Longitude1 != 0 ? @Model.Longitude1 : 8.233], 13);
+        // Init kartet med fallback til et standardpunkt
+        const map = L.map('mapDraw').setView([58.333, 8.233], 13);
 
-        // Bakgrunnskart (Kartverket WMS)
         L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {
             layers: 'topo',
             format: 'image/png',
@@ -96,7 +91,6 @@
             attribution: '© Kartverket'
         }).addTo(map);
 
-        // Aktiver Geoman tegneverktøy
         map.pm.addControls({
             position: 'topleft',
             drawMarker: true,
@@ -112,29 +106,11 @@
         map.on('pm:create', e => {
             const geojson = e.layer.toGeoJSON();
             document.getElementById('GeoJsonCoordinates').value = JSON.stringify(geojson.geometry);
-
-            if (geojson.geometry.type === "Point") {
-                const [lng, lat] = geojson.geometry.coordinates;
-                document.getElementById('Latitude1').value = lat;
-                document.getElementById('Longitude1').value = lng;
-                document.getElementById('Latitude2').value = 0;
-                document.getElementById('Longitude2').value = 0;
-            } else if (geojson.geometry.type === "LineString") {
-                const [[lng1, lat1], [lng2, lat2]] = geojson.geometry.coordinates;
-                document.getElementById('Latitude1').value = lat1;
-                document.getElementById('Longitude1').value = lng1;
-                document.getElementById('Latitude2').value = lat2;
-                document.getElementById('Longitude2').value = lng2;
-            }
         });
 
         // Når bruker fjerner tegning
         map.on('pm:remove', () => {
             document.getElementById('GeoJsonCoordinates').value = '';
-            document.getElementById('Latitude1').value = 0;
-            document.getElementById('Longitude1').value = 0;
-            document.getElementById('Latitude2').value = 0;
-            document.getElementById('Longitude2').value = 0;
         });
     </script>
 }

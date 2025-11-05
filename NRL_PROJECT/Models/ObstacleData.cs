@@ -17,23 +17,25 @@ namespace NRL_PROJECT.Models
         public double ObstacleWidth { get; set; }
         public string ObstacleComment { get; set; }
 
-        public double Latitude1 { get; set; }
-        public double Longitude1 { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
 
-        public double? Latitude2 { get; set; }
-        public double? Longitude2 { get; set; }
+        /*
 
-        // Ny "computed property" for GeoJSON
-        [NotMapped]
-        public string GeoJsonLine =>
-            Latitude2.HasValue && Longitude2.HasValue
-                ? $"{{ \"type\": \"LineString\", \"coordinates\": [[{Longitude1}, {Latitude1}], [{Longitude2}, {Latitude2}]] }}"
-                : $"{{ \"type\": \"Point\", \"coordinates\": [{Longitude1}, {Latitude1}] }}";
+         // Ny "computed property" for GeoJSON
+         [NotMapped]
+         public string GeoJsonLine =>
+             Latitude2.HasValue && Longitude2.HasValue
+                 ? $"{{ \"type\": \"LineString\", \"coordinates\": [[{Longitude1}, {Latitude1}], [{Longitude2}, {Latitude2}]] }}"
+                 : $"{{ \"type\": \"Point\", \"coordinates\": [{Longitude1}, {Latitude1}] }}";
+
+         */
 
         public MapData MapData { get; set; } = new MapData
     {
         GeoJsonCoordinates = string.Empty
     };
+       
 
         public ICollection<ObstacleReportData> ObstacleReports { get; set; } = new List<ObstacleReportData>();
     }
