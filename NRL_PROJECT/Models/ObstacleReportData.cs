@@ -41,6 +41,7 @@ namespace NRL_PROJECT.Models
         public MapData? MapData { get; set; }
 
         public enum EnumTypes
+              
         {
             New = 0,
             Open = 1,
@@ -49,5 +50,16 @@ namespace NRL_PROJECT.Models
             Closed = 4,
             Deleted = 5
         }
+        
+        // Opplasting: brukes kun under innsending (ikke lagres i databasen)
+        [NotMapped]
+        public IFormFile? ImageFile { get; set; }  // mottar fil fra skjema
+
+        // Lokal referanse etter lagring
+        [NotMapped]
+        public string? ImagePath { get; set; }     // intern bruk før lagring av URL
+
+
     }
-}
+    }
+

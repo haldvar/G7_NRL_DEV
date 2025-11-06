@@ -17,7 +17,7 @@ namespace NRL_PROJECT.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("ProductVersion", "9.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -88,17 +88,15 @@ namespace NRL_PROJECT.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ObstacleComment")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<double>("ObstacleHeight")
+                    b.Property<double?>("ObstacleHeight")
                         .HasColumnType("double");
 
                     b.Property<string>("ObstacleType")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<double>("ObstacleWidth")
+                    b.Property<double?>("ObstacleWidth")
                         .HasColumnType("double");
 
                     b.HasKey("ObstacleId");

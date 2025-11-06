@@ -6,3 +6,10 @@
 NRL_PROJECT/NRL_PROJECT.csproj.user
 
 /node_modules
+/NRL_PROJECT/Migrations/20251105145828_InitialCreate9.cs
+/NRL_PROJECT/Migrations/20251105145828_InitialCreate9.Designer.cs
+/NRL_PROJECT/Migrations/20251106113531_InitialCreate20.cs
+/NRL_PROJECT/Migrations/20251106113531_InitialCreate20.Designer.cs
+/NRL_PROJECT/Migrations/20251106115948_mulighet_for_null_i_obstacledata.cs
+/NRL_PROJECT/Migrations/20251106115948_mulighet_for_null_i_obstacledata.Designer.cs
+/NRL_PROJECT/Migrations/NRL_Db_ContextModelSnapshot.cs
