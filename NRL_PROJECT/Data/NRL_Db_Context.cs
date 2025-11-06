@@ -1,10 +1,12 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using NRL_PROJECT.Models;
 
 namespace NRL_PROJECT.Data
 {
-    public class NRL_Db_Context : DbContext
+    public class NRL_Db_Context : IdentityDbContext<User>
     {
         public NRL_Db_Context(DbContextOptions<NRL_Db_Context> options) : base(options) { }
 
@@ -19,6 +21,8 @@ namespace NRL_PROJECT.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+            
             modelBuilder.Entity<ObstacleReportData>()
                 .HasOne(r => r.Obstacle)
                 .WithMany(o => o.ObstacleReports)

@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 
 namespace NRL_PROJECT.Models
 {
@@ -17,7 +18,7 @@ namespace NRL_PROJECT.Models
 
         // 🔹 Brukeren som opprettet rapporten
         [ForeignKey(nameof(User))]
-        public int? UserID { get; set; }
+        public string? UserID { get; set; }
         public User? User { get; set; }
 
         [Required]

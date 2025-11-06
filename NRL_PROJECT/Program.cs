@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
@@ -24,15 +25,18 @@ builder.Services.AddControllersWithViews();
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
-
 */
+
+ // Add Identity
+ builder.Services.AddIdentity<User, IdentityRole>()
+     .AddEntityFrameworkStores<NRL_Db_Context>()
+     .AddDefaultTokenProviders();
 
 
 // BRUK DENNE (in-memory database i stedet for MySQL) VED TESTING: 
 
 builder.Services.AddDbContext<NRL_Db_Context>(options =>
    options.UseInMemoryDatabase("TestDb"));
-
 
 
 // ------------------------------------------------------------
@@ -44,7 +48,7 @@ var app = builder.Build();
 // ------------------------------------------------------------
 // TESTDATA
 // ------------------------------------------------------------
-
+/*
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<NRL_Db_Context>();
@@ -179,7 +183,7 @@ using (var scope = app.Services.CreateScope())
         context.SaveChanges();
     }
 }
-
+*/
 
 // ------------------------------------------------------------
 // KONFIGURER MIDDLEWARE (HTTP request pipeline)
