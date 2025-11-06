@@ -109,6 +109,8 @@ namespace NRL_PROJECT.Controllers
                 imagePath = "/uploads/" + uniqueFileName;
             }
 
+            
+
             // ✅ Lagre Obstacle
             var obstacle = new ObstacleData
             {
@@ -119,6 +121,10 @@ namespace NRL_PROJECT.Controllers
                 ObstacleImageURL = imagePath,                 // ✅ ASSIGN THE URL
                 MapData = model.MapData
             };
+            if (obstacle.ObstacleComment == null)
+            {
+                obstacle.ObstacleComment = "Empty";
+            }
             _context.Obstacles.Add(obstacle);
             await _context.SaveChangesAsync();
 

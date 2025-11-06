@@ -15,7 +15,7 @@ namespace NRL_PROJECT.Models
 
         public double ObstacleHeight { get; set; }
         public double ObstacleWidth { get; set; }
-        public string ObstacleComment { get; set; } = "Skriv en kommentar";
+        public string ObstacleComment { get; set; } = "";
         
         //  URL / filsti til bilde lagret i wwwroot/uploads
         [StringLength(255)]
