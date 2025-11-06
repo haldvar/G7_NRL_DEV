@@ -3,10 +3,17 @@
 @{
     ViewData["Title"] = "Register Map Location";
     Layout = "_Layout";
+
+    // Fallback til første koordinat
+    var firstCoord = Model.Coordinates?.OrderBy(c => c.OrderIndex).FirstOrDefault();
+    double startLat = firstCoord?.Latitude ?? 60.3913;
+    double startLng = firstCoord?.Longitude ?? 5.3221;
+    int zoom = Model.MapZoomLevel != 0 ? Model.MapZoomLevel : 12;
 }
+
+<!-- Inkluderer partial som tegner kart-div og skjult input -->
 <partial name="_MapDrawPartial" model="Model" />
 
-<!-- Title -->
 <h1 class="text-5xl md:text-6xl font-extrabold text-purple-700 text-center mb-4 tracking-wide">
     🗺️ Register Map Location
 </h1>
@@ -14,8 +21,8 @@
     Draw a point or a line on the map below and submit your obstacle.
 </p>
 
-<!-- Form with buttons -->
-<form method="post" asp-action="Submit" asp-controller="Map" class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-6">
+<form method="post" asp-action="Submit" asp-controller="Map"
+      class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-6 z-10">
     <input type="hidden" id="geoInput" name="GeoJsonCoordinates" />
 
     <button type="submit"
@@ -29,20 +36,27 @@
     </a>
 </form>
 
-  
 @section Styles {
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
-    <!-- Tilpasset styling her -->
 }
 
 @section Scripts {
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
     <script>
-        const map = L.map('mapDraw').setView([@Model.Latitude, @Model.Longitude], @Model.MapZoomLevel);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        // Init kartet med første koordinat
+        const map = L.map('mapDraw').setView([@startLat, @startLng], @zoom);
 
+        // Bakgrunnskart (Kartverket WMS)
+        L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {
+            layers: 'topo',
+            format: 'image/png',
+            transparent: false,
+            attribution: '© Kartverket'
+        }).addTo(map);
+
+        // Aktiver tegneverktøy
         map.pm.addControls({
             position: 'topleft',
             drawMarker: true,
@@ -54,11 +68,13 @@
             removalMode: true
         });
 
+        // Når bruker tegner nytt objekt
         map.on('pm:create', e => {
             const geojson = e.layer.toGeoJSON();
-            document.getElementById('geoInput').value = JSON.stringify(geojson.geometry.coordinates);
+            document.getElementById('geoInput').value = JSON.stringify(geojson.geometry);
         });
 
+        // Når bruker fjerner tegning
         map.on('pm:remove', () => {
             document.getElementById('geoInput').value = '';
         });

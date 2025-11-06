@@ -8,14 +8,15 @@ namespace NRL_PROJECT.Models
         [Key]
         public int MapDataID { get; set; }
 
-        public double Latitude { get; set; }
-        public double Longitude { get; set; }
+        public string GeometryType { get; set; } = "Point"; // "Point" eller "LineString"
         public int MapZoomLevel { get; set; }
 
         public string GeoJsonCoordinates { get; set; } = string.Empty;
 
+        public ICollection<MapCoordinate> Coordinates { get; set; } = new List<MapCoordinate>();
+
+
+        // Relasjon til rapporter
         public ICollection<ObstacleReportData> ObstacleReports { get; set; } = new List<ObstacleReportData>();
     }
-
-
 }
