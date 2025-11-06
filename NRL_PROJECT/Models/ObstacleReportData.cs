@@ -30,7 +30,7 @@ namespace NRL_PROJECT.Models
 
         // 🔹 Brukeren som har vurdert rapporten (kan være null)
         [ForeignKey(nameof(Reviewer))]
-        public int? ReviewedByUserID { get; set; }
+        public string? ReviewedByUserID { get; set; }
         public User? Reviewer { get; set; }
 
         [StringLength(255)]
