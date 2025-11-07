@@ -1,12 +1,37 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\karol\\Koding\\Karoline2\\NRL_PROJECT\\",
-  "Documents": [],
+  "WorkspaceRootPath": "C:\\Users\\elise\\Documents\\Prosjekt-kartverket\\G7_NRL_DEV\\NRL_PROJECT\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{6208EA5C-8F99-1A43-50EF-683E7CE0DDD0}|NRL_PROJECT.csproj|c:\\users\\elise\\documents\\prosjekt-kartverket\\g7_nrl_dev\\nrl_project\\nrl_project.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{6208EA5C-8F99-1A43-50EF-683E7CE0DDD0}|NRL_PROJECT.csproj|solutionrelative:nrl_project.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": []
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "NRL_PROJECT.csproj",
+              "DocumentMoniker": "C:\\Users\\elise\\Documents\\Prosjekt-kartverket\\G7_NRL_DEV\\NRL_PROJECT\\NRL_PROJECT.csproj",
+              "RelativeDocumentMoniker": "NRL_PROJECT.csproj",
+              "ToolTip": "C:\\Users\\elise\\Documents\\Prosjekt-kartverket\\G7_NRL_DEV\\NRL_PROJECT\\NRL_PROJECT.csproj",
+              "RelativeToolTip": "NRL_PROJECT.csproj",
+              "ViewState": "AgIAADAAAAAAAAAAAAAAADcAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-10-15T10:33:57.036Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
     }
   ]
 }

@@ -18,8 +18,6 @@ namespace NRL_PROJECT.Models
         Admin = 2
     }
 
-
-
-
+    public enum ReportStatus { Ny = 0, UnderBehandling = 1, Godkjent = 2, Avvist = 3, Venter = 4 }
 
 }

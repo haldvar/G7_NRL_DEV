@@ -139,11 +139,14 @@ namespace NRL_PROJECT.Migrations
 
             modelBuilder.Entity("NRL_PROJECT.Models.ObstacleReportData", b =>
                 {
-                    b.Property<int>("ObstacleReportID")
+                    b.Property<int>("Report_Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ObstacleReportID"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Report_Id"));
+
+                    b.Property<string>("HandledBy")
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("MapDataID")
                         .HasColumnType("int");
@@ -158,16 +161,37 @@ namespace NRL_PROJECT.Migrations
                     b.Property<DateTime>("ObstacleReportDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<int>("ObstacleReportID")
+                        .HasColumnType("int");
+
                     b.Property<int>("ObstacleReportStatus")
                         .HasColumnType("int");
+
+                    b.Property<int>("ReportStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reported_Item")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Reported_Location")
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("ReviewedByUserID")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("StatusChangedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("StatusComment")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("Time_of_Submitted_Report")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<int?>("UserID")
                         .HasColumnType("int");
 
-                    b.HasKey("ObstacleReportID");
+                    b.HasKey("Report_Id");
 
                     b.HasIndex("MapDataID");
 

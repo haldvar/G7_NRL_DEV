@@ -1,0 +1,192 @@
+@model NRL_PROJECT.Models.ObstacleReportViewModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using System.Globalization
+@{
+    ViewData["Title"] = "Rapportdetaljer";
+
+    // Bygg lat/lon som tekst for JS (Leaflet)
+    var inv = CultureInfo.InvariantCulture;
+    string? latJs = null, lonJs = null;
+
+    if (Model.Latitude != 0 && Model.Longitude != 0)
+    {
+        latJs = Model.Latitude.ToString("F6", inv);
+        lonJs = Model.Longitude.ToString("F6", inv);
+    }
+    else if (!string.IsNullOrWhiteSpace(Model.Reported_Location))
+    {
+        // Prøv å parse "58.268795, 8.374899" eller tilsvarende
+        var nb = CultureInfo.GetCultureInfo("nb-NO");
+        var raw = Model.Reported_Location.Replace(" ", "").Replace(";", ",");
+        var parts = raw.Split(',', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2 &&
+            double.TryParse(parts[0], NumberStyles.Float, nb, out var lat) &&
+            double.TryParse(parts[1], NumberStyles.Float, nb, out var lon))
+        {
+            latJs = lat.ToString("F6", inv);
+            lonJs = lon.ToString("F6", inv);
+        }
+    }
+
+    var hasCoords = !string.IsNullOrWhiteSpace(latJs) && !string.IsNullOrWhiteSpace(lonJs);
+}
+
+<div class="container mx-auto max-w-6xl px-4 py-6">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+
+        <!-- VENSTRE: Status/handling + detaljer -->
+        <div class="space-y-6 lg:col-span-2">
+
+            <!-- Status / handling -->
+            <div class="rounded-2xl border bg-white p-4 shadow-sm">
+                <form asp-controller="Registrar" asp-action="UpdateStatus" method="post" class="space-y-3">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.ReportId" />
+                    <textarea name="comment" rows="3"
+                              class="w-full rounded-xl border px-3 py-2 text-sm"
+                              placeholder="Kommentar (valgfritt)"></textarea>
+                              
+
+                    <div class="flex flex-wrap gap-3 pt-1">
+                        <!-- GUL: Under behandling -->
+                        <button name="status" value="UnderBehandling" type="submit"
+                                class="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2 text-white hover:bg-amber-600">
+                            Under behandling
+                        </button>
+
+                        <!-- GRØNN: Godkjenn -->
+                        <button name="status" value="Godkjent" type="submit"
+                                class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700">
+                            Godkjenn
+                        </button>
+
+                        <!-- RØD: Avvis -->
+                        <button name="status" value="Avvist" type="submit"
+                                class="inline-flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-white hover:bg-rose-700">
+                            Avvis
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Detaljer -->
+            <div class="rounded-2xl border bg-white p-5 shadow-sm">
+                <h2 class="mb-4 text-lg font-semibold text-slate-900">Rapportdetaljer</h2>
+
+                <dl class="grid grid-cols-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
+                    <div>
+                        <dt class="font-semibold text-slate-700">Rapport ID</dt>
+                        <dd>@Model.ReportId</dd>
+                    </div>
+
+                    <div>
+                        <dt class="font-semibold text-slate-700">Hindertype</dt>
+                        <dd>@(Model.ObstacleType ?? "-")</dd>
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <dt class="font-semibold text-slate-700">Lokasjon</dt>
+                        <dd class="font-mono">
+                            @if (hasCoords)
+                            {
+                                @($"{latJs}, {lonJs}")
+                            }
+                            else
+                            {
+
+                                @(Model.Reported_Location ?? "-")
+                            }
+                        </dd>
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <dt class="font-semibold text-slate-700">Beskrivelse</dt>
+                        <dd>@(Model.ObstacleComment ?? "-")</dd>
+                    </div>
+
+                    <div>
+                        <dt class="font-semibold text-slate-700">Tidspunkt registrert</dt>
+                        <dd>@Model.TimeOfSubmittedReport.ToString("dd.MM.yyyy HH:mm")</dd>
+                    </div>
+
+                    <div>
+                        <dt class="font-semibold text-slate-700">Status</dt>
+                        <dd>@await Html.PartialAsync("_StatusTag", Model.ReportStatus)</dd>
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <dt class="font-semibold text-slate-700">Innsender (UserId)</dt>
+                        <dd>
+                            @Model.UserId
+                            @if (!string.IsNullOrWhiteSpace(Model.UserName))
+                            {
+                                <span class="text-slate-500"> — @Model.UserName</span>
+                            }
+                        </dd>
+                    </div>
+                </dl>
+
+                <div class="mt-4">
+                    <a asp-action="RegistrarView"
+                       class="inline-flex items-center rounded-xl border px-4 py-2 text-sm hover:bg-slate-50">
+                        Tilbake
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- HØYRE: Kart -->
+        <div class="lg:col-span-1">
+            <div class="rounded-2xl border bg-white p-4 shadow-sm">
+                <h3 class="mb-3 text-base font-semibold text-slate-900">Kart</h3>
+
+                @if (hasCoords)
+                {
+                    <div id="map" class="w-full rounded-xl border" style="height: 380px;"></div>
+                }
+                else
+                {
+                    <div class="text-sm text-slate-500">Ingen koordinater i rapporten.</div>
+                }
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@if (hasCoords)
+{
+    <!-- Leaflet CSS/JS (legg gjerne i _Layout om du vil ha globalt) -->
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+
+    <script>
+        (function () {
+          // Hent fra server (InvariantCulture)
+          var lat = parseFloat('@latJs');
+          var lon = parseFloat('@lonJs');
+
+          // Opprett kart
+          var map = L.map('map', { zoomControl: true })
+                     .setView([lat, lon], 15);
+
+          // Bakgrunnskart
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap'
+          }).addTo(map);
+
+          // Marker med popup
+          L.marker([lat, lon]).addTo(map)
+            .bindPopup('@(Model.ObstacleType ?? "Hinder")<br/>Lat: ' + lat + ', Lon: ' + lon)
+            .openPopup();
+        })();
+    </script>
+}
+

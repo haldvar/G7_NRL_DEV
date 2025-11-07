@@ -1,0 +1,135 @@
+@model IEnumerable<NRL_PROJECT.Models.ObstacleReportViewModel>
+@using System.Globalization
+
+@{
+    Layout = "_Layout";
+
+    var ci = CultureInfo.InvariantCulture;
+    var list = Model.ToList();
+
+    int cNy = list.Count(x => x.ReportStatus == NRL_PROJECT.Models.ReportStatus.Ny);
+    int cVenter = list.Count(x => x.ReportStatus == NRL_PROJECT.Models.ReportStatus.Venter);
+    int cUnder = list.Count(x => x.ReportStatus == NRL_PROJECT.Models.ReportStatus.UnderBehandling);
+    int cGodkjent = list.Count(x => x.ReportStatus == NRL_PROJECT.Models.ReportStatus.Godkjent);
+    int cAvvist = list.Count(x => x.ReportStatus.ToString() == "Avvist"); // hvis du har enum-verdi Avvist
+
+    var selectedStatus = (string)Context.Request.Query["status"];
+    if (string.IsNullOrWhiteSpace(selectedStatus)) selectedStatus = "Alle";
+
+    var currentSearch = (string)Context.Request.Query["q"]; // hvis du har fritekstsøk
+}
+
+
+
+<div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
+    <!-- VENSTRE SIDEPANEL -->
+    <aside class="space-y-6 lg:col-span-3">
+        <!-- Søk -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <h3 class="mb-2 text-base font-semibold text-slate-800">Søk</h3>
+            <form method="get" asp-action="RegistrarView" asp-controller="Registrar" class="flex items-center gap-2">
+                <input type="hidden" name="status" value="@selectedStatus" />
+                <input name="q"
+                       value="@currentSearch"
+                       type="search"
+                       placeholder="Søk på ID, type eller navn..."
+                       class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-slate-400 focus:outline-none" />
+                <button type="submit"
+                        class="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
+                    Søk
+                </button>
+            </form>
+        </div>
+
+        <!-- Meldinger -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <h3 class="mb-3 text-base font-semibold text-slate-800">Meldinger</h3>
+            <div class="flex flex-col gap-2">
+                <button type="button"
+                        class="w-full rounded-md border border-slate-300 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-100">
+                    Innboks
+                </button>
+                <button type="button"
+                        class="w-full rounded-md border border-slate-300 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-100">
+                    Sendt
+                </button>
+                <button type="button"
+                        class="w-full rounded-md border border-slate-300 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-100">
+                    Kladd
+                </button>
+            </div>
+        </div>
+
+        <!-- Andre registerførere -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <h3 class="mb-3 text-base font-semibold text-slate-800">Registerførere</h3>
+            <button type="button"
+                    class="w-full rounded-md border border-slate-300 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-100">
+                Samhandling registerførere
+            </button>
+        </div>
+    </aside>
+
+    <!-- HØYRE KOLONNE: RAPPORTLISTE -->
+    <section class="space-y-3 lg:col-span-9">
+        <div class="mb-4 flex items-center justify-between">
+            <h2 class="text-2xl font-semibold text-slate-900">Innrapporterte hinder</h2>
+
+            <!-- Filter-dropdown til høyre -->
+                <form method="get" asp-action="RegistrarView" asp-controller="Registrar" class="flex items-center gap-2">
+                    <label for="statusFilter" class="text-sm text-slate-700">Filtrer:</label>
+                    <select id="statusFilter" name="status"
+                            class="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-slate-400 focus:outline-none"
+                            onchange="this.form.submit()">
+
+                        <!-- NB: value er ren! Teksten kan ha teller. -->
+                        <option value="Alle" selected="@(selectedStatus == "Alle")">Alle (@list.Count)</option>
+                        <option value="Ny" selected="@(selectedStatus == "Ny")">Ny (@cNy)</option>
+                        <option value="Venter" selected="@(selectedStatus == "Venter")">Venter (@cVenter)</option>
+                        <option value="UnderBehandling" selected="@(selectedStatus == "UnderBehandling")">Under behandling (@cUnder)</option>
+                        <option value="Godkjent" selected="@(selectedStatus == "Godkjent")">Godkjent (@cGodkjent)</option>
+                        <option value="Avvist" selected="@(selectedStatus == "Avvist")">Avvist (@cAvvist)</option>
+                    </select>
+
+                    @* Behold søk hvis du bruker q *@
+                    <input type="hidden" name="q" value="@currentSearch" />
+                </form>
+        </div>
+
+        @foreach (var r in Model)
+        {
+            <a asp-controller="Registrar"
+               asp-action="ReportDetails"
+               asp-route-id="@r.ReportId"
+               asp-route-status="@selectedStatus"
+               asp-route-q="@currentSearch"
+               class="block rounded-2xl border bg-white p-4 transition hover:shadow-md">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <div class="font-semibold text-sky-700">Rapport #@r.ReportId</div>
+                        <div class="mt-0.5 text-base font-medium text-slate-900">@r.ObstacleType</div>
+                        <div class="mt-1 text-sm text-slate-600">
+                            @r.Latitude, @r.Longitude
+                            <span class="mx-2">•</span>
+                            <span class="text-slate-500">Innmeldt:</span>
+                            @r.TimeOfSubmittedReport.ToString("dd.MM.yyyy HH:mm")
+                        </div>
+                        <div class="mt-1 text-sm text-slate-600">
+                            <span class="text-slate-500">Innsender (UserId):</span> @r.UserId
+                            @if (!string.IsNullOrWhiteSpace(r.UserName))
+                            {
+                                <span class="text-slate-400">—</span> 
+                                @r.UserName
+                            }
+                        </div>
+                    </div>
+                    <div class="shrink-0">
+                        @await Html.PartialAsync("_StatusTag", r.ReportStatus)
+                    </div>
+                </div>
+            </a>
+        }
+    </section>
+</div>
+
+
