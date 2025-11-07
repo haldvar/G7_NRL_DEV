@@ -7,7 +7,6 @@ namespace NRL_PROJECT.Data
     public class NRL_Db_Context : DbContext
     {
         public NRL_Db_Context(DbContextOptions<NRL_Db_Context> options) : base(options) { }
-
         public DbSet<ObstacleData> Obstacles { get; set; }
         public DbSet<MapCoordinate> MapCoordinates { get; set; }
         public DbSet<ObstacleReportData> ObstacleReports { get; set; }

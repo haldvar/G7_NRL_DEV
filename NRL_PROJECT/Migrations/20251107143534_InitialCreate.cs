@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
@@ -23,7 +23,7 @@ namespace NRL_PROJECT.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     AccessLevelName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    AccessLevelDescription = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false)
+                    AccessLevelDescription = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
@@ -36,37 +36,17 @@ namespace NRL_PROJECT.Migrations
                 name: "MapDatas",
                 columns: table => new
                 {
-                    MapViewID = table.Column<int>(type: "int", nullable: false)
+                    MapDataID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    CenterLatitude = table.Column<double>(type: "double", nullable: false),
-                    CenterLongitude = table.Column<double>(type: "double", nullable: false),
-                    MapZoomLevel = table.Column<int>(type: "int", nullable: false)
+                    GeometryType = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    MapZoomLevel = table.Column<int>(type: "int", nullable: false),
+                    GeoJsonCoordinates = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MapDatas", x => x.MapViewID);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "Obstacles",
-                columns: table => new
-                {
-                    ObstacleId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    ObstacleType = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    ObstacleHeight = table.Column<float>(type: "float", nullable: false),
-                    ObstacleWidth = table.Column<float>(type: "float", nullable: false),
-                    Longitude = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
-                    Latitude = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
-                    ObstacleComment = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    ObstacleDataID = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Obstacles", x => x.ObstacleId);
+                    table.PrimaryKey("PK_MapDatas", x => x.MapDataID);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -105,6 +85,61 @@ namespace NRL_PROJECT.Migrations
                         column: x => x.AccessLevelID,
                         principalTable: "AccessLevels",
                         principalColumn: "AccessLevelID",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "MapCoordinates",
+                columns: table => new
+                {
+                    CoordinateId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    MapDataID = table.Column<int>(type: "int", nullable: false),
+                    Latitude = table.Column<double>(type: "double", nullable: false),
+                    Longitude = table.Column<double>(type: "double", nullable: false),
+                    OrderIndex = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MapCoordinates", x => x.CoordinateId);
+                    table.ForeignKey(
+                        name: "FK_MapCoordinates_MapDatas_MapDataID",
+                        column: x => x.MapDataID,
+                        principalTable: "MapDatas",
+                        principalColumn: "MapDataID",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Obstacles",
+                columns: table => new
+                {
+                    ObstacleId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    ObstacleDescription = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ObstacleType = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ObstacleHeight = table.Column<double>(type: "double", nullable: false),
+                    ObstacleWidth = table.Column<double>(type: "double", nullable: false),
+                    ObstacleComment = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ObstacleImageURL = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Latitude = table.Column<double>(type: "double", nullable: false),
+                    Longitude = table.Column<double>(type: "double", nullable: false),
+                    MapDataID = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Obstacles", x => x.ObstacleId);
+                    table.ForeignKey(
+                        name: "FK_Obstacles_MapDatas_MapDataID",
+                        column: x => x.MapDataID,
+                        principalTable: "MapDatas",
+                        principalColumn: "MapDataID",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
@@ -150,16 +185,14 @@ namespace NRL_PROJECT.Migrations
                 {
                     ObstacleReportID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    UserID = table.Column<int>(type: "int", nullable: false),
-                    ReviewedByUserID = table.Column<int>(type: "int", nullable: false),
-                    ObstacleID = table.Column<int>(type: "int", nullable: false),
+                    ObstacleID = table.Column<int>(type: "int", nullable: true),
+                    UserID = table.Column<int>(type: "int", nullable: true),
                     ObstacleReportComment = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ObstacleReportDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     ObstacleReportStatus = table.Column<int>(type: "int", nullable: false),
-                    ObstacleImageURL = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    MapDataID = table.Column<int>(type: "int", nullable: false)
+                    ReviewedByUserID = table.Column<int>(type: "int", nullable: true),
+                    MapDataID = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -168,14 +201,12 @@ namespace NRL_PROJECT.Migrations
                         name: "FK_ObstacleReports_MapDatas_MapDataID",
                         column: x => x.MapDataID,
                         principalTable: "MapDatas",
-                        principalColumn: "MapViewID",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "MapDataID");
                     table.ForeignKey(
                         name: "FK_ObstacleReports_Obstacles_ObstacleID",
                         column: x => x.ObstacleID,
                         principalTable: "Obstacles",
-                        principalColumn: "ObstacleId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "ObstacleId");
                     table.ForeignKey(
                         name: "FK_ObstacleReports_Users_ReviewedByUserID",
                         column: x => x.ReviewedByUserID,
@@ -190,6 +221,11 @@ namespace NRL_PROJECT.Migrations
                         onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MapCoordinates_MapDataID",
+                table: "MapCoordinates",
+                column: "MapDataID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ObstacleReports_MapDataID",
@@ -212,6 +248,11 @@ namespace NRL_PROJECT.Migrations
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Obstacles_MapDataID",
+                table: "Obstacles",
+                column: "MapDataID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserRoles_AccessLevelID",
                 table: "UserRoles",
                 column: "AccessLevelID");
@@ -231,16 +272,19 @@ namespace NRL_PROJECT.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ObstacleReports");
+                name: "MapCoordinates");
 
             migrationBuilder.DropTable(
-                name: "MapDatas");
+                name: "ObstacleReports");
 
             migrationBuilder.DropTable(
                 name: "Obstacles");
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "MapDatas");
 
             migrationBuilder.DropTable(
                 name: "Organisations");

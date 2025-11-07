@@ -1,5 +1,5 @@
 @model IEnumerable<NRL_PROJECT.Models.ObstacleReportViewModel>
-@using EnumStatus = NRL_PROJECT.Models.ObstacleReportData.EnumTypes
+@using EnumStatus = NRL_PROJECT.Models.EnumStatus
 @using System.Globalization
 
 @{
@@ -8,10 +8,10 @@
     var ci = CultureInfo.InvariantCulture;
     var list = Model.ToList();
 
-    int cNy = list.Count(x => x.ReportStatus == EnumStatus.New);
-    int cVenter = list.Count(x => x.ReportStatus == EnumStatus.Open);
-    int cUnderBeh = list.Count(x => x.ReportStatus == EnumStatus.InProgress);
-    int cGodkjent = list.Count(x => x.ReportStatus == EnumStatus.Resolved);
+    int cNy = list.Count(x => x.ReportStatus == EnumStatus.Ny);
+    int cVenter = list.Count(x => x.ReportStatus == EnumStatus.Venter);
+    int cUnderBeh = list.Count(x => x.ReportStatus == EnumStatus.UnderBehandling);
+    int cGodkjent = list.Count(x => x.ReportStatus == EnumStatus.Godkjent);
     int cAvvist = list.Count(x => x.ReportStatus.ToString() == "Avvist"); // hvis du ikke har EnumStatus.Avvist
 
 
@@ -126,7 +126,7 @@
                         </div>
                     </div>
                     <div class="shrink-0">
-                        @await Html.PartialAsync("_StatusTag", r.ReportStatus)
+                        @await Html.PartialAsync("_EnumTypes", r.ReportStatus)
                     </div>
                 </div>
             </a>

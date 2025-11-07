@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
-using Microsoft.EntityFrameworkCore;
+using BackendStatus = NRL_PROJECT.Models.ObstacleReportData.EnumTypes;
+using UiStatus = NRL_PROJECT.Models.EnumStatus;
 using System.Linq;
+using System.Net.NetworkInformation;
 using EnumStatus = NRL_PROJECT.Models.ObstacleReportData.EnumTypes;
 
 namespace NRL_PROJECT.Controllers
@@ -15,33 +18,43 @@ namespace NRL_PROJECT.Controllers
             {
                 _context = context;
             }
-
+            private static UiStatus MapToUi(BackendStatus backendStatus)
+            {
+                return backendStatus switch
+                {
+                    BackendStatus.New => UiStatus.Ny,
+                    BackendStatus.Open => UiStatus.Venter,
+                    BackendStatus.InProgress => UiStatus.UnderBehandling,
+                    BackendStatus.Resolved => UiStatus.Godkjent,
+                    BackendStatus.Closed => UiStatus.Godkjent,
+                    BackendStatus.Deleted => UiStatus.Avvist,
+                    _ => UiStatus.Ny
+                };
+        }
         //POST: /Registrar/UpdateStatus
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateStatus(int id, EnumStatus status, string? comment)
+        public async Task<IActionResult> UpdateStatus(int id, string status, string? comment)
         {
             var report = await _context.ObstacleReports
-                .Include(r => r.User)
                 .FirstOrDefaultAsync(r => r.ObstacleReportID == id);
 
             if (report == null) return NotFound();
 
-            report.ObstacleReportStatus = status;
-            if (!string.IsNullOrWhiteSpace(comment))
-                report.ObstacleReportComment = comment.Trim();
-
-            var userName = User?.Identity?.Name;
-            var reviewer = await _context.Users.FirstOrDefaultAsync(u => u.FirstName  == userName);
-            if (reviewer != null)
+            // Map fra knappens tekst (UI) -> backend-enum (lagres i DB)
+            var newBackendStatus = status switch
             {
-                report.ReviewedByUserID = reviewer.UserID;
-                report.Reviewer = reviewer;
-            }
+                "UnderBehandling" => BackendStatus.InProgress,
+                "Godkjent" => BackendStatus.Resolved,   // evt. Closed, hvis det er korrekt hos dere
+                "Avvist" => BackendStatus.Deleted,    // evt. egen Rejected hvis du har
+                _ => BackendStatus.Open        // “Ny/Venter”
+            };
+
+            report.ObstacleReportStatus = newBackendStatus;
+            report.ObstacleReportComment = (comment ?? "").Trim();
 
             await _context.SaveChangesAsync();
 
-            TempData["StatusMsg"] = $"Status satt til «{status}».";
             return RedirectToAction(nameof(ReportDetails), new { id });
         }
 
@@ -51,13 +64,17 @@ namespace NRL_PROJECT.Controllers
             var report = await _context.ObstacleReports
                 .Include(r => r.Obstacle)
                 .Include(r => r.User)
+                .Include(r => r.MapData)
+                    .ThenInclude(m => m.Coordinates)
                 .FirstOrDefaultAsync(r => r.ObstacleReportID == id);
 
-            if (report == null) return NotFound();
+            if (report == null)
+                return NotFound();
 
+            // ---- Koordinater ----
             var firstCoord = report.MapData?.Coordinates?
-    .OrderBy(c => c.MapDataID)   // bruk den sorteringen du har (ID/Order)
-    .FirstOrDefault();
+                .OrderBy(c => c.MapDataID)
+                .FirstOrDefault();
 
             var lat = firstCoord?.Latitude ?? 0;
             var lng = firstCoord?.Longitude ?? 0;
@@ -68,35 +85,40 @@ namespace NRL_PROJECT.Controllers
 
             var geoJson = report.MapData?.GeoJsonCoordinates ?? string.Empty;
 
+            // ---- Bygg ViewModel null-sikkert ----
             var vm = new ObstacleReportViewModel
             {
-                // innsendning
+                // Innsender
                 ReportId = report.ObstacleReportID,
                 TimeOfSubmittedReport = report.ObstacleReportDate,
 
-                // hinder
-                ObstacleID = report.ObstacleReportID,          // evt. report.ObstacleId hvis du vil vise hinder-ID
-                ObstacleType = report.Obstacle?.ObstacleType,
-                ObstacleComment = report.Obstacle?.ObstacleComment,
-                ObstacleHeight = report.Obstacle?.ObstacleHeight,
-                ObstacleWidth = report.Obstacle?.ObstacleWidth,
+                // Hindring
+                ObstacleID = report.Obstacle?.ObstacleId ?? 0,
+                ObstacleType = report.Obstacle?.ObstacleType ?? "",
+                ObstacleComment = report.Obstacle?.ObstacleComment ?? "",
+                ObstacleHeight = report.Obstacle?.ObstacleHeight ?? 0,
+                ObstacleWidth = report.Obstacle?.ObstacleWidth ?? 0,
 
-                // lokasjon
+                // Lokasjon
                 Latitude = lat,
                 Longitude = lng,
                 Reported_Location = reportedLocation,
                 GeoJsonCoordinates = geoJson,
 
-                // status
-                ReportStatus = report.ObstacleReportStatus,
+                // Status
+                ReportStatus = MapToUi(report.ObstacleReportStatus),
 
-                // innsender
-                UserId = report.User.RoleID,                   // evt. report.UserID hvis VM forventer bruker-ID
-                UserName = $"{report.User?.FirstName ?? ""} {report.User?.LastName ?? ""}".Trim()
+                // Bruker
+                UserId = report.User?.RoleID ?? 0,
+                UserName = report.User != null
+                    ? $"{(report.User.FirstName ?? "").Trim()} {(report.User.LastName ?? "").Trim()}".Trim()
+                    : "Ukjent"
             };
 
             return View(vm);
         }
+
+        
 
         // Henter alle rapporter
         [HttpGet]
@@ -143,36 +165,48 @@ namespace NRL_PROJECT.Controllers
             }
 
             var model = await query
-                 .OrderByDescending(r => r.ObstacleReportDate) // <- riktig dato-felt
-                 .Select(r => new ObstacleReportViewModel
-                 {
-                    ReportId = r.ObstacleReportID,
-                    TimeOfSubmittedReport = r.ObstacleReportDate,
+      .OrderByDescending(r => r.ObstacleReportDate)
+      .Select(r => new ObstacleReportViewModel
+      {
+          ReportId = r.ObstacleReportID,
 
-                    ObstacleID = r.Obstacle.ObstacleId,
-                    ObstacleType = r.Obstacle != null ? r.Obstacle.ObstacleType : "",
-                    ObstacleComment = r.Obstacle != null ? r.Obstacle.ObstacleComment : "",
-                    Latitude = (r.MapData != null)
-                        ? r.MapData.Coordinates
-                            .OrderBy(c => c.CoordinateId)
-                            .Select(c => (double?)c.Latitude)
-                            .FirstOrDefault() ?? 0
-                        : 0,
+          // DateTime? -> DateTime
+          TimeOfSubmittedReport = r.ObstacleReportDate,
 
-                   Longitude = (r.MapData != null)
-                        ? r.MapData.Coordinates
-                            .OrderBy(c => c.CoordinateId)
-                            .Select(c => (double?)c.Longitude)
-                            .FirstOrDefault() ?? 0
-                        : 0,
+          // Relasjon kan være null
+          ObstacleID = r.Obstacle != null ? r.Obstacle.ObstacleId : 0,
+          ObstacleType = r.Obstacle != null ? (r.Obstacle.ObstacleType ?? "") : "",
+          ObstacleComment = r.Obstacle != null ? (r.Obstacle.ObstacleComment ?? "") : "",
 
-                    ReportStatus = r.ObstacleReportStatus,
-                    StatusComment = r.ObstacleReportComment,     // hvis VM har dette feltet
+          // Koordinater: MapData kan være null, og lista kan være tom
+          Latitude =
+              (r.MapData != null && r.MapData.Coordinates.Any())
+                  ? r.MapData.Coordinates
+                      .OrderBy(c => c.CoordinateId)
+                      .Select(c => (double?)c.Latitude)
+                      .FirstOrDefault() ?? 0
+                  : 0,
 
-                    UserId = r.User.RoleID,                      // eller r.UserID – avhengig av VM
-                    UserName = $"{r.User.FirstName ?? ""} {r.User.LastName ?? ""}".Trim()
-                })
-                .ToListAsync();
+          Longitude =
+              (r.MapData != null && r.MapData.Coordinates.Any())
+                  ? r.MapData.Coordinates
+                      .OrderBy(c => c.CoordinateId)
+                      .Select(c => (double?)c.Longitude)
+                      .FirstOrDefault() ?? 0
+                  : 0,
+
+          // Status/kommentar
+          ReportStatus = MapToUi(r.ObstacleReportStatus),       
+          StatusComment = r.ObstacleReportComment ?? "",
+
+          // Bruker
+          UserId = r.UserID ?? 0,
+          UserName = r.User != null
+              ? $"{(r.User.FirstName ?? "").Trim()} {(r.User.LastName ?? "").Trim()}".Trim()
+              : "Ukjent"
+      })
+      .ToListAsync();
+
 
             ViewBag.SelectedStatus = status ?? "Alle";
             return View(model);

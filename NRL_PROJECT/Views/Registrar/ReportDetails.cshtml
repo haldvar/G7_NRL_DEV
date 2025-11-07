@@ -15,7 +15,6 @@
     }
     else if (!string.IsNullOrWhiteSpace(Model.Reported_Location))
     {
-        // Prøv å parse "58.268795, 8.374899" eller tilsvarende
         var nb = CultureInfo.GetCultureInfo("nb-NO");
         var raw = Model.Reported_Location.Replace(" ", "").Replace(";", ",");
         var parts = raw.Split(',', StringSplitOptions.RemoveEmptyEntries);
@@ -111,7 +110,7 @@
 
                     <div>
                         <dt class="font-semibold text-slate-700">Status</dt>
-                        <dd>@await Html.PartialAsync("_StatusTag", Model.ReportStatus)</dd>
+                        <dd>@await Html.PartialAsync("_EnumTypes", Model.ReportStatus)</dd>
                     </div>
 
                     <div class="sm:col-span-2">

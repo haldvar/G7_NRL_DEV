@@ -6,7 +6,7 @@ namespace NRL_PROJECT.Models
     public class ObstacleReportViewModel
     {
         //innsender
-        public int UserId { get; set; }
+        public int? UserId { get; set; }
         public string? UserName { get; set; }
 
         public int ReportId { get; set; }                 // ID til rapporten
@@ -31,7 +31,7 @@ namespace NRL_PROJECT.Models
         public double Longitude { get; set; }
 
         // Statusfelt (valgfritt, for registerførervisning)
-        public EnumStatus ReportStatus { get; set; }
+        public EnumStatus? ReportStatus { get; set; }
 
         // For enkel sjekk i view
         public bool HasCoordinates => Latitude != 0 && Longitude != 0;
