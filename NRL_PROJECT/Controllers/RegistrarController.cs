@@ -105,6 +105,8 @@ namespace NRL_PROJECT.Controllers
             var query = _context.ObstacleReports
                 .Include(r => r.Obstacle)
                 .Include(r => r.User)
+                .Include(r => r.MapData)
+                   .ThenInclude(m => m.Coordinates)
                 .AsQueryable();
 
             // Rens eventuelle "Alle (2)" -> "Alle"
@@ -150,21 +152,21 @@ namespace NRL_PROJECT.Controllers
                     ObstacleID = r.Obstacle.ObstacleId,
                     ObstacleType = r.Obstacle != null ? r.Obstacle.ObstacleType : "",
                     ObstacleComment = r.Obstacle != null ? r.Obstacle.ObstacleComment : "",
-                     Latitude = (r.MapData != null && r.MapData.Coordinates.Any())
+                    Latitude = (r.MapData != null)
                         ? r.MapData.Coordinates
-                            .OrderBy(c => c.MapDataID)
+                            .OrderBy(c => c.CoordinateId)
                             .Select(c => (double?)c.Latitude)
                             .FirstOrDefault() ?? 0
                         : 0,
 
-                     Longitude = (r.MapData != null && r.MapData.Coordinates.Any())
+                   Longitude = (r.MapData != null)
                         ? r.MapData.Coordinates
-                            .OrderBy(c => c.MapDataID)
+                            .OrderBy(c => c.CoordinateId)
                             .Select(c => (double?)c.Longitude)
                             .FirstOrDefault() ?? 0
                         : 0,
 
-                     ReportStatus = r.ObstacleReportStatus,
+                    ReportStatus = r.ObstacleReportStatus,
                     StatusComment = r.ObstacleReportComment,     // hvis VM har dette feltet
 
                     UserId = r.User.RoleID,                      // eller r.UserID – avhengig av VM
