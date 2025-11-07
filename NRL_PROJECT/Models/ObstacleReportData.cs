@@ -33,10 +33,6 @@ namespace NRL_PROJECT.Models
         public int? ReviewedByUserID { get; set; }
         public User? Reviewer { get; set; }
 
-        //  URL / filsti til bilde lagret i wwwroot/uploads
-        [StringLength(255)]
-        public string? ObstacleImageURL { get; set; }
-
         //  Kobling til MapData (kan være null)
         [ForeignKey(nameof(MapData))]
         public int? MapDataID { get; set; }
@@ -53,12 +49,6 @@ namespace NRL_PROJECT.Models
             Deleted = 5
         }
 
-        // Opplasting: brukes kun under innsending (ikke lagres i databasen)
-        [NotMapped]
-        public IFormFile? ImageFile { get; set; }  // mottar fil fra skjema
 
-        // Lokal referanse etter lagring
-        [NotMapped]
-        public string? ImagePath { get; set; }     // intern bruk før lagring av URL
     }
 }

@@ -12,7 +12,6 @@
             <th class="px-4 py-2">ObstacleReportComment</th>
             <th class="px-4 py-2">ObstacleReportDate</th>
             <th class="px-4 py-2">ObstacleReportStatus</th>
-            <th class="px-4 py-2">ObstacleImageURL</th>
             <th class="px-4 py-2">MapDataID</th>
         </tr>
     </thead>
@@ -27,7 +26,6 @@
                 <td class="px-4 py-2">@report.ObstacleReportComment</td>
                 <td class="px-4 py-2">@report.ObstacleReportDate.ToString("yyyy-MM-dd HH:mm")</td>
                 <td class="px-4 py-2">@report.ObstacleReportStatus</td>
-                <td class="px-4 py-2">@report.ObstacleImageURL</td>
                 <td class="px-4 py-2">@report.MapDataID</td>
             </tr>
         }
@@ -48,8 +46,7 @@
             <th class="px-4 py-2">ObstacleWidth</th>
             <th class="px-4 py-2">ObstacleComment</th>
             <th class="px-4 py-2">ObstacleReportDate</th>
-            <th class="px-4 py-2">Longitude</th>
-            <th class="px-4 py-2">Latitude</th>            
+            <th class="px-4 py-2">Coordinates</th>
             <th class="px-4 py-2">ObstacleImageURL</th>
         </tr>
     </thead>
@@ -64,9 +61,8 @@
                 <td class="px-4 py-2">@report.Obstacle?.ObstacleWidth</td>
                 <td class="px-4 py-2">@report.Obstacle?.ObstacleComment</td>
                 <td class="px-4 py-2">@report.ObstacleReportDate.ToString("yyyy-MM-dd HH:mm")</td>
-                <td class="px-4 py-2">@report.MapData?.Longitude</td>
-                <td class="px-4 py-2">@report.MapData?.Latitude</td>                
-                <td class="px-4 py-2">@report.ObstacleImageURL</td>
+                <td class="px-4 py-2">@report.MapData?.Coordinates</td>
+                <td class="px-4 py-2">@report.Obstacle?.ObstacleImageURL</td>
             </tr>
         }
     </tbody>

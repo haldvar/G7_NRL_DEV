@@ -18,6 +18,7 @@
 
     <ItemGroup>
       <Compile Remove="Controllers\ReportController.cs" />
+      <Compile Remove="Models\ObstacleMarkers.cs" />
     </ItemGroup>
 
     <ItemGroup>

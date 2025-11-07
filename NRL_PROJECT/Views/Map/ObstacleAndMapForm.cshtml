@@ -1,8 +1,8 @@
-@model NRL_PROJECT.Models.ObstacleReportData
+@model NRL_PROJECT.Models.ObstacleData
 
 @section Styles {
-	<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-	<link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
 }
 
 <div class="text-center mb-10">
@@ -15,13 +15,21 @@
 
 	<!--  OBSTACLE INFORMATION -->
 	<div class="bg-slate-700/60 rounded-2xl p-8 shadow-lg border border-slate-600">
-		<h2 class="text-2xl font-bold text-sky-300 mb-6"> Obstacle Information</h2>
+        <h2 class="text-2xl font-bold text-sky-300 mb-6"> Obstacle Information</h2>
+        
+        <!--  MAP SECTION -->
+        <div class="bg-slate-700/60 rounded-2xl p-8 shadow-lg border border-slate-600">
+            <h2 class="text-2xl md:text-3xl font-bold text-amber-400 mb-4 text-center">🗺️ Draw Obstacle Location</h2>
+            <p class="text-center text-slate-300 mb-8 text-lg">Bruk kartverktøyene for å markere hinderet.</p>
 
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div id="mapDraw" class="z-10" style="height: 400px;"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 			<div>
-				<label asp-for="ObstacleReportComment" class="block text-sm font-medium text-sky-200">Comment</label>
-				<textarea asp-for="ObstacleReportComment" rows="3" class="mt-1 block w-full bg-slate-900 border-slate-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-400 focus:outline-none"></textarea>
-				<span asp-validation-for="ObstacleReportComment" class="text-red-500 text-sm"></span>
+				<label asp-for="ObstacleComment" class="block text-sm font-medium text-sky-200">Comment</label>
+				<textarea asp-for="ObstacleComment" rows="3" class="mt-1 block w-full bg-slate-900 border-slate-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-400 focus:outline-none"></textarea>
+				<span asp-validation-for="ObstacleComment" class="text-red-500 text-sm"></span>
 			</div>
 
 			<div>
@@ -37,19 +45,10 @@
 		</div>
 
 		<!-- Hidden map fields -->
-		<input type="hidden" asp-for="MapData.Latitude" id="Latitude" />
-		<input type="hidden" asp-for="MapData.Longitude" id="Longitude" />
-		<input type="hidden" asp-for="MapData.GeoJsonCoordinates" id="GeoJsonCoordinates" />
+        <input type="hidden" asp-for="MapData.GeoJsonCoordinates" id="GeoJsonCoordinates" />
+
 	</div>
-
-	<!--  MAP SECTION -->
-	<div class="bg-slate-700/60 rounded-2xl p-8 shadow-lg border border-slate-600">
-		<h2 class="text-2xl md:text-3xl font-bold text-amber-400 mb-4 text-center">🗺️ Draw Obstacle Location</h2>
-		<p class="text-center text-slate-300 mb-8 text-lg">Bruk kartverktøyene for å markere hinderet.</p>
-
-		<div id="mapDraw" style="height: 400px;"></div>
-	</div>
-
+    
 	<!--  SUBMIT / CANCEL BUTTONS -->
 	<div class="flex flex-col md:flex-row justify-center gap-6 mt-10">
 		<button type="submit"
@@ -62,6 +61,7 @@
 		</a>
 	</div>
 </form>
+
 
 @if (!ViewData.ModelState.IsValid)
 {
@@ -76,39 +76,106 @@
 }
 
 @section Scripts {
-	<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-	<script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script>
-	<script>
-		const map = L.map('mapDraw').setView([58.333, 8.233], 13);
-		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-			attribution: '&copy; OpenStreetMap contributors'
-		}).addTo(map);
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
+    <script>
+        // Init kartet med fallback til et standardpunkt
+        const map = L.map('mapDraw', {zoomControl: false }).setView([58.333, 8.233], 13);
 
-		const drawnItems = new L.FeatureGroup();
-		map.addLayer(drawnItems);
+        L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {
+            layers: 'topo',
+            format: 'image/png',
+            transparent: false,
+            attribution: '© Kartverket'
+        }).addTo(map);
 
-		const drawControl = new L.Control.Draw({
-			edit: { featureGroup: drawnItems },
-			draw: { polygon: false, circle: false, rectangle: false, marker: true, polyline: false }
-		});
-		map.addControl(drawControl);
+        // Zoom control (already created at bottom-right)
+        const zoomCtl = L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-		map.on('draw:created', function (e) {
-			const layer = e.layer;
-			drawnItems.clearLayers();
-			drawnItems.addLayer(layer);
+        map.pm.addControls({
+            position: 'bottomright',
+            drawText: false,
+            drawMarker: true,
+            drawPolyline: true,
+            drawPolygon: false,
+            drawCircle: false,
+            drawCircleMarker: false,
+            drawRectangle: false,
+            editMode: false,
+            removalMode: false,
+            cutPolygon: false,
+            dragMode: false,
+            rotateMode: false,
+        });
 
-			const geojson = layer.toGeoJSON();
-			const coords = geojson.geometry.coordinates;
-			document.getElementById('GeoJsonCoordinates').value = JSON.stringify(geojson.geometry);
-			document.getElementById('Latitude').value = coords[1];
-			document.getElementById('Longitude').value = coords[0];
-		});
+        // A feature group to track user-drawn layers (so we can enforce "one at a time")
+        const drawn = L.featureGroup().addTo(map);
 
-		map.on('draw:deleted', function () {
-			document.getElementById('GeoJsonCoordinates').value = '';
-			document.getElementById('Latitude').value = 0;
-			document.getElementById('Longitude').value = 0;
-		});
-	</script>
+        // 1) Limit Polyline to TWO points (finish draw on second click)
+        map.on('pm:drawstart', ({ shape, workingLayer }) => {
+            if (shape === 'Line') {
+                workingLayer.on('pm:vertexadded', () => {
+                    const pts = workingLayer.getLatLngs();
+                    if (pts.length >= 2) {
+                        // finish current line immediately after the 2nd point
+                        if (map.pm?.Draw?.Line?._finishShape) {
+                            map.pm.Draw.Line._finishShape(); // adds the finished layer to the map
+                        } else {
+                            // Fallback: stop draw mode; the second click will have created the layer already
+                            map.pm.disableDraw();
+                        }
+                    }
+                });
+            }
+});
+
+        // 2) Allow only ONE Marker total (replace previous or disable the button)
+        let currentMarker = null;
+
+        map.on('pm:create', (e) => {
+            const { layer, shape } = e;
+
+            // Put new layers into our tracking group
+            drawn.addLayer(layer);
+
+            if (shape === 'Marker') {
+                // If there's already a marker, remove it (keeping only the newest)
+                if (currentMarker && map.hasLayer(currentMarker)) {
+                    map.removeLayer(currentMarker);
+                }
+                currentMarker = layer;
+
+                // Optionally disable the "drawMarker" button after one is placed
+                if (map.pm?.Toolbar?.setButtonDisabled) {
+                    map.pm.Toolbar.setButtonDisabled('drawMarker', true);
+                }
+            }
+
+            if (shape === 'Line') {
+                // Ensure any existing polylines are removed so only one line is kept
+                drawn.eachLayer((l) => {
+                    if (l !== layer && l instanceof L.Polyline && !(l instanceof L.Polygon)) {
+                        map.removeLayer(l);
+                    }
+                });
+            }
+
+            // Update your hidden input (keep your existing logic)
+            const geojson = layer.toGeoJSON();
+            document.getElementById('GeoJsonCoordinates').value = JSON.stringify(geojson.geometry);
+        });
+
+        // Re-enable marker drawing if the marker gets removed
+        map.on('pm:remove', (e) => {
+            if (e.layer === currentMarker) {
+                currentMarker = null;
+                if (map.pm?.Toolbar?.setButtonDisabled) {
+                    map.pm.Toolbar.setButtonDisabled('drawMarker', false);
+                }
+            }
+
+            // Clear hidden field if everything was removed (keep your existing logic)
+            document.getElementById('GeoJsonCoordinates').value = '';
+        });
+    </script>
 }

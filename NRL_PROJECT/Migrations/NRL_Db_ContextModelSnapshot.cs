@@ -17,7 +17,7 @@ namespace NRL_PROJECT.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("ProductVersion", "9.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -44,6 +44,33 @@ namespace NRL_PROJECT.Migrations
                     b.ToTable("AccessLevels");
                 });
 
+            modelBuilder.Entity("NRL_PROJECT.Models.MapCoordinate", b =>
+                {
+                    b.Property<int>("CoordinateId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("CoordinateId"));
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double");
+
+                    b.Property<int>("MapDataID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("int");
+
+                    b.HasKey("CoordinateId");
+
+                    b.HasIndex("MapDataID");
+
+                    b.ToTable("MapCoordinates");
+                });
+
             modelBuilder.Entity("NRL_PROJECT.Models.MapData", b =>
                 {
                     b.Property<int>("MapDataID")
@@ -56,11 +83,9 @@ namespace NRL_PROJECT.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<double>("Latitude")
-                        .HasColumnType("double");
-
-                    b.Property<double>("Longitude")
-                        .HasColumnType("double");
+                    b.Property<string>("GeometryType")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<int>("MapZoomLevel")
                         .HasColumnType("int");
@@ -94,6 +119,10 @@ namespace NRL_PROJECT.Migrations
                     b.Property<double>("ObstacleHeight")
                         .HasColumnType("double");
 
+                    b.Property<string>("ObstacleImageURL")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
                     b.Property<string>("ObstacleType")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -121,10 +150,6 @@ namespace NRL_PROJECT.Migrations
 
                     b.Property<int?>("ObstacleID")
                         .HasColumnType("int");
-
-                    b.Property<string>("ObstacleImageURL")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("ObstacleReportComment")
                         .IsRequired()
@@ -244,6 +269,17 @@ namespace NRL_PROJECT.Migrations
                     b.ToTable("UserRoles");
                 });
 
+            modelBuilder.Entity("NRL_PROJECT.Models.MapCoordinate", b =>
+                {
+                    b.HasOne("NRL_PROJECT.Models.MapData", "MapData")
+                        .WithMany("Coordinates")
+                        .HasForeignKey("MapDataID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MapData");
+                });
+
             modelBuilder.Entity("NRL_PROJECT.Models.ObstacleData", b =>
                 {
                     b.HasOne("NRL_PROJECT.Models.MapData", "MapData")
@@ -321,6 +357,8 @@ namespace NRL_PROJECT.Migrations
 
             modelBuilder.Entity("NRL_PROJECT.Models.MapData", b =>
                 {
+                    b.Navigation("Coordinates");
+
                     b.Navigation("ObstacleReports");
                 });
 
