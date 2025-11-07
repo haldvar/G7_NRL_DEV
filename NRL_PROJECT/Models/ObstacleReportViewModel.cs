@@ -1,4 +1,7 @@
+using EnumStatus = NRL_PROJECT.Models.ObstacleReportData.EnumTypes;
+
 namespace NRL_PROJECT.Models
+
 {
     public class ObstacleReportViewModel
     {
@@ -19,8 +22,7 @@ namespace NRL_PROJECT.Models
 
 
         public string? StatusComment { get; set; }      // kommentaren du skriver i ReportDetails
-        public DateTime? StatusChangedAt { get; set; }  // valgfritt: når status/kommentar ble endret
-        public string? HandledBy { get; set; }
+
 
         // Kart / koordinater
         public string? Reported_Location { get; set; }
@@ -29,7 +31,7 @@ namespace NRL_PROJECT.Models
         public double Longitude { get; set; }
 
         // Statusfelt (valgfritt, for registerførervisning)
-        public ReportStatus ReportStatus { get; set; }
+        public EnumStatus ReportStatus { get; set; }
 
         // For enkel sjekk i view
         public bool HasCoordinates => Latitude != 0 && Longitude != 0;

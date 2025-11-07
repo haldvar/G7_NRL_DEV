@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using NRL_PROJECT.Data;
-using Microsoft.AspNetCore.Mvc;
-using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using EnumStatus = NRL_PROJECT.Models.ObstacleReportData.EnumTypes;
 
 namespace NRL_PROJECT.Controllers
     {
@@ -19,15 +19,25 @@ namespace NRL_PROJECT.Controllers
         //POST: /Registrar/UpdateStatus
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateStatus(int id, ReportStatus status, string? comment)
+        public async Task<IActionResult> UpdateStatus(int id, EnumStatus status, string? comment)
         {
-            var report = await _context.ObstacleReports.FirstOrDefaultAsync(r => r.Report_Id == id);
+            var report = await _context.ObstacleReports
+                .Include(r => r.User)
+                .FirstOrDefaultAsync(r => r.ObstacleReportID == id);
+
             if (report == null) return NotFound();
 
-            report.ReportStatus = status;
-            report.StatusComment = string.IsNullOrWhiteSpace(comment) ? null : comment.Trim();
-            report.StatusChangedAt = DateTime.UtcNow;              // du kan bruke local time om ønskelig
-            report.HandledBy = User?.Identity?.Name ?? "Registrar"; // senere: faktisk bruker
+            report.ObstacleReportStatus = status;
+            if (!string.IsNullOrWhiteSpace(comment))
+                report.ObstacleReportComment = comment.Trim();
+
+            var userName = User?.Identity?.Name;
+            var reviewer = await _context.Users.FirstOrDefaultAsync(u => u.FirstName  == userName);
+            if (reviewer != null)
+            {
+                report.ReviewedByUserID = reviewer.UserID;
+                report.Reviewer = reviewer;
+            }
 
             await _context.SaveChangesAsync();
 
@@ -41,38 +51,51 @@ namespace NRL_PROJECT.Controllers
             var report = await _context.ObstacleReports
                 .Include(r => r.Obstacle)
                 .Include(r => r.User)
-                .FirstOrDefaultAsync(r => r.Report_Id == id);
+                .FirstOrDefaultAsync(r => r.ObstacleReportID == id);
 
             if (report == null) return NotFound();
 
+            var firstCoord = report.MapData?.Coordinates?
+    .OrderBy(c => c.MapDataID)   // bruk den sorteringen du har (ID/Order)
+    .FirstOrDefault();
+
+            var lat = firstCoord?.Latitude ?? 0;
+            var lng = firstCoord?.Longitude ?? 0;
+
+            var reportedLocation = firstCoord != null
+                ? $"{lat},{lng}"
+                : string.Empty;
+
+            var geoJson = report.MapData?.GeoJsonCoordinates ?? string.Empty;
+
             var vm = new ObstacleReportViewModel
             {
-                // innsending
-                ReportId = report.Report_Id,
-                TimeOfSubmittedReport = report.Time_of_Submitted_Report,
+                // innsendning
+                ReportId = report.ObstacleReportID,
+                TimeOfSubmittedReport = report.ObstacleReportDate,
 
                 // hinder
-                ObstacleID = report.ObstacleReportID,
+                ObstacleID = report.ObstacleReportID,          // evt. report.ObstacleId hvis du vil vise hinder-ID
                 ObstacleType = report.Obstacle?.ObstacleType,
                 ObstacleComment = report.Obstacle?.ObstacleComment,
                 ObstacleHeight = report.Obstacle?.ObstacleHeight,
                 ObstacleWidth = report.Obstacle?.ObstacleWidth,
 
-                // lokasjon – bruk tall om de finnes, ellers la Reported_Location være med
-                Latitude = report.Obstacle?.Latitude ?? 0,
-                Longitude = report.Obstacle?.Longitude ?? 0,
-                Reported_Location = report.Reported_Location,         // ← denne kan du vise/parse i view
-                GeoJsonCoordinates = report.Reported_Location,         // hvis du vil gjenbruke navnet
+                // lokasjon
+                Latitude = lat,
+                Longitude = lng,
+                Reported_Location = reportedLocation,
+                GeoJsonCoordinates = geoJson,
 
                 // status
-                ReportStatus = report.ReportStatus,
+                ReportStatus = report.ObstacleReportStatus,
 
                 // innsender
-                UserId = report.User.RoleID,              
-                UserName = $"{report.User.FirstName ?? ""} {report.User.LastName ?? ""}".Trim()
+                UserId = report.User.RoleID,                   // evt. report.UserID hvis VM forventer bruker-ID
+                UserName = $"{report.User?.FirstName ?? ""} {report.User?.LastName ?? ""}".Trim()
             };
 
-            return View(vm); // Views/Registrar/ReportDetails.cshtml
+            return View(vm);
         }
 
         // Henter alle rapporter
@@ -94,38 +117,57 @@ namespace NRL_PROJECT.Controllers
             // Bare filtrer hvis status er IKKE "Alle" og faktisk matcher enum
             if (!string.IsNullOrWhiteSpace(status) &&
                 !string.Equals(status, "Alle", StringComparison.OrdinalIgnoreCase) &&
-                Enum.TryParse<ReportStatus>(status, ignoreCase: true, out var parsed))
+                Enum.TryParse<EnumStatus>(status, ignoreCase: true, out var parsed))
             {
-                query = query.Where(r => r.ReportStatus == parsed);
+                query = query.Where(r => r.ObstacleReportStatus == parsed);
             }
 
-            // (valgfritt) fritekstsøk
             if (!string.IsNullOrWhiteSpace(q))
             {
                 q = q.Trim();
+
                 query = query.Where(r =>
-                    r.Report_Id.ToString().Contains(q) ||
-                    (r.Obstacle.ObstacleType ?? "").Contains(q) ||
-                    ((r.User.FirstName ?? "") + " " + (r.User.LastName ?? "")).Contains(q) ||
-                    (r.User.FirstName ?? "").Contains(q));
+                    r.ObstacleReportID.ToString().Contains(q) ||
+
+                    // ObstacleType trygt når r.Obstacle kan være null
+                    (r.Obstacle != null ? r.Obstacle.ObstacleType : "").Contains(q) ||
+
+                    // Fornavn + etternavn trygt når r.User kan være null
+                    (
+                        (r.User != null ? r.User.FirstName : "") + " " +
+                        (r.User != null ? r.User.LastName : "")
+                    ).Contains(q)
+                );
             }
 
             var model = await query
-                .OrderByDescending(r => r.Time_of_Submitted_Report)
-                .Select(r => new ObstacleReportViewModel
-                {
-                    ReportId = r.Report_Id,
-                    TimeOfSubmittedReport = r.Time_of_Submitted_Report,
-                    ObstacleID = r.ObstacleReportID,
+                 .OrderByDescending(r => r.ObstacleReportDate) // <- riktig dato-felt
+                 .Select(r => new ObstacleReportViewModel
+                 {
+                    ReportId = r.ObstacleReportID,
+                    TimeOfSubmittedReport = r.ObstacleReportDate,
+
+                    ObstacleID = r.Obstacle.ObstacleId,
                     ObstacleType = r.Obstacle != null ? r.Obstacle.ObstacleType : "",
                     ObstacleComment = r.Obstacle != null ? r.Obstacle.ObstacleComment : "",
-                    Latitude = r.Obstacle != null ? r.Obstacle.Latitude : 0,
-                    Longitude = r.Obstacle != null ? r.Obstacle.Longitude : 0,
-                    ReportStatus = r.ReportStatus,
-                    StatusComment = r.StatusComment,
-                    StatusChangedAt = r.StatusChangedAt,
-                    HandledBy = r.HandledBy,
-                    UserId = r.User.RoleID,
+                     Latitude = (r.MapData != null && r.MapData.Coordinates.Any())
+                        ? r.MapData.Coordinates
+                            .OrderBy(c => c.MapDataID)
+                            .Select(c => (double?)c.Latitude)
+                            .FirstOrDefault() ?? 0
+                        : 0,
+
+                     Longitude = (r.MapData != null && r.MapData.Coordinates.Any())
+                        ? r.MapData.Coordinates
+                            .OrderBy(c => c.MapDataID)
+                            .Select(c => (double?)c.Longitude)
+                            .FirstOrDefault() ?? 0
+                        : 0,
+
+                     ReportStatus = r.ObstacleReportStatus,
+                    StatusComment = r.ObstacleReportComment,     // hvis VM har dette feltet
+
+                    UserId = r.User.RoleID,                      // eller r.UserID – avhengig av VM
                     UserName = $"{r.User.FirstName ?? ""} {r.User.LastName ?? ""}".Trim()
                 })
                 .ToListAsync();

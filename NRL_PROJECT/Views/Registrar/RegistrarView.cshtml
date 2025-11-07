@@ -1,4 +1,5 @@
 @model IEnumerable<NRL_PROJECT.Models.ObstacleReportViewModel>
+@using EnumStatus = NRL_PROJECT.Models.ObstacleReportData.EnumTypes
 @using System.Globalization
 
 @{
@@ -7,11 +8,12 @@
     var ci = CultureInfo.InvariantCulture;
     var list = Model.ToList();
 
-    int cNy = list.Count(x => x.ReportStatus == NRL_PROJECT.Models.ReportStatus.Ny);
-    int cVenter = list.Count(x => x.ReportStatus == NRL_PROJECT.Models.ReportStatus.Venter);
-    int cUnder = list.Count(x => x.ReportStatus == NRL_PROJECT.Models.ReportStatus.UnderBehandling);
-    int cGodkjent = list.Count(x => x.ReportStatus == NRL_PROJECT.Models.ReportStatus.Godkjent);
-    int cAvvist = list.Count(x => x.ReportStatus.ToString() == "Avvist"); // hvis du har enum-verdi Avvist
+    int cNy = list.Count(x => x.ReportStatus == EnumStatus.New);
+    int cVenter = list.Count(x => x.ReportStatus == EnumStatus.Open);
+    int cUnderBeh = list.Count(x => x.ReportStatus == EnumStatus.InProgress);
+    int cGodkjent = list.Count(x => x.ReportStatus == EnumStatus.Resolved);
+    int cAvvist = list.Count(x => x.ReportStatus.ToString() == "Avvist"); // hvis du ikke har EnumStatus.Avvist
+
 
     var selectedStatus = (string)Context.Request.Query["status"];
     if (string.IsNullOrWhiteSpace(selectedStatus)) selectedStatus = "Alle";
@@ -86,7 +88,7 @@
                         <option value="Alle" selected="@(selectedStatus == "Alle")">Alle (@list.Count)</option>
                         <option value="Ny" selected="@(selectedStatus == "Ny")">Ny (@cNy)</option>
                         <option value="Venter" selected="@(selectedStatus == "Venter")">Venter (@cVenter)</option>
-                        <option value="UnderBehandling" selected="@(selectedStatus == "UnderBehandling")">Under behandling (@cUnder)</option>
+                        <option value="UnderBehandling" selected="@(selectedStatus == "UnderBehandling")">Under behandling (@cUnderBeh)</option>
                         <option value="Godkjent" selected="@(selectedStatus == "Godkjent")">Godkjent (@cGodkjent)</option>
                         <option value="Avvist" selected="@(selectedStatus == "Avvist")">Avvist (@cAvvist)</option>
                     </select>
