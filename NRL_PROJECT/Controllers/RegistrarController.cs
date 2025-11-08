@@ -41,12 +41,12 @@ namespace NRL_PROJECT.Controllers
 
             if (report == null) return NotFound();
 
-            // Map fra knappens tekst (UI) -> backend-enum (lagres i DB)
+            
             var newBackendStatus = status switch
             {
                 "UnderBehandling" => BackendStatus.InProgress,
-                "Godkjent" => BackendStatus.Resolved,   // evt. Closed, hvis det er korrekt hos dere
-                "Avvist" => BackendStatus.Deleted,    // evt. egen Rejected hvis du har
+                "Godkjent" => BackendStatus.Resolved,   
+                "Avvist" => BackendStatus.Deleted,    
                 _ => BackendStatus.Open        // “Ny/Venter”
             };
 

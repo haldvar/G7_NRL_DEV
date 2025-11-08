@@ -12,7 +12,7 @@
     int cVenter = list.Count(x => x.ReportStatus == EnumStatus.Venter);
     int cUnderBeh = list.Count(x => x.ReportStatus == EnumStatus.UnderBehandling);
     int cGodkjent = list.Count(x => x.ReportStatus == EnumStatus.Godkjent);
-    int cAvvist = list.Count(x => x.ReportStatus.ToString() == "Avvist"); // hvis du ikke har EnumStatus.Avvist
+    int cAvvist = list.Count(x => x.ReportStatus.ToString() == "Avvist"); 
 
 
     var selectedStatus = (string)Context.Request.Query["status"];
@@ -93,7 +93,7 @@
                         <option value="Avvist" selected="@(selectedStatus == "Avvist")">Avvist (@cAvvist)</option>
                     </select>
 
-                    @* Behold søk hvis du bruker q *@
+                    
                     <input type="hidden" name="q" value="@currentSearch" />
                 </form>
         </div>
