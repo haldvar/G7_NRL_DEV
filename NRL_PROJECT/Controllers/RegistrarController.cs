@@ -6,10 +6,12 @@ using BackendStatus = NRL_PROJECT.Models.ObstacleReportData.EnumTypes;
 using UiStatus = NRL_PROJECT.Models.EnumStatus;
 using System.Linq;
 using System.Net.NetworkInformation;
+using Microsoft.AspNetCore.Authorization;
 using EnumStatus = NRL_PROJECT.Models.ObstacleReportData.EnumTypes;
 
 namespace NRL_PROJECT.Controllers
     {
+        [Authorize(Roles = "Registrar,Admin")]
         public class RegistrarController : Controller
         {
             private readonly NRL_Db_Context _context;
@@ -31,6 +33,14 @@ namespace NRL_PROJECT.Controllers
                     _ => UiStatus.Ny
                 };
         }
+            
+            // ✅ NEW: Landing page for Registrars after login
+            [HttpGet]
+            public IActionResult RegisterView()
+            {
+                return RedirectToAction("RegistrarView");
+            }
+            
         //POST: /Registrar/UpdateStatus
         [HttpPost]
         [ValidateAntiForgeryToken]

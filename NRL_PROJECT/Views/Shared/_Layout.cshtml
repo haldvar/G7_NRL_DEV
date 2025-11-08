@@ -1,3 +1,6 @@
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<User> UserManager
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,11 +14,11 @@
     <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css" />
-
     <link rel="stylesheet" href="/lib/leaflet/leaflet.css" />
     <script src="/lib/leaflet/leaflet.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
     <script src="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
+
     @RenderSection("Styles", required: false)
 </head>
 
@@ -26,7 +29,6 @@
         <nav class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
             <!-- Left side: Logo + navigation -->
             <div class="flex items-center space-x-8">
-                <!-- Logo -->
                 <a class="text-2xl font-bold tracking-wide text-blue-700 transition hover:text-blue-800"
                    asp-area="" asp-controller="Home" asp-action="Index">
                     <img src="~/img/kartverket-logo.png" alt="Kartverket" class="h-7 w-auto opacity-90" />
@@ -34,18 +36,30 @@
 
                 <!-- Desktop menu -->
                 <div class="hidden space-x-6 font-medium md:flex">
-                    <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                    <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="MapView">Map</a>
-                    <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="About">About</a>
-                    <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                    <a class="text-gray-700 transition hover:text-blue-600" asp-controller="Home" asp-action="Index">Home</a>
+                    <a class="text-gray-700 transition hover:text-blue-600" asp-controller="Map" asp-action="MapView">Map</a>
+                    <a class="text-gray-700 transition hover:text-blue-600" asp-controller="Home" asp-action="About">About</a>
+                    <a class="text-gray-700 transition hover:text-blue-600" asp-controller="Home" asp-action="Privacy">Privacy</a>
                 </div>
             </div>
 
-            <!-- Right side: Statusbar -->
+            <!-- Right side: Statusbar (Desktop) -->
             <div class="hidden items-center space-x-6 text-sm font-medium md:flex">
-                <span class="text-gray-600">👤 Logged in as <strong>Pilot123</strong></span>
-                <span class="rounded-full bg-green-100 px-3 py-1 text-xs text-green-700">Active Obstacles: 12</span>
-                <button class="rounded-lg bg-red-500 px-4 py-2 text-white transition hover:bg-red-600">Log out</button>
+                @if (User.Identity?.IsAuthenticated ?? false)
+                {
+                    var currentUser = await UserManager.GetUserAsync(User);
+                    var roles = await UserManager.GetRolesAsync(currentUser);
+                    var role = roles.FirstOrDefault();
+
+                    <span class="text-gray-600">👤 Logged in as <strong>@User.Identity.Name</strong> (@role)</span>
+                    <span class="rounded-full bg-green-100 px-3 py-1 text-xs text-green-700">Active Obstacles: 12</span>
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="rounded-lg bg-red-500 px-4 py-2 text-white transition hover:bg-red-600">
+                            Log out
+                        </button>
+                    </form>
+                }
             </div>
 
             <!-- Mobile menu button -->
@@ -60,23 +74,32 @@
         <!-- Mobile dropdown -->
         <div id="mobile-menu" class="hidden border-t bg-white shadow-sm md:hidden">
             <div class="space-y-2 px-6 py-4">
-                <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="MapView">Map</a>
-                <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="About">About</a>
-                <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                <a class="block text-gray-700 transition hover:text-blue-600" asp-controller="Home" asp-action="Index">Home</a>
+                <a class="block text-gray-700 transition hover:text-blue-600" asp-controller="Map" asp-action="MapView">Map</a>
+                <a class="block text-gray-700 transition hover:text-blue-600" asp-controller="Home" asp-action="About">About</a>
+                <a class="block text-gray-700 transition hover:text-blue-600" asp-controller="Home" asp-action="Privacy">Privacy</a>
 
-                <!-- Statusbar in mobile menu -->
-                <div class="border-t pt-4">
-                    <span class="mb-2 block text-gray-600">👤 Logged in as <strong>Pilot123</strong></span>
-                    <span class="mb-2 inline-block rounded-full bg-green-100 px-3 py-1 text-xs text-green-700">Active Obstacles: 12</span>
-                    <button class="w-full rounded-lg bg-red-500 px-4 py-2 text-white transition hover:bg-red-600">Log out</button>
-                </div>
+                <!-- Statusbar (Mobile) -->
+                @if (User.Identity?.IsAuthenticated ?? false)
+                {
+                    var currentUser = await UserManager.GetUserAsync(User);
+                    var roles = await UserManager.GetRolesAsync(currentUser);
+                    var role = roles.FirstOrDefault();
+
+                    <div class="border-t pt-4">
+                        <span class="text-gray-600">👤 Logged in as <strong>@User.Identity.Name</strong> (@role)</span>
+                        <span class="mb-2 inline-block rounded-full bg-green-100 px-3 py-1 text-xs text-green-700">Active Obstacles: 12</span>
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="w-full">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="w-full rounded-lg bg-red-500 px-4 py-2 text-white transition hover:bg-red-600">
+                                Log out
+                            </button>
+                        </form>
+                    </div>
+                }
             </div>
         </div>
-       
-
-      </header>
-   
+    </header>
 
     <!-- MAIN CONTENT -->
     <main role="main" class="mx-auto max-w-5xl flex-grow px-6 py-10">
@@ -87,7 +110,7 @@
     <footer class="mt-8 border-t bg-white">
         <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 text-sm text-gray-500">
             <span>&copy; 2025 - NRL_PROJECT</span>
-            <a class="transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <a class="transition hover:text-blue-600" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
 

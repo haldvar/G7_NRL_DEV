@@ -7,7 +7,6 @@ using NRL_PROJECT.Models.ViewModels;
 
 namespace NRL_PROJECT.Controllers
 {
-    // Only Admins can access
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
@@ -20,7 +19,37 @@ namespace NRL_PROJECT.Controllers
             _roleManager = roleManager;
         }
 
+        // GET: /Admin/Dashboard - Main landing page for admins
+        [HttpGet]
+        public async Task<IActionResult> Dashboard()
+        {
+            // Get statistics
+            var totalUsers = await _userManager.Users.CountAsync();
+            var admins = 0;
+            var pilots = 0;
+            var registrars = 0;
+            var noRole = 0;
+
+            foreach (var user in await _userManager.Users.ToListAsync())
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                if (roles.Contains("Admin")) admins++;
+                else if (roles.Contains("Pilot")) pilots++;
+                else if (roles.Contains("Registrar")) registrars++;
+                else noRole++;
+            }
+
+            ViewBag.TotalUsers = totalUsers;
+            ViewBag.Admins = admins;
+            ViewBag.Pilots = pilots;
+            ViewBag.Registrars = registrars;
+            ViewBag.NoRole = noRole;
+
+            return View();
+        }
+
         // GET: /Admin/ManageUsers
+        [HttpGet]
         public async Task<IActionResult> ManageUsers()
         {
             var users = await _userManager.Users.ToListAsync();
@@ -60,7 +89,10 @@ namespace NRL_PROJECT.Controllers
 
             // Remove all existing roles
             var currentRoles = await _userManager.GetRolesAsync(user);
-            await _userManager.RemoveFromRolesAsync(user, currentRoles);
+            if (currentRoles.Any())
+            {
+                await _userManager.RemoveFromRolesAsync(user, currentRoles);
+            }
 
             // Add new role (if not "No Role")
             if (!string.IsNullOrEmpty(role) && role != "No Role")
@@ -68,7 +100,7 @@ namespace NRL_PROJECT.Controllers
                 await _userManager.AddToRoleAsync(user, role);
             }
 
-            TempData["Success"] = $"Role updated for {user.UserName}";
+            TempData["Success"] = $"Rolle oppdatert for {user.UserName}";
             return RedirectToAction("ManageUsers");
         }
 
@@ -88,11 +120,11 @@ namespace NRL_PROJECT.Controllers
             
             if (result.Succeeded)
             {
-                TempData["Success"] = $"User {user.UserName} deleted";
+                TempData["Success"] = $"Bruker {user.UserName} slettet";
             }
             else
             {
-                TempData["Error"] = "Failed to delete user";
+                TempData["Error"] = "Kunne ikke slette bruker";
             }
 
             return RedirectToAction("ManageUsers");

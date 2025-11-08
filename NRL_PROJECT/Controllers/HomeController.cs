@@ -7,6 +7,7 @@ using System.Text.Json;
 
 namespace NRL_PROJECT.Controllers
 {
+    
     public class HomeController : Controller
     {
         private readonly NRL_Db_Context _context;

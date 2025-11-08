@@ -47,7 +47,6 @@ namespace NRL_PROJECT.Controllers
                 {
                     // New users have NO role by default
                     // Admins will assign roles later
-            
                     return RedirectToAction("RegistrationSuccess", "Account");
                 }
                 else
@@ -70,11 +69,13 @@ namespace NRL_PROJECT.Controllers
         }
         
         // GET /Account/Login
+        [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
 
+        // POST /Account/Login
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
@@ -88,16 +89,37 @@ namespace NRL_PROJECT.Controllers
                     var result = await _signInManager.PasswordSignInAsync(
                         userName: user.UserName,
                         password: model.Password,
-                        isPersistent: false,
+                        isPersistent: model.RememberMe,
                         lockoutOnFailure: false);
+                        
                     if (result.Succeeded)
                     {
-                        // Redirect to home view
-                        return RedirectToAction("Index", "Home");
+                        // Get user's roles
+                        var roles = await _userManager.GetRolesAsync(user);
+                        
+                        // Redirect based on role
+                        if (roles.Contains("Admin"))
+                        {
+                            return RedirectToAction("ManageUsers", "Admin");
+                        }
+                        else if (roles.Contains("Registrar"))
+                        {
+                            return RedirectToAction("RegistrarView", "Registrar");
+                        }
+                        else if (roles.Contains("Pilot"))
+                        {
+                            return RedirectToAction("Index", "Home");
+                        }
+                        else
+                        {
+                            // User has no role
+                            TempData["Info"] = "Din konto venter på rolletildeling. Kontakt en administrator.";
+                            return RedirectToAction("Index", "Home");
+                        }
                     }
                 }
                 
-                ModelState.AddModelError("", "Ugyldig login");
+                ModelState.AddModelError("", "Ugyldig e-post eller passord");
             }
             return View(model);
         }
@@ -109,6 +131,13 @@ namespace NRL_PROJECT.Controllers
         {
             await _signInManager.SignOutAsync();
             return RedirectToAction("Login", "Account");
+        }
+        
+        // GET /Account/AccessDenied
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }

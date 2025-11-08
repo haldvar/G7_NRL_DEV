@@ -27,7 +27,12 @@
         <button type="submit" class="btn btn-primary">Login</button>
     </div>
 </form>
-
+<!-- Register New User Button -->
+<div class="mt-4 text-center">
+<span class="text-muted">Don't have an account?</span>
+<a asp-controller="Account" asp-action="Register" class="btn btn-outline-secondary ml-2">
+    Register New User
+</a>
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
 }
