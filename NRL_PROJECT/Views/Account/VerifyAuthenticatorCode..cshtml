@@ -2,7 +2,11 @@
 @model VerifyAuthenticatorCodeViewModel
 
 @{
-    ViewData["Title"] = "Verify";
+    ViewData["Title"] = "Bekreft kode";
+}
+
+@{
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
 }
 
 <h1>@ViewData["Title"].</h1>
@@ -33,7 +37,7 @@
         </div>
     </div>
     <p>
-        <a asp-action="UseRecoveryCode">Mistet autentisering?</a>
+        <a asp-action="UseRecoveryCode">Mistet autentiserings metoden/metoder?</a>
     </p>
 </form>
 
