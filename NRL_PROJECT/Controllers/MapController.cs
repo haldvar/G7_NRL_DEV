@@ -137,7 +137,7 @@ namespace NRL_PROJECT.Controllers
             //  Opprett rapport-oppføring
             var report = new ObstacleReportData
             {
-                ObstacleID = obstacle.ObstacleId,
+                ObstacleID = obstacle.ObstacleID,
                 UserID = null, // ingen bruker koblet enda
                 ReviewedByUserID = null,
                 ObstacleReportComment = "Her skal Registerfører kunne skrive inn kommentar.",
@@ -170,9 +170,9 @@ namespace NRL_PROJECT.Controllers
 
         // POST: /Map/SubmitObstacleReport
         [HttpPost]
-        public async Task<IActionResult> SubmitObstacleReport(int obstacleId, string geoJson)
+        public async Task<IActionResult> SubmitObstacleReport(int ObstacleID, string geoJson)
         {
-            var obstacle = await _context.Obstacles.FindAsync(obstacleId);
+            var obstacle = await _context.Obstacles.FindAsync(ObstacleID);
             if (obstacle == null)
                 return NotFound();
 
@@ -189,7 +189,7 @@ namespace NRL_PROJECT.Controllers
 
             var report = new ObstacleReportData
             {
-                ObstacleID = obstacle.ObstacleId,
+                ObstacleID = obstacle.ObstacleID,
                 ObstacleReportComment = "New report submitted.",
                 ObstacleReportDate = DateTime.UtcNow,
                 ObstacleReportStatus = ObstacleReportData.EnumTypes.New,
@@ -244,7 +244,7 @@ namespace NRL_PROJECT.Controllers
                     geometry,
                     properties = new
                     {
-                        id = o.ObstacleId,
+                        id = o.ObstacleID,
                         type = o.ObstacleType,
                         height = o.ObstacleHeight,
                         width = o.ObstacleWidth,
