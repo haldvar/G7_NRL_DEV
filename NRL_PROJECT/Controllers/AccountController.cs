@@ -51,7 +51,7 @@ namespace NRL_PROJECT.Controllers
                 if (result.Succeeded)
                 {
                     await _signInManager.SignInAsync(user, isPersistent: false);
-                    _logger.LogInformation(1,"User created a new account with password.");
+                    _logger.LogInformation(1,"Brukeren din har blitt opprettet! Vent på godkjennelse fra admin.");
                     return RedirectToLocal(returnUrl);
                 }
 
@@ -83,7 +83,7 @@ namespace NRL_PROJECT.Controllers
 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation(2, "User logged in.");
+                    _logger.LogInformation(2, "Brukeren er logget inn.");
                     return RedirectToLocal(returnUrl);
                 }
 
@@ -94,12 +94,12 @@ namespace NRL_PROJECT.Controllers
 
                 if (result.IsLockedOut)
                 {
-                    _logger.LogWarning(3, "User account locked out.");
+                    _logger.LogWarning(3, "Brukeren er låst, prøv igjen senere.");
                     return View("Lockout");
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    ModelState.AddModelError(string.Empty, "Ugyldig login.");
                     return View(model);
                 }
             }
@@ -112,10 +112,11 @@ namespace NRL_PROJECT.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            _logger.LogInformation(4, "User logged out.");
+            _logger.LogInformation(4, "Brukeren er logget ut.");
             return RedirectToAction(nameof(HomeController.Index), "Home");
         }
         
+        /*
         // POST /Account/ExternalLogin
         [HttpPost]
         [AllowAnonymous]
@@ -210,6 +211,8 @@ namespace NRL_PROJECT.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             return View(model);
         }
+        
+        */
         
         // GET /Account/ConfirmEmail
         [HttpGet]
@@ -347,10 +350,10 @@ namespace NRL_PROJECT.Controllers
                 return View("Error");
             }
             
-            var message = "Your security code is: " + code;
+            var message = "Din sikkerhetskode er: " + code;
             if (model.SelectedProvider == "Email")
             {
-                await _emailSender.SendEmailAsync(await _userManager.GetEmailAsync(user), "Security Code", message);
+                await _emailSender.SendEmailAsync(await _userManager.GetEmailAsync(user), "Sikkerhetskode", message);
             }
 
             return RedirectToAction(nameof(VerifyCode),
@@ -362,7 +365,7 @@ namespace NRL_PROJECT.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> VerifyCode(string provider, bool rememberMe, string returnUrl = null)
         {
-            // Require that the user has already logged in via username/password or external login
+            // Require that the user has already logged in via username/password
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
@@ -384,7 +387,7 @@ namespace NRL_PROJECT.Controllers
                 return View(model);
             }
             
-            // The following code protects for brute force force attacks against the two factor codes.
+            // The following code protects for brute force attacks against the two-factor codes.
             // If a user enters incorrect codes for a specified amount of time then the user account
             // will be locked out for a specified amount of time
             var result = await _signInManager.TwoFactorSignInAsync(model.Provider, model.Code, model.RememberMe, model.RememberBrowser);
@@ -394,12 +397,12 @@ namespace NRL_PROJECT.Controllers
             }
             if (result.IsLockedOut)
             {
-                _logger.LogWarning(7, "User account locked out.");
+                _logger.LogWarning(7, "Brukeren er låst.");
                 return View("Lockout");
             }
             else
             {
-                ModelState.AddModelError(string.Empty, "Invalid code.");
+                ModelState.AddModelError(string.Empty, "Ugyldig kode.");
                 return View(model);
             }
         }
@@ -409,7 +412,7 @@ namespace NRL_PROJECT.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> VerifyAuthenticatorCode(bool rememberMe, string returnUrl = null)
         {
-            // Require that the user has already logged in via username/password or external login
+            // Require that the user has already logged in via username/password
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
@@ -430,7 +433,7 @@ namespace NRL_PROJECT.Controllers
                 return View(model);
             }
 
-            // The following code protects for brute force attacks against the two factor codes.
+            // The following code protects for brute force attacks against the two-factor codes.
             // If a user enters incorrect codes for a specified amount of time then the user account
             // will be locked out for a specified amount of time.
             var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(model.Code, model.RememberMe, model.RememberBrowser);
@@ -440,12 +443,12 @@ namespace NRL_PROJECT.Controllers
             }
             if (result.IsLockedOut)
             {
-                _logger.LogWarning(7, "User account locked out.");
+                _logger.LogWarning(7, "Brukeren er låst ut.");
                 return View("Lockout");
             }
             else
             {
-                ModelState.AddModelError(string.Empty, "Invalid code.");
+                ModelState.AddModelError(string.Empty, "Ugyldig kode.");
                 return View(model);
             }
         }
@@ -455,7 +458,7 @@ namespace NRL_PROJECT.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> UseRecoveryCode(string returnUrl = null)
         {
-            // Require that the user has already logged in via username/password or external login
+            // Require that the user has already logged in via username/password
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
@@ -483,7 +486,7 @@ namespace NRL_PROJECT.Controllers
             }
             else
             {
-                ModelState.AddModelError(string.Empty, "Invalid code.");
+                ModelState.AddModelError(string.Empty, "Ugyldig kode.");
                 return View(model);
             }
         }

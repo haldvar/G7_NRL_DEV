@@ -33,10 +33,6 @@ builder.Services.AddDbContext<NRL_Db_Context>(options =>
    options.UseInMemoryDatabase("TestDb"));
 
 //-------------------------------------------------------------
-// KONFIGURERE IDENTITY OG AUTHENTICATION
-//-------------------------------------------------------------
-
-//-------------------------------------------------------------
 // IDENTITY OG AUTHENTICATION SETUP
 //-------------------------------------------------------------
 

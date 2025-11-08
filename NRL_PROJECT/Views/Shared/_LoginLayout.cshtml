@@ -7,16 +7,6 @@
 
     <!-- Tailwind via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Leaflet -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css" />
-
-    <link rel="stylesheet" href="/lib/leaflet/leaflet.css" />
-    <script src="/lib/leaflet/leaflet.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
-    <script src="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
-    @RenderSection("Styles", required: false)
 </head>
 
 <body class="min-h-screen flex flex-col bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800">
@@ -34,18 +24,13 @@
 
                 <!-- Desktop menu -->
                 <div class="hidden md:flex space-x-6 font-medium">
-                    <a class="text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                    <a class="text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Map" asp-action="MapView">Map</a>
                     <a class="text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="About">About</a>
-                    <a class="text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                 </div>
             </div>
 
             <!-- Right side: Statusbar -->
             <div class="hidden md:flex items-center space-x-6 text-sm font-medium">
-                <span class="text-gray-600">👤 Logged in as <strong>Pilot123</strong></span>
-                <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs">Active Obstacles: 12</span>
-                <button class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">Log out</button>
+                <span class="text-gray-600">👤 <strong>You are not logged in</strong></span>
             </div>
 
             <!-- Mobile menu button -->
@@ -60,16 +45,11 @@
         <!-- Mobile dropdown -->
         <div id="mobile-menu" class="hidden md:hidden bg-white border-t shadow-sm">
             <div class="px-6 py-4 space-y-2">
-                <a class="block text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                <a class="block text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Map" asp-action="MapView">Map</a>
                 <a class="block text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="About">About</a>
-                <a class="block text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
 
                 <!-- Statusbar in mobile menu -->
                 <div class="pt-4 border-t">
-                    <span class="block text-gray-600 mb-2">👤 Logged in as <strong>Pilot123</strong></span>
-                    <span class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs mb-2">Active Obstacles: 12</span>
-                    <button class="w-full bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">Log out</button>
+                    <span class="block text-gray-600 mb-2">👤 <strong>You are not logged in</strong></span>
                 </div>
             </div>
         </div>
