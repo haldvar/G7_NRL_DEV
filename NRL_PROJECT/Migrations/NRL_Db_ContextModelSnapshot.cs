@@ -116,6 +116,9 @@ namespace NRL_PROJECT.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<string>("ObstacleDescription")
+                        .HasColumnType("longtext");
+
                     b.Property<double>("ObstacleHeight")
                         .HasColumnType("double");
 

@@ -9,6 +9,7 @@ namespace NRL_PROJECT.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ObstacleId { get; set; }
+        public string? ObstacleDescription { get; set; }
 
         [Required]
         public string ObstacleType { get; set; } = "Ukjent";

@@ -19,7 +19,7 @@ builder.Services.AddControllersWithViews();
 // KOMMENTERES UT UNDER TESTING:
 
 
- 
+
  builder.Services.AddDbContext<NRL_Db_Context>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -31,10 +31,10 @@ builder.Services.AddControllersWithViews();
 
 
 // BRUK DENNE (in-memory database i stedet for MySQL) VED TESTING: 
-//
-// builder.Services.AddDbContext<NRL_Db_Context>(options =>
-//    options.UseInMemoryDatabase("TestDb"));
-
+/*
+ builder.Services.AddDbContext<NRL_Db_Context>(options =>
+    options.UseInMemoryDatabase("TestDb"));
+*/
 
 
 // ------------------------------------------------------------

@@ -40,7 +40,11 @@ namespace NRL_PROJECT.Controllers
         public async Task<IActionResult> SubmitObstacleWithLocation(ObstacleData model, ObstacleReportData model2)
         {
             if (model.MapData == null)
+            { 
                 model.MapData = new MapData();
+                return View("ObstacleAndMapForm", model);
+            }
+            model.MapData ??= new MapData();
 
             if (string.IsNullOrWhiteSpace(model.MapData.GeoJsonCoordinates))
             {
