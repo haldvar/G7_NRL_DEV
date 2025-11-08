@@ -9,9 +9,9 @@ public class VerifyAuthenticatorCodeViewModel
 
     public string ReturnUrl { get; set; }
 
-    [Display(Name = "Remember this browser?")]
+    [Display(Name = "Husk denne nettleseren?")]
     public bool RememberBrowser { get; set; }
 
-    [Display(Name = "Remember me?")]
+    [Display(Name = "Husk meg?")]
     public bool RememberMe { get; set; }
 }

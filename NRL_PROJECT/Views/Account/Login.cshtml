@@ -18,7 +18,6 @@
     <div class="col-md-8">
         <section>
             <form asp-controller="Account" asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal" role="form">
-                <h4>Use a local account to log in.</h4>
                 @Html.AntiForgeryToken()
                 <hr />
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -52,10 +51,10 @@
                     </div>    
                 </div>
                 <p>
-                    <a asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]">Register as a new user?</a>
+                    <a asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]">Registrere ny bruker?</a>
                 </p>
                 <p>
-                    <a asp-action="ForgotPassword">Forgot your password?</a>
+                    <a asp-action="ForgotPassword">Glemt Passord?</a>
                 </p>
             </form>
         </section>

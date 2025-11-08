@@ -24,13 +24,13 @@
 
                 <!-- Desktop menu -->
                 <div class="hidden md:flex space-x-6 font-medium">
-                    <a class="text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="About">About</a>
+                    <a class="text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="About">Om oss</a>
                 </div>
             </div>
 
             <!-- Right side: Statusbar -->
             <div class="hidden md:flex items-center space-x-6 text-sm font-medium">
-                <span class="text-gray-600">👤 <strong>You are not logged in</strong></span>
+                <span class="text-gray-600">👤 <strong>Du er ikke logget inn</strong></span>
             </div>
 
             <!-- Mobile menu button -->
@@ -45,11 +45,11 @@
         <!-- Mobile dropdown -->
         <div id="mobile-menu" class="hidden md:hidden bg-white border-t shadow-sm">
             <div class="px-6 py-4 space-y-2">
-                <a class="block text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="About">About</a>
+                <a class="block text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="About">Om oss</a>
 
                 <!-- Statusbar in mobile menu -->
                 <div class="pt-4 border-t">
-                    <span class="block text-gray-600 mb-2">👤 <strong>You are not logged in</strong></span>
+                    <span class="block text-gray-600 mb-2">👤 <strong>Du er ikke logget inn</strong></span>
                 </div>
             </div>
         </div>
@@ -95,7 +95,7 @@
             <li class="nav-item">
                 <form asp-action="Logout" asp-controller="Account" method="post" class="form-inline">
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-link nav-link" style="border: none; padding: 0;">Logout</button>
+                    <button type="submit" class="btn btn-link nav-link" style="border: none; padding: 0;">Logg ut</button>
                 </form>
             </li>
         }

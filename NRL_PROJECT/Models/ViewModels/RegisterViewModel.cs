@@ -17,23 +17,23 @@ namespace NRL_PROJECT.Models.ViewModels
 
         [Required]
         [DataType(DataType.Password)]
-        [Compare("Password", ErrorMessage = "Passwords do not match.")]
+        [Compare("Password", ErrorMessage = "Passordene matcher ikke.")]
         public string ConfirmPassword { get; set; }
 
         [Required]
-        [Display(Name = "First Name")]
+        [Display(Name = "Fornavn")]
         public string FirstName { get; set; }
 
         [Required]
-        [Display(Name = "Last Name")]
+        [Display(Name = "Etternavn")]
         public string LastName { get; set; }
 
         [Required]
-        [Display(Name = "Organisation ID")]
+        [Display(Name = "Organisasjons ID")]
         public int OrgID { get; set; }
 
         [Required]
-        [Display(Name = "Role ID")]
+        [Display(Name = "Rolle ID")]
         public int RoleID { get; set; }
     }
 
