@@ -6,8 +6,8 @@ namespace NRL_PROJECT.Models
     public class ObstacleReportViewModel
     {
         //innsender
-        public int? UserId { get; set; }
-        public string? UserName { get; set; }
+        public string? UserId { get; set; } = "";
+        public string? UserName { get; set; } = "";
 
         public int ReportId { get; set; }                 // ID til rapporten
         public DateTime TimeOfSubmittedReport { get; set; } // tidspunkt

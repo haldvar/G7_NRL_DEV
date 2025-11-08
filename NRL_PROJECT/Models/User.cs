@@ -1,34 +1,29 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 
 namespace NRL_PROJECT.Models
 {
-    public class User
+    public class User : IdentityUser
     {
-        [Key]
-        public int? UserID { get; set; }
+         // ID arves fra IdentityUser (som string)
+         // Email arves fra IdentityUser
+         // Passord arves fra IdentityUser
 
         [Required, StringLength(100)]
         public string FirstName { get; set; }
 
         [Required, StringLength(100)]
         public string LastName { get; set; }
-
-        [Required, StringLength(100)]
-        public string Email { get; set; }
-
-        [Required, StringLength(255)]
-        public string PasswordHash { get; set; }
-
-        [ForeignKey("Organisation")]
-        public int OrgID { get; set; }
-
-        [ForeignKey("UserRole")]
-        public int RoleID { get; set; }
+        
+        public int? OrgID { get; set; } // nullable
+        public int? RoleID { get; set; } // nullable
               
-
-        public UserRole Role { get; set; }
-        public Organisation Organisation { get; set; }
+        [ForeignKey("OrgID")]
+        public Organisation? Organisation { get; set; }
+        
+        [ForeignKey("RoleID")]
+        public UserRole? Role { get; set; }
 
         public ICollection<ObstacleReportData> ObstacleReportsSubmitted { get; set; }
         public ICollection<ObstacleReportData> ObstacleReportsReviewed { get; set; }

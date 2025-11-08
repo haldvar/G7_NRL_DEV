@@ -1,24 +1,32 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using NRL_PROJECT.Models;
 
 namespace NRL_PROJECT.Data
 {
-    public class NRL_Db_Context : DbContext
+    public class NRL_Db_Context : IdentityDbContext<User>
     {
-        public NRL_Db_Context(DbContextOptions<NRL_Db_Context> options) : base(options) { }
+        public NRL_Db_Context(DbContextOptions<NRL_Db_Context> options) : base(options) 
+        { 
+        }
         public DbSet<ObstacleData> Obstacles { get; set; }
         public DbSet<MapCoordinate> MapCoordinates { get; set; }
         public DbSet<ObstacleReportData> ObstacleReports { get; set; }
         public DbSet<AccessLevel> AccessLevels { get; set; }
         public DbSet<Organisation> Organisations { get; set; }
-        public DbSet<User> Users  { get; set; }
+        //DbSet<User> arves fra IdentityDbContext
+        // public DbSet<User> Users  { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<MapData> MapDatas { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
+            
             // ObstacleReportData-relasjoner
             modelBuilder.Entity<ObstacleReportData>()
                 .HasOne(r => r.Obstacle)
@@ -53,6 +61,31 @@ namespace NRL_PROJECT.Data
                 .WithMany(md => md.Coordinates)
                 .HasForeignKey(mc => mc.MapDataID)
                 .OnDelete(DeleteBehavior.Cascade);
+            
+            // Seed Identity roles
+            modelBuilder.Entity<IdentityRole>().HasData(
+                new IdentityRole
+                {
+                    Id = "adminRoleId",
+                    Name = "Admin",
+                    NormalizedName = "ADMIN",
+                    ConcurrencyStamp = "adminRodeId"
+                },
+                new IdentityRole
+                {
+                    Id = "pilotRoleId",
+                    Name = "Pilot",
+                    NormalizedName = "PILOT",
+                    ConcurrencyStamp = "pilotRoleId"
+                },
+                new IdentityRole
+                {
+                    Id = "registrarRoleId",
+                    Name = "Registrar",
+                    NormalizedName = "REGISTRAR",
+                    ConcurrencyStamp = "registrarRoleId"
+                }
+            );
         }
 
     }

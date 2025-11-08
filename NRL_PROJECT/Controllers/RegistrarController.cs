@@ -109,7 +109,7 @@ namespace NRL_PROJECT.Controllers
                 ReportStatus = MapToUi(report.ObstacleReportStatus),
 
                 // Bruker
-                UserId = report.User?.RoleID ?? 0,
+                UserId = report.UserID ?? "",  // Changed: UserID is now string
                 UserName = report.User != null
                     ? $"{(report.User.FirstName ?? "").Trim()} {(report.User.LastName ?? "").Trim()}".Trim()
                     : "Ukjent"
@@ -200,7 +200,7 @@ namespace NRL_PROJECT.Controllers
           StatusComment = r.ObstacleReportComment ?? "",
 
           // Bruker
-          UserId = r.UserID ?? 0,
+          UserId = r.UserID ?? "",  // Changed: UserID is now string
           UserName = r.User != null
               ? $"{(r.User.FirstName ?? "").Trim()} {(r.User.LastName ?? "").Trim()}".Trim()
               : "Ukjent"
