@@ -103,7 +103,7 @@ namespace NRL_PROJECT.Controllers
                 TimeOfSubmittedReport = report.ObstacleReportDate,
 
                 // Hindring
-                ObstacleID = report.Obstacle?.ObstacleId ?? 0,
+                ObstacleID = report.Obstacle?.ObstacleID ?? 0,
                 ObstacleType = report.Obstacle?.ObstacleType ?? "",
                 ObstacleComment = report.Obstacle?.ObstacleComment ?? "",
                 ObstacleHeight = report.Obstacle?.ObstacleHeight ?? 0,
@@ -184,7 +184,7 @@ namespace NRL_PROJECT.Controllers
           TimeOfSubmittedReport = r.ObstacleReportDate,
 
           // Relasjon kan være null
-          ObstacleID = r.Obstacle != null ? r.Obstacle.ObstacleId : 0,
+          ObstacleID = r.Obstacle != null ? r.Obstacle.ObstacleID : 0,
           ObstacleType = r.Obstacle != null ? (r.Obstacle.ObstacleType ?? "") : "",
           ObstacleComment = r.Obstacle != null ? (r.Obstacle.ObstacleComment ?? "") : "",
 

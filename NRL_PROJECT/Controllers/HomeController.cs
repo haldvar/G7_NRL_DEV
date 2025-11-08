@@ -51,7 +51,7 @@ namespace NRL_PROJECT.Controllers
             _context.Obstacles.Add(obstacle);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(ObstacleOverview), new { id = obstacle.ObstacleId });
+            return RedirectToAction(nameof(ObstacleOverview), new { id = obstacle.ObstacleID });
         }
 
         [HttpGet]
