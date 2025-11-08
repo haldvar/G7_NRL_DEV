@@ -40,7 +40,7 @@
             <div class="rounded-2xl border bg-white p-4 shadow-sm">
                 <form asp-controller="Registrar" asp-action="UpdateStatus" method="post" class="space-y-3">
                     @Html.AntiForgeryToken()
-                    <input type="hidden" name="id" value="@Model.ReportId" />
+                    <input type="hidden" name="id" value="@Model.ObstacleReportID" />
                     <textarea name="comment" rows="3"
                               class="w-full rounded-xl border px-3 py-2 text-sm"
                               placeholder="Kommentar (valgfritt)"></textarea>
@@ -75,7 +75,7 @@
                 <dl class="grid grid-cols-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
                     <div>
                         <dt class="font-semibold text-slate-700">Rapport ID</dt>
-                        <dd>@Model.ReportId</dd>
+                        <dd>@Model.ObstacleReportID</dd>
                     </div>
 
                     <div>

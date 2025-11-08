@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
@@ -116,7 +116,7 @@ namespace NRL_PROJECT.Migrations
                 name: "Obstacles",
                 columns: table => new
                 {
-                    ObstacleId = table.Column<int>(type: "int", nullable: false)
+                    ObstacleID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     ObstacleDescription = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -134,7 +134,7 @@ namespace NRL_PROJECT.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Obstacles", x => x.ObstacleId);
+                    table.PrimaryKey("PK_Obstacles", x => x.ObstacleID);
                     table.ForeignKey(
                         name: "FK_Obstacles_MapDatas_MapDataID",
                         column: x => x.MapDataID,
@@ -206,7 +206,7 @@ namespace NRL_PROJECT.Migrations
                         name: "FK_ObstacleReports_Obstacles_ObstacleID",
                         column: x => x.ObstacleID,
                         principalTable: "Obstacles",
-                        principalColumn: "ObstacleId");
+                        principalColumn: "ObstacleID");
                     table.ForeignKey(
                         name: "FK_ObstacleReports_Users_ReviewedByUserID",
                         column: x => x.ReviewedByUserID,
