@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
 
 var builder = WebApplication.CreateBuilder(args);
-
-
 
 // ------------------------------------------------------------
 // KONFIGURER TJENESTER (Dependency Injection)
@@ -19,22 +19,57 @@ builder.Services.AddControllersWithViews();
 // KOMMENTERES UT UNDER TESTING:
 
 
-
  builder.Services.AddDbContext<NRL_Db_Context>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
 
-
-
-
-
 // BRUK DENNE (in-memory database i stedet for MySQL) VED TESTING: 
 /*
  builder.Services.AddDbContext<NRL_Db_Context>(options =>
     options.UseInMemoryDatabase("TestDb"));
 */
+
+//-------------------------------------------------------------
+// IDENTITY OG AUTHENTICATION SETUP
+//-------------------------------------------------------------
+
+ builder.Services.AddIdentity<User, IdentityRole>(options =>
+     {
+         // Lockout settings
+         options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+         options.Lockout.MaxFailedAccessAttempts = 5;
+         options.Lockout.AllowedForNewUsers = false;
+         // Sign in settings
+         options.SignIn.RequireConfirmedPhoneNumber = false;
+         options.SignIn.RequireConfirmedEmail = false;
+         options.SignIn.RequireConfirmedAccount = false;
+         // User settings
+         options.User.RequireUniqueEmail = true;
+         // Password settings
+         options.Password.RequireDigit = true;
+         options.Password.RequireLowercase = true;
+         options.Password.RequireUppercase = true;
+         options.Password.RequireNonAlphanumeric = false;
+         options.Password.RequiredLength = 6;
+     })
+     .AddEntityFrameworkStores<NRL_Db_Context>() // EF
+     .AddDefaultTokenProviders();
+
+// Configure application cookie
+ builder.Services.ConfigureApplicationCookie(options =>
+ {
+     options.LoginPath = "/Account/Login";
+     options.LogoutPath = "/Account/Logout";
+     options.AccessDeniedPath = "/Account/AccessDenied";
+     options.ExpireTimeSpan = TimeSpan.FromHours(2);
+     options.SlidingExpiration = true;
+ });
+
+// Registrer e-posttjeneste (dummy for testing)
+
+ builder.Services.AddTransient<IEmailSender, AuthMessageSender>();
 
 
 // ------------------------------------------------------------
@@ -46,7 +81,7 @@ var app = builder.Build();
 // ------------------------------------------------------------
 // TESTDATA
 // ------------------------------------------------------------
-
+/*
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<NRL_Db_Context>();
@@ -166,7 +201,7 @@ using (var scope = app.Services.CreateScope())
     }
 
 }
-
+*/
 
 // ------------------------------------------------------------
 // KONFIGURER MIDDLEWARE (HTTP request pipeline)
@@ -190,6 +225,9 @@ app.UseStaticFiles();
 // Aktiver ruting (slik at /Home/Index m.m. fungerer)
 app.UseRouting();
 
+// Legger til Authentication
+app.UseAuthentication();
+
 // Aktiver eventuell autorisasjon (hvis prosjektet bruker det)
 app.UseAuthorization();
 
@@ -198,9 +236,8 @@ app.UseAuthorization();
 // ------------------------------------------------------------
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}"
+    pattern: "{controller=Account}/{action=Login}/{id?}"
 );
-
 
 // ------------------------------------------------------------
 // AUTOMATISK DATABASEMIGRERING VED OPPSTART
@@ -224,3 +261,17 @@ using (var scope = app.Services.CreateScope())
 
 app.Run();
 
+//-------------------------------------------------------------
+// EPOST TJENESTE IMPLEMENTASJON
+//-------------------------------------------------------------
+
+public class AuthMessageSender : IEmailSender
+{
+    public Task SendEmailAsync(string email, string subject, string htmlMessage)
+    {
+        Console.WriteLine(email);
+        Console.WriteLine(subject);
+        Console.WriteLine(htmlMessage);
+        return Task.CompletedTask;
+    }
+}

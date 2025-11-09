@@ -1,12 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 
 namespace NRL_PROJECT.Models
 {
-    public class User
+    public class User : IdentityUser
     {
         [Key]
-        public int? UserID { get; set; }
+        public string? UserID { get; set; }
 
         [Required, StringLength(100)]
         public string FirstName { get; set; }
