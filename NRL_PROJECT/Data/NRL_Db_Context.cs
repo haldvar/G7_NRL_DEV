@@ -1,10 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using NRL_PROJECT.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace NRL_PROJECT.Data
 {
-    public class NRL_Db_Context : DbContext
+    public class NRL_Db_Context : IdentityDbContext<User>
     {
         public NRL_Db_Context(DbContextOptions<NRL_Db_Context> options) : base(options) { }
         public DbSet<ObstacleData> Obstacles { get; set; }
@@ -19,6 +21,8 @@ namespace NRL_PROJECT.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+            
             // ObstacleReportData-relasjoner
             modelBuilder.Entity<ObstacleReportData>()
                 .HasOne(r => r.Obstacle)
@@ -47,7 +51,7 @@ namespace NRL_PROJECT.Data
                 .Property(r => r.RoleName)
                 .HasConversion<string>();
 
-            // ✅ MapData ↔ MapCoordinate
+            // MapData ↔ MapCoordinate
             modelBuilder.Entity<MapCoordinate>()
                 .HasOne(mc => mc.MapData)
                 .WithMany(md => md.Coordinates)
