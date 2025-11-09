@@ -12,8 +12,8 @@ using NRL_PROJECT.Data;
 namespace NRL_PROJECT.Migrations
 {
     [DbContext(typeof(NRL_Db_Context))]
-    [Migration("20251109135502_InitialCreate66")]
-    partial class InitialCreate66
+    [Migration("20251109185224_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

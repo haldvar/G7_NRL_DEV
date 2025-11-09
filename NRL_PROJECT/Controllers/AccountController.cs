@@ -45,7 +45,16 @@ namespace NRL_PROJECT.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
-                var user = new User { UserName = model.Email, Email = model.Email, EmailConfirmed = true, LockoutEnabled = false, LockoutEnd = null };
+                var user = new User
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    EmailConfirmed = true,
+                    LockoutEnabled = false,
+                    LockoutEnd = null,
+                    OrgID = model.OrgID,
+                    RoleID = model.RoleID
+                };
                 var result = await _userManager.CreateAsync(user, model.Password);
 
                 if (result.Succeeded)
@@ -113,7 +122,7 @@ namespace NRL_PROJECT.Controllers
         {
             await _signInManager.SignOutAsync();
             _logger.LogInformation(4, "Brukeren er logget ut.");
-            return RedirectToAction(nameof(HomeController.Index), "Home");
+            return RedirectToAction("Login","Account");
         }
         
         /*
@@ -217,13 +226,13 @@ namespace NRL_PROJECT.Controllers
         // GET /Account/ConfirmEmail
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> ConfirmEmail(string userId, string code)
+        public async Task<IActionResult> ConfirmEmail(string userID, string code)
         {
-            if (userId == null || code == null)
+            if (userID == null || code == null)
             {
                 return View("Error");
             }
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _userManager.FindByIdAsync(userID);
             if (user == null)
             {
                 return View("Error");
