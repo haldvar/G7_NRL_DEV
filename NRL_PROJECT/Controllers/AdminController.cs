@@ -56,6 +56,17 @@ namespace NRL_PROJECT.Controllers
             
             var userViewModels = new List<UserManagementViewModel>();
             
+            var adminCount = 0;
+            
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                if (roles.Contains("Admin")) adminCount++;
+            }
+
+            ViewBag.AdminCount = adminCount;
+
+            
             foreach (var user in users)
             {
                 var roles = await _userManager.GetRolesAsync(user);
@@ -72,15 +83,16 @@ namespace NRL_PROJECT.Controllers
                 });
             }
             
+            ViewBag.AdminCount = adminCount;
             return View(userViewModels);
         }
 
         // POST: /Admin/AssignRole
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AssignRole(string userID, string role)
+        public async Task<IActionResult> AssignRole(string UserID, string role)
         {
-            var user = await _userManager.FindByIdAsync(userID);
+            var user = await _userManager.FindByIdAsync(UserID);
             
             if (user == null)
             {
@@ -104,30 +116,76 @@ namespace NRL_PROJECT.Controllers
             return RedirectToAction("ManageUsers");
         }
 
-        // POST: /Admin/DeleteUser
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteUser(string userID)
+        public async Task<IActionResult> DeleteUser(string UserID)
         {
-            var user = await _userManager.FindByIdAsync(userID);
-            
+            var user = await _userManager.FindByIdAsync(UserID);
             if (user == null)
             {
-                return NotFound();
+                TempData["Error"] = "Bruker ikke funnet.";
+                return RedirectToAction("ManageUsers");
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+            if (roles.Contains("Admin"))
+            {
+                var allUsers = await _userManager.Users.ToListAsync();
+                int adminCount = 0;
+
+                foreach (var u in allUsers)
+                {
+                    var r = await _userManager.GetRolesAsync(u);
+                    if (r.Contains("Admin"))
+                        adminCount++;
+                }
+
+                if (adminCount <= 1)
+                {
+                    TempData["Error"] = "Du kan ikke slette den siste admin-brukeren.";
+                    return RedirectToAction("ManageUsers");
+                }
             }
 
             var result = await _userManager.DeleteAsync(user);
-            
+            TempData["Success"] = result.Succeeded ? $"Bruker {user.UserName} slettet." : "Kunne ikke slette bruker.";
+            return RedirectToAction("ManageUsers");
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateUser(RegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return RedirectToAction("ManageUsers");
+
+            var user = new User
+            {
+                UserName = model.Username,
+                Email = model.Email,
+                EmailConfirmed = true,
+                FirstName = model.FirstName,
+                LastName = model.LastName
+            };
+
+            var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
-                TempData["Success"] = $"Bruker {user.UserName} slettet";
+                if (!string.IsNullOrEmpty(model.RoleName) && model.RoleName != "No Role")
+                {
+                    await _userManager.AddToRoleAsync(user, model.RoleName);
+                }
+
+                TempData["Success"] = "User created successfully.";
             }
             else
             {
-                TempData["Error"] = "Kunne ikke slette bruker";
+                TempData["Error"] = string.Join(", ", result.Errors.Select(e => e.Description));
             }
 
             return RedirectToAction("ManageUsers");
         }
+
+
+
+        }
     }
-}

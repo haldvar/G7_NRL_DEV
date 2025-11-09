@@ -52,7 +52,8 @@ namespace NRL_PROJECT.Controllers
                     EmailConfirmed = true,
                     LockoutEnabled = false,
                     LockoutEnd = null,
-                    OrgID = model.OrgID,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
                     RoleID = model.RoleID
                 };
                 var result = await _userManager.CreateAsync(user, model.Password);

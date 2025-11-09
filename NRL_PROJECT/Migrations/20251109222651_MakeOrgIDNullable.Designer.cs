@@ -12,8 +12,8 @@ using NRL_PROJECT.Data;
 namespace NRL_PROJECT.Migrations
 {
     [DbContext(typeof(NRL_Db_Context))]
-    [Migration("20251109185224_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251109222651_MakeOrgIDNullable")]
+    partial class MakeOrgIDNullable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -354,7 +354,6 @@ namespace NRL_PROJECT.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
 
@@ -385,13 +384,11 @@ namespace NRL_PROJECT.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
 
-                    b.Property<int>("OrgID")
+                    b.Property<int?>("OrgID")
                         .HasColumnType("int");
 
                     b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("longtext");
@@ -399,7 +396,7 @@ namespace NRL_PROJECT.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int>("RoleID")
+                    b.Property<int?>("RoleID")
                         .HasColumnType("int");
 
                     b.Property<string>("SecurityStamp")
@@ -408,12 +405,12 @@ namespace NRL_PROJECT.Migrations
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("UserID")
-                        .HasColumnType("longtext");
-
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
+
+                    b.Property<int?>("UserRoleRoleID")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -426,7 +423,7 @@ namespace NRL_PROJECT.Migrations
 
                     b.HasIndex("OrgID");
 
-                    b.HasIndex("RoleID");
+                    b.HasIndex("UserRoleRoleID");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -560,19 +557,13 @@ namespace NRL_PROJECT.Migrations
                 {
                     b.HasOne("NRL_PROJECT.Models.Organisation", "Organisation")
                         .WithMany("Users")
-                        .HasForeignKey("OrgID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("OrgID");
 
-                    b.HasOne("NRL_PROJECT.Models.UserRole", "Role")
+                    b.HasOne("NRL_PROJECT.Models.UserRole", null)
                         .WithMany("Users")
-                        .HasForeignKey("RoleID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserRoleRoleID");
 
                     b.Navigation("Organisation");
-
-                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("NRL_PROJECT.Models.UserRole", b =>

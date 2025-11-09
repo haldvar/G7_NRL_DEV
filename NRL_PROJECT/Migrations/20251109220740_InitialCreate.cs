@@ -194,25 +194,24 @@ namespace NRL_PROJECT.Migrations
                 {
                     Id = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    UserID = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
                     FirstName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     LastName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Email = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    PasswordHash = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    OrgID = table.Column<int>(type: "int", nullable: false),
-                    RoleID = table.Column<int>(type: "int", nullable: false),
+                    OrgID = table.Column<int>(type: "int", nullable: true),
+                    RoleID = table.Column<int>(type: "int", nullable: true),
+                    UserRoleRoleID = table.Column<int>(type: "int", nullable: true),
                     UserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     NormalizedUserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    Email = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     NormalizedEmail = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     EmailConfirmed = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    PasswordHash = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     SecurityStamp = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ConcurrencyStamp = table.Column<string>(type: "longtext", nullable: true)
@@ -232,14 +231,12 @@ namespace NRL_PROJECT.Migrations
                         name: "FK_AspNetUsers_Organisations_OrgID",
                         column: x => x.OrgID,
                         principalTable: "Organisations",
-                        principalColumn: "OrgID",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "OrgID");
                     table.ForeignKey(
-                        name: "FK_AspNetUsers_UserRoles_RoleID",
-                        column: x => x.RoleID,
+                        name: "FK_AspNetUsers_UserRoles_UserRoleRoleID",
+                        column: x => x.UserRoleRoleID,
                         principalTable: "UserRoles",
-                        principalColumn: "RoleID",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "RoleID");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -427,9 +424,9 @@ namespace NRL_PROJECT.Migrations
                 column: "OrgID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUsers_RoleID",
+                name: "IX_AspNetUsers_UserRoleRoleID",
                 table: "AspNetUsers",
-                column: "RoleID");
+                column: "UserRoleRoleID");
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",

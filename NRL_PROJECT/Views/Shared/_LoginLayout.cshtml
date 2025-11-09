@@ -30,8 +30,21 @@
 
             <!-- Right side: Statusbar -->
             <div class="hidden md:flex items-center space-x-6 text-sm font-medium">
-                <span class="text-gray-600">👤 <strong>Du er ikke logget inn</strong></span>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <span class="text-gray-600">👤 <strong>@User.Identity.Name</strong></span>
+                    <form asp-action="Logout" asp-controller="Account" method="post" class="inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="text-red-600 hover:text-red-800 transition">Logg ut</button>
+                    </form>
+                }
+                else
+                {
+                    <span class="text-gray-600">👤 <strong>Du er ikke logget inn</strong></span>
+                    <a asp-controller="Account" asp-action="Login" class="text-blue-600 hover:text-blue-800 transition">Logg inn</a>
+                }
             </div>
+
 
             <!-- Mobile menu button -->
             <button id="menu-btn" class="md:hidden p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -44,15 +57,29 @@
 
         <!-- Mobile dropdown -->
         <div id="mobile-menu" class="hidden md:hidden bg-white border-t shadow-sm">
-            <div class="px-6 py-4 space-y-2">
-                <a class="block text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="About">Om oss</a>
+        <div class="px-6 py-4 space-y-2">
+            <a class="block text-gray-700 hover:text-blue-600 transition" asp-area="" asp-controller="Home" asp-action="About">Om oss</a>
 
-                <!-- Statusbar in mobile menu -->
-                <div class="pt-4 border-t">
+            <!-- Statusbar in mobile menu -->
+            <!-- Statusbar in mobile menu -->
+            <div class="pt-4 border-t">
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <span class="block text-gray-600 mb-2">👤 <strong>@User.Identity.Name</strong></span>
+                    <form asp-action="Logout" asp-controller="Account" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="text-red-600 hover:text-red-800 transition">Logg ut</button>
+                    </form>
+                }
+                else
+                {
                     <span class="block text-gray-600 mb-2">👤 <strong>Du er ikke logget inn</strong></span>
-                </div>
+                    <a asp-controller="Account" asp-action="Login" class="text-blue-600 hover:text-blue-800 transition">Logg inn</a>
+                }
             </div>
         </div>
+        </div>
+
        
 
       </header>
