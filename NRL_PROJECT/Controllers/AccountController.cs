@@ -226,13 +226,13 @@ namespace NRL_PROJECT.Controllers
         // GET /Account/ConfirmEmail
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> ConfirmEmail(string userID, string code)
+        public async Task<IActionResult> ConfirmEmail(string UserID, string code)
         {
-            if (userID == null || code == null)
+            if (UserID == null || code == null)
             {
                 return View("Error");
             }
-            var user = await _userManager.FindByIdAsync(userID);
+            var user = await _userManager.FindByIdAsync(UserID);
             if (user == null)
             {
                 return View("Error");
