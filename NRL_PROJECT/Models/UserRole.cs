@@ -9,7 +9,7 @@ namespace NRL_PROJECT.Models
             [Key]
             public int RoleID { get; set; }
 
-            [Required, StringLength(100)]
+            [StringLength(100)]
             public UserRoleType RoleName { get; set; }
 
             [ForeignKey("AccessLevel")]
