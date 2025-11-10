@@ -1,4 +1,6 @@
-﻿using System.Security.Claims;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -47,25 +49,40 @@ namespace NRL_PROJECT.Controllers
             {
                 var user = new User
                 {
-                    UserName = model.Email,
+                    UserName = model.Username,
                     Email = model.Email,
                     EmailConfirmed = true,
                     LockoutEnabled = false,
                     LockoutEnd = null,
                     FirstName = model.FirstName,
                     LastName = model.LastName,
-                    RoleID = model.RoleID
                 };
                 var result = await _userManager.CreateAsync(user, model.Password);
 
                 if (result.Succeeded)
                 {
                     await _signInManager.SignInAsync(user, isPersistent: false);
-                    _logger.LogInformation(1,"Brukeren din har blitt opprettet! Vent på godkjennelse fra admin.");
+                    _logger.LogInformation(1, "Brukeren din har blitt opprettet!");
                     return RedirectToLocal(returnUrl);
                 }
 
-                AddErrors(result);
+                // LOG THE ERRORS TO SEE WHAT'S WRONG
+                foreach (var error in result.Errors)
+                {
+                    _logger.LogError($"Registration error: {error.Code} - {error.Description}");
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+            else
+            {
+                // LOG MODELSTATE ERRORS
+                foreach (var modelState in ModelState.Values)
+                {
+                    foreach (var error in modelState.Errors)
+                    {
+                        _logger.LogError($"ModelState error: {error.ErrorMessage}");
+                    }
+                }
             }
             return View(model);
         }

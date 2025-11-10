@@ -126,9 +126,9 @@ using (var scope = app.Services.CreateScope())
         // 3. Create default admin user - HARDCODED FOR EXAM
         var userManager = services.GetRequiredService<UserManager<User>>();
         
-        string adminEmail = "admin@nrl.no";
-        string adminPassword = "Admin@123";
-
+        string adminEmail = builder.Configuration["AdminUser:Email"];
+        string adminPassword = builder.Configuration["AdminUser:Password"];
+        
         if (await userManager.FindByEmailAsync(adminEmail) == null)
         {
             var adminUser = new User 

@@ -12,8 +12,8 @@ using NRL_PROJECT.Data;
 namespace NRL_PROJECT.Migrations
 {
     [DbContext(typeof(NRL_Db_Context))]
-    [Migration("20251109222651_MakeOrgIDNullable")]
-    partial class MakeOrgIDNullable
+    [Migration("20251110005441_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

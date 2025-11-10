@@ -30,16 +30,13 @@ namespace NRL_PROJECT.Models.ViewModels
         [Required]
         [Display(Name = "Etternavn")]
         public string LastName { get; set; }
-
-        [Required]
+        
         [Display(Name = "Organisasjons ID")]
         public int OrgID { get; set; }
-
-        [Required]
+        
         [Display(Name = "Rolle ID")]
         public int RoleID { get; set; }
         
-        [Required]
         [Display(Name = "Rolle")]
         public string RoleName { get; set; }
 
