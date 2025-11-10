@@ -32,13 +32,13 @@ namespace NRL_PROJECT.Models.ViewModels
         public string LastName { get; set; }
         
         [Display(Name = "Organisasjons ID")]
-        public int OrgID { get; set; }
+        public int? OrgID { get; set; }
         
         [Display(Name = "Rolle ID")]
-        public int RoleID { get; set; }
+        public int? RoleID { get; set; }
         
         [Display(Name = "Rolle")]
-        public string RoleName { get; set; }
+        public string? RoleName { get; set; }
 
     }
 
