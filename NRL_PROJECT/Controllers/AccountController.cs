@@ -63,7 +63,7 @@ namespace NRL_PROJECT.Controllers
                 {
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     _logger.LogInformation(1, "Brukeren din har blitt opprettet!");
-                    return RedirectToLocal(returnUrl);
+                    return await RedirectToLocal(returnUrl);
                 }
 
                 // LOG THE ERRORS TO SEE WHAT'S WRONG
@@ -96,22 +96,38 @@ namespace NRL_PROJECT.Controllers
             return View();
         }
 
-        // POST /Account/Login
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
-            
+
             if (ModelState.IsValid)
             {
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null)
+                {
+                    ModelState.AddModelError(string.Empty, "Ugyldig login.");
+                    return View(model);
+                }
+
+                if (!await _userManager.IsEmailConfirmedAsync(user))
+                {
+                    ModelState.AddModelError(string.Empty, "Du må bekrefte e-posten før du kan logge inn.");
+                    return View(model);
+                }
+
+                var result = await _signInManager.PasswordSignInAsync(
+                    user.UserName, // ← Use username internally
+                    model.Password,
+                    model.RememberMe,
+                    lockoutOnFailure: false);
 
                 if (result.Succeeded)
                 {
                     _logger.LogInformation(2, "Brukeren er logget inn.");
-                    return RedirectToLocal(returnUrl);
+                    return await RedirectToLocal(returnUrl);
                 }
 
                 if (result.RequiresTwoFactor)
@@ -124,14 +140,13 @@ namespace NRL_PROJECT.Controllers
                     _logger.LogWarning(3, "Brukeren er låst, prøv igjen senere.");
                     return View("Lockout");
                 }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Ugyldig login.");
-                    return View(model);
-                }
+
+                ModelState.AddModelError(string.Empty, "Ugyldig login.");
             }
+
             return View(model);
         }
+
         
         //POST /Account/Logout
         [HttpPost]
@@ -179,7 +194,7 @@ namespace NRL_PROJECT.Controllers
                 await _signInManager.UpdateExternalAuthenticationTokensAsync(info);
                 
                 _logger.LogInformation(5, "User logged in with {Name} provider.", info.LoginProvider);
-                return RedirectToLocal(returnUrl);
+                return await RedirectToLocal(returnUrl);
             }
 
             if (result.RequiresTwoFactor)
@@ -230,7 +245,7 @@ namespace NRL_PROJECT.Controllers
                         // Update any authentication tokens as well
                         await _signInManager.UpdateExternalAuthenticationTokensAsync(info);
                         
-                        return RedirectToLocal(returnUrl);
+                        return await RedirectToLocal(returnUrl);
                     }
                 }
                 AddErrors(result);
@@ -420,7 +435,7 @@ namespace NRL_PROJECT.Controllers
             var result = await _signInManager.TwoFactorSignInAsync(model.Provider, model.Code, model.RememberMe, model.RememberBrowser);
             if (result.Succeeded)
             {
-                return RedirectToLocal(model.ReturnUrl);
+                return await RedirectToLocal(model.ReturnUrl);
             }
             if (result.IsLockedOut)
             {
@@ -466,7 +481,7 @@ namespace NRL_PROJECT.Controllers
             var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(model.Code, model.RememberMe, model.RememberBrowser);
             if (result.Succeeded)
             {
-                return RedirectToLocal(model.ReturnUrl);
+                return await RedirectToLocal(model.ReturnUrl);
             }
             if (result.IsLockedOut)
             {
@@ -509,7 +524,7 @@ namespace NRL_PROJECT.Controllers
             var result = await _signInManager.TwoFactorRecoveryCodeSignInAsync(model.Code);
             if (result.Succeeded)
             {
-                return RedirectToLocal(model.ReturnUrl);
+                return await RedirectToLocal(model.ReturnUrl);
             }
             else
             {
@@ -532,7 +547,7 @@ namespace NRL_PROJECT.Controllers
             return _userManager.GetUserAsync(HttpContext.User);
         }
 
-        private IActionResult RedirectToLocal(string returnUrl)
+        private async Task<IActionResult> RedirectToLocal(string returnUrl)
         {
             if (Url.IsLocalUrl(returnUrl))
             {
@@ -540,6 +555,26 @@ namespace NRL_PROJECT.Controllers
             }
             else
             {
+                // Check user role and redirect accordingly
+                var user = await _userManager.GetUserAsync(HttpContext.User);
+                if (user != null)
+                {
+                    var roles = await _userManager.GetRolesAsync(user);
+
+                    if (roles.Contains("Admin"))
+                    {
+                        return RedirectToAction("ManageUsers", "Admin");
+                        
+                    }
+                    else if (roles.Contains("Registrar"))
+                    {
+                        return RedirectToAction("RegistrarView", "Registrar");
+                    }
+                    else if (roles.Contains("Pilot"))
+                    {
+                        return RedirectToAction("Index", "Home");
+                    }
+                }
                 return RedirectToAction(nameof(HomeController.Index), "Home");
             }
         }

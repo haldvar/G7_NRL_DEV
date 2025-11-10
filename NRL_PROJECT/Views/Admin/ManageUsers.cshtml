@@ -4,7 +4,8 @@
     var adminCount = ViewBag.AdminCount;
 }
 <div class="container mt-4">
-    <h2>Manage Users</h2>
+    <h2 class="mb-4">Manage Users</h2>
+    
     @if (TempData["Success"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -96,4 +97,86 @@
             }
         </tbody>
     </table>
+
+    <!-- Create New User Button -->
+    <div class="mb-4">
+        <button type="button" class="btn btn-primary" onclick="toggleCreateUserForm()">
+            <i class="bi bi-plus-circle"></i> Create New User
+        </button>
+    </div>
+
+    <!-- Create User Form (Hidden by default) -->
+    <div id="createUserForm" class="card mb-4" style="display: none;">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Create New User</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="CreateUser" method="post">
+                @Html.AntiForgeryToken()
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="Username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="Username" name="Username" required />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="Email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="Email" name="Email" required />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="FirstName" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="FirstName" name="FirstName" required />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="LastName" class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="LastName" name="LastName" required />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="Password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="Password" name="Password" required />
+                        <small class="form-text text-muted">
+                            At least 8 characters with uppercase, lowercase, digit, and special character.
+                        </small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="ConfirmPassword" class="form-label">Confirm Password</label>
+                        <input type="password" class="form-control" id="ConfirmPassword" name="ConfirmPassword" required />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="RoleName" class="form-label">Role</label>
+                        <select class="form-select" id="RoleName" name="RoleName" required>
+                            <option value="">-- Select Role --</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Pilot">Pilot</option>
+                            <option value="Registrar">Registrar</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success">Create User</button>
+                    <button type="button" class="btn btn-secondary" onclick="toggleCreateUserForm()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        function toggleCreateUserForm() {
+            var form = document.getElementById('createUserForm');
+            if (form.style.display === 'none' || form.style.display === '') {
+                form.style.display = 'block';
+                // Scroll to the form
+                form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                form.style.display = 'none';
+            }
+        }
+    </script>
+}
