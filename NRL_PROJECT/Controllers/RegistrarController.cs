@@ -6,10 +6,12 @@ using BackendStatus = NRL_PROJECT.Models.ObstacleReportData.EnumTypes;
 using UiStatus = NRL_PROJECT.Models.EnumStatus;
 using System.Linq;
 using System.Net.NetworkInformation;
+using Microsoft.AspNetCore.Authorization;
 using EnumStatus = NRL_PROJECT.Models.ObstacleReportData.EnumTypes;
 
 namespace NRL_PROJECT.Controllers
     {
+        [Authorize(Roles = "Admin,Registrar")]
         public class RegistrarController : Controller
         {
             private readonly NRL_Db_Context _context;
@@ -109,7 +111,7 @@ namespace NRL_PROJECT.Controllers
                 ReportStatus = MapToUi(report.ObstacleReportStatus),
 
                 // Bruker
-                UserID = report.User?.UserID ?? "",
+                UserID = report.User?.Id ?? "",
                 UserName = report.User != null
                     ? $"{(report.User.FirstName ?? "").Trim()} {(report.User.LastName ?? "").Trim()}".Trim()
                     : "Ukjent"

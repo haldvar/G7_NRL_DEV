@@ -1,4 +1,6 @@
-﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -45,17 +47,42 @@ namespace NRL_PROJECT.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
-                var user = new User { UserName = model.Email, Email = model.Email, EmailConfirmed = true, LockoutEnabled = false, LockoutEnd = null };
+                var user = new User
+                {
+                    UserName = model.Username,
+                    Email = model.Email,
+                    EmailConfirmed = true,
+                    LockoutEnabled = false,
+                    LockoutEnd = null,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                };
                 var result = await _userManager.CreateAsync(user, model.Password);
 
                 if (result.Succeeded)
                 {
                     await _signInManager.SignInAsync(user, isPersistent: false);
-                    _logger.LogInformation(1,"Brukeren din har blitt opprettet! Vent på godkjennelse fra admin.");
-                    return RedirectToLocal(returnUrl);
+                    _logger.LogInformation(1, "Brukeren din har blitt opprettet!");
+                    return RedirectToAction("Login", "Account");
                 }
 
-                AddErrors(result);
+                // LOG THE ERRORS TO SEE WHAT'S WRONG
+                foreach (var error in result.Errors)
+                {
+                    _logger.LogError($"Registration error: {error.Code} - {error.Description}");
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+            else
+            {
+                // LOG MODELSTATE ERRORS
+                foreach (var modelState in ModelState.Values)
+                {
+                    foreach (var error in modelState.Errors)
+                    {
+                        _logger.LogError($"ModelState error: {error.ErrorMessage}");
+                    }
+                }
             }
             return View(model);
         }
@@ -69,22 +96,38 @@ namespace NRL_PROJECT.Controllers
             return View();
         }
 
-        // POST /Account/Login
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
-            
+
             if (ModelState.IsValid)
             {
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null)
+                {
+                    ModelState.AddModelError(string.Empty, "Ugyldig login.");
+                    return View(model);
+                }
+
+                if (!await _userManager.IsEmailConfirmedAsync(user))
+                {
+                    ModelState.AddModelError(string.Empty, "Du må bekrefte e-posten før du kan logge inn.");
+                    return View(model);
+                }
+
+                var result = await _signInManager.PasswordSignInAsync(
+                    user.UserName, // ← Use username internally
+                    model.Password,
+                    model.RememberMe,
+                    lockoutOnFailure: false);
 
                 if (result.Succeeded)
                 {
                     _logger.LogInformation(2, "Brukeren er logget inn.");
-                    return RedirectToLocal(returnUrl);
+                    return await RedirectToLocal(returnUrl);
                 }
 
                 if (result.RequiresTwoFactor)
@@ -97,14 +140,13 @@ namespace NRL_PROJECT.Controllers
                     _logger.LogWarning(3, "Brukeren er låst, prøv igjen senere.");
                     return View("Lockout");
                 }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Ugyldig login.");
-                    return View(model);
-                }
+
+                ModelState.AddModelError(string.Empty, "Ugyldig login.");
             }
+
             return View(model);
         }
+
         
         //POST /Account/Logout
         [HttpPost]
@@ -113,7 +155,7 @@ namespace NRL_PROJECT.Controllers
         {
             await _signInManager.SignOutAsync();
             _logger.LogInformation(4, "Brukeren er logget ut.");
-            return RedirectToAction(nameof(HomeController.Index), "Home");
+            return RedirectToAction("Login","Account");
         }
         
         /*
@@ -152,7 +194,7 @@ namespace NRL_PROJECT.Controllers
                 await _signInManager.UpdateExternalAuthenticationTokensAsync(info);
                 
                 _logger.LogInformation(5, "User logged in with {Name} provider.", info.LoginProvider);
-                return RedirectToLocal(returnUrl);
+                return await RedirectToLocal(returnUrl);
             }
 
             if (result.RequiresTwoFactor)
@@ -203,7 +245,7 @@ namespace NRL_PROJECT.Controllers
                         // Update any authentication tokens as well
                         await _signInManager.UpdateExternalAuthenticationTokensAsync(info);
                         
-                        return RedirectToLocal(returnUrl);
+                        return await RedirectToLocal(returnUrl);
                     }
                 }
                 AddErrors(result);
@@ -217,13 +259,13 @@ namespace NRL_PROJECT.Controllers
         // GET /Account/ConfirmEmail
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> ConfirmEmail(string userId, string code)
+        public async Task<IActionResult> ConfirmEmail(string UserID, string code)
         {
-            if (userId == null || code == null)
+            if (UserID == null || code == null)
             {
                 return View("Error");
             }
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _userManager.FindByIdAsync(UserID);
             if (user == null)
             {
                 return View("Error");
@@ -393,7 +435,7 @@ namespace NRL_PROJECT.Controllers
             var result = await _signInManager.TwoFactorSignInAsync(model.Provider, model.Code, model.RememberMe, model.RememberBrowser);
             if (result.Succeeded)
             {
-                return RedirectToLocal(model.ReturnUrl);
+                return await RedirectToLocal(model.ReturnUrl);
             }
             if (result.IsLockedOut)
             {
@@ -439,7 +481,7 @@ namespace NRL_PROJECT.Controllers
             var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(model.Code, model.RememberMe, model.RememberBrowser);
             if (result.Succeeded)
             {
-                return RedirectToLocal(model.ReturnUrl);
+                return await RedirectToLocal(model.ReturnUrl);
             }
             if (result.IsLockedOut)
             {
@@ -482,7 +524,7 @@ namespace NRL_PROJECT.Controllers
             var result = await _signInManager.TwoFactorRecoveryCodeSignInAsync(model.Code);
             if (result.Succeeded)
             {
-                return RedirectToLocal(model.ReturnUrl);
+                return await RedirectToLocal(model.ReturnUrl);
             }
             else
             {
@@ -505,7 +547,7 @@ namespace NRL_PROJECT.Controllers
             return _userManager.GetUserAsync(HttpContext.User);
         }
 
-        private IActionResult RedirectToLocal(string returnUrl)
+        private async Task<IActionResult> RedirectToLocal(string returnUrl)
         {
             if (Url.IsLocalUrl(returnUrl))
             {
@@ -513,6 +555,26 @@ namespace NRL_PROJECT.Controllers
             }
             else
             {
+                // Check user role and redirect accordingly
+                var user = await _userManager.GetUserAsync(HttpContext.User);
+                if (user != null)
+                {
+                    var roles = await _userManager.GetRolesAsync(user);
+
+                    if (roles.Contains("Admin"))
+                    {
+                        return RedirectToAction("ManageUsers", "Admin");
+                        
+                    }
+                    else if (roles.Contains("Registrar"))
+                    {
+                        return RedirectToAction("RegistrarView", "Registrar");
+                    }
+                    else if (roles.Contains("Pilot"))
+                    {
+                        return RedirectToAction("Index", "Home");
+                    }
+                }
                 return RedirectToAction(nameof(HomeController.Index), "Home");
             }
         }
