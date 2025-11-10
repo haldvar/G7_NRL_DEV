@@ -63,7 +63,7 @@ namespace NRL_PROJECT.Controllers
                 {
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     _logger.LogInformation(1, "Brukeren din har blitt opprettet!");
-                    return await RedirectToLocal(returnUrl);
+                    return RedirectToAction("Login", "Account");
                 }
 
                 // LOG THE ERRORS TO SEE WHAT'S WRONG
