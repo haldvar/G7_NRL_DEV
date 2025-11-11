@@ -1,6 +1,6 @@
 @model List<NRL_PROJECT.Models.ObstacleReportData>
 
-<h1 class="text-3xl font-bold text-blue-700 mb-6 text-center">📋 Obstacle Report Overview (fil: ReportListOverview)</h1>
+<h1 class="text-3xl font-bold text-blue-700 mb-6 text-center">📋 Rapportoversikt (fil: ReportListOverview)</h1>
 
 <table class="table-auto w-full border border-gray-300 rounded-lg shadow-md">
     <thead class="bg-gray-100 text-left">
@@ -34,7 +34,7 @@
 
 
 
-<h1 class="text-3xl font-bold text-blue-700 mb-6 text-center">📋 Obstacle Overview (fil: ReportListOverview)</h1>
+<h1 class="text-3xl font-bold text-blue-700 mb-6 text-center">📋 Innrapporterte hindre (fil: ReportListOverview)</h1>
 
 <table class="table-auto w-full border border-gray-300 rounded-lg shadow-md">
     <thead class="bg-gray-100 text-left">
@@ -42,8 +42,8 @@
             <th class="px-4 py-2">ObstacleID</th>
             <th class="px-4 py-2">UserName</th>
             <th class="px-4 py-2">ObstacleType</th>
-            <th class="px-4 py-2">ObstacleHeight</th>
-            <th class="px-4 py-2">ObstacleWidth</th>
+            
+           
             <th class="px-4 py-2">ObstacleComment</th>
             <th class="px-4 py-2">ObstacleReportDate</th>
             <th class="px-4 py-2">Coordinates</th>
@@ -57,8 +57,8 @@
                 <td class="px-4 py-2">@report.ObstacleID</td>
                 <td class="px-4 py-2">@report.UserName</td>
                 <td class="px-4 py-2">@report.Obstacle?.ObstacleType</td>
-                <td class="px-4 py-2">@report.Obstacle?.ObstacleHeight</td>
-                <td class="px-4 py-2">@report.Obstacle?.ObstacleWidth</td>
+                
+                
                 <td class="px-4 py-2">@report.Obstacle?.ObstacleComment</td>
                 <td class="px-4 py-2">@report.ObstacleReportDate.ToString("yyyy-MM-dd HH:mm")</td>
                 <td class="px-4 py-2">@report.MapData?.Coordinates</td>

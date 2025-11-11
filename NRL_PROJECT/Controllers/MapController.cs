@@ -249,21 +249,33 @@ namespace NRL_PROJECT.Controllers
         }
 
         // GET: /Map/MapView
-        [HttpGet]
-        public IActionResult MapView()
+        public async Task<IActionResult> MapView(int? id)
         {
-            var defaultMapData = new MapData
+            // Load the MapData to use as base model (if id provided), otherwise create empty
+            MapData model;
+            if (id.HasValue)
             {
-                GeometryType = "Point",
-                MapZoomLevel = 12,
-                Coordinates = new List<MapCoordinate>
-                {
-                    new MapCoordinate { Latitude = 60.3913, Longitude = 5.3221, OrderIndex = 0 }
-                }
-            };
+                model = await _context.MapDatas
+                    .Include(m => m.Coordinates)
+                    .FirstOrDefaultAsync(m => m.MapDataID == id.Value) ?? new MapData();
+            }
+            else
+            {
+                model = new MapData();
+            }
 
-            return View(defaultMapData);
+            // Populate ObstacleReports (load reports that have MapData with geometry)
+            var reportsWithGeometry = await _context.ObstacleReports
+                .Include(r => r.MapData)
+                .Where(r => r.MapData != null && !string.IsNullOrWhiteSpace(r.MapData.GeoJsonCoordinates))
+                .ToListAsync();
+
+            // Attach for the view (so Model.ObstacleReports is available to the Razor)
+            model.ObstacleReports = reportsWithGeometry;
+
+            return View(model);
         }
+
 
         // POST: /Map/Submit
         [HttpPost]
