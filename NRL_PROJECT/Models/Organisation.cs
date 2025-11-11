@@ -8,7 +8,7 @@ namespace NRL_PROJECT.Models
         [Key]
         public int OrgID { get; set; }
 
-        [Required, StringLength(100)]
+        [StringLength(100)]
         public string OrgName { get; set; }
 
         [StringLength(100)]

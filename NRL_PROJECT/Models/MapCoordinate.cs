@@ -8,7 +8,7 @@ namespace NRL_PROJECT.Models
         public int CoordinateId { get; set; }
 
         public int MapDataID { get; set; }
-        public MapData MapData { get; set; }
+        public MapData? MapData { get; set; }
 
         public double Latitude { get; set; }
         public double Longitude { get; set; }
