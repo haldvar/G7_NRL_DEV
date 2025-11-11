@@ -6,7 +6,7 @@ namespace NRL_PROJECT.Models
     public class ObstacleReportViewModel
     {
         //innsender
-        public string? UserID { get; set; }
+        // public string? UserID { get; set; }
         public string? UserName { get; set; }
 
         public int ObstacleReportID { get; set; }                 // ID til rapporten

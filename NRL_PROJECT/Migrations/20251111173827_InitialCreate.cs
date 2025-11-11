@@ -349,7 +349,9 @@ namespace NRL_PROJECT.Migrations
                     ObstacleReportID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     ObstacleID = table.Column<int>(type: "int", nullable: true),
-                    UserID = table.Column<string>(type: "varchar(255)", nullable: true)
+                    UserId = table.Column<string>(type: "varchar(255)", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    UserName = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ObstacleReportComment = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -369,8 +371,8 @@ namespace NRL_PROJECT.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_ObstacleReports_AspNetUsers_UserID",
-                        column: x => x.UserID,
+                        name: "FK_ObstacleReports_AspNetUsers_UserId",
+                        column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -455,9 +457,9 @@ namespace NRL_PROJECT.Migrations
                 column: "ReviewedByUserID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ObstacleReports_UserID",
+                name: "IX_ObstacleReports_UserId",
                 table: "ObstacleReports",
-                column: "UserID");
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Obstacles_MapDataID",

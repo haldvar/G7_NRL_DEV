@@ -299,8 +299,12 @@ namespace NRL_PROJECT.Migrations
                     b.Property<string>("ReviewedByUserID")
                         .HasColumnType("varchar(255)");
 
-                    b.Property<string>("UserID")
+                    b.Property<string>("UserId")
                         .HasColumnType("varchar(255)");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.HasKey("ObstacleReportID");
 
@@ -310,7 +314,7 @@ namespace NRL_PROJECT.Migrations
 
                     b.HasIndex("ReviewedByUserID");
 
-                    b.HasIndex("UserID");
+                    b.HasIndex("UserId");
 
                     b.ToTable("ObstacleReports");
                 });
@@ -538,7 +542,7 @@ namespace NRL_PROJECT.Migrations
 
                     b.HasOne("NRL_PROJECT.Models.User", "User")
                         .WithMany("ObstacleReportsSubmitted")
-                        .HasForeignKey("UserID")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("MapData");

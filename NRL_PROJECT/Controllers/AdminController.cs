@@ -160,7 +160,7 @@ namespace NRL_PROJECT.Controllers
 
             var user = new User
             {
-                UserName = model.Username,
+                UserName = string.IsNullOrWhiteSpace(model.UserName) ? model.Email : model.UserName,
                 Email = model.Email,
                 EmailConfirmed = true,
                 FirstName = model.FirstName,

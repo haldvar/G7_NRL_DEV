@@ -18,8 +18,10 @@ namespace NRL_PROJECT.Models
 
         //  Brukeren som opprettet rapporten
         [ForeignKey(nameof(User))]
-        public string? UserID { get; set; }
+        public string? UserId { get; set; }
         public User? User { get; set; }
+
+        public string UserName { get; set; }
 
         [Required]
         public string ObstacleReportComment { get; set; } = string.Empty;

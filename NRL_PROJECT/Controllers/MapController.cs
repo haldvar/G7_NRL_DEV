@@ -1,9 +1,10 @@
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
 using System.Text.Json;
-using Microsoft.AspNetCore.Hosting;
 
 namespace NRL_PROJECT.Controllers
 {
@@ -11,11 +12,13 @@ namespace NRL_PROJECT.Controllers
     {
         private readonly NRL_Db_Context _context;
         private readonly IWebHostEnvironment _environment;
+        private readonly UserManager<User> _userManager;
 
-        public MapController(NRL_Db_Context context, IWebHostEnvironment environment)
+        public MapController(NRL_Db_Context context, IWebHostEnvironment environment, UserManager<User> userManager)
         {
             _context = context;
             _environment = environment;
+            _userManager = userManager;
         }
 
         // GET: /Map/ObstacleAndMapForm
@@ -31,19 +34,15 @@ namespace NRL_PROJECT.Controllers
                 }
             };
 
-            return View(new ObstacleData());
+            return View(model);
         }
 
         // POST: /Map/SubmitObstacleWithLocation
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SubmitObstacleWithLocation(ObstacleData model, ObstacleReportData model2)
+        public async Task<IActionResult> SubmitObstacleWithLocation(ObstacleData model)
         {
-            if (model.MapData == null)
-            { 
-                model.MapData = new MapData();
-                return View("ObstacleAndMapForm", model);
-            }
+            // Sikre at MapData alltid finnes
             model.MapData ??= new MapData();
 
             if (string.IsNullOrWhiteSpace(model.MapData.GeoJsonCoordinates))
@@ -93,8 +92,8 @@ namespace NRL_PROJECT.Controllers
             // ✅ Lagre MapData
             _context.MapDatas.Add(model.MapData);
             await _context.SaveChangesAsync();
-            
-            //  Håndter bildeopplasting
+
+            // Håndter bildeopplasting
             string? imagePath = null;
             if (model.ImageFile != null && model.ImageFile.Length > 0)
             {
@@ -113,44 +112,31 @@ namespace NRL_PROJECT.Controllers
                 imagePath = "/uploads/" + uniqueFileName;
             }
 
-            
-
-            // ✅ Lagre Obstacle
-            var obstacle = new ObstacleData
-            {
-                ObstacleType = model.ObstacleType,
-                ObstacleHeight = model.ObstacleHeight,
-                ObstacleWidth = model.ObstacleWidth,
-                ObstacleComment = model.ObstacleComment,
-                ObstacleImageURL = imagePath,                 // ✅ ASSIGN THE URL
-                MapData = model.MapData
-            };
-            if (obstacle.ObstacleComment == null)
-            {
-                obstacle.ObstacleComment = "Empty";
-            }
-            _context.Obstacles.Add(obstacle);
+            // ✅ Oppdater obstacle direkte (ingen duplisering)
+            model.ObstacleImageURL = imagePath;
+            _context.Obstacles.Add(model);
             await _context.SaveChangesAsync();
 
-            
-
-            //  Opprett rapport-oppføring
+            // Hent innlogget bruker
+            var currentUserId = _userManager.GetUserId(User);
+            var currentUser = await _userManager.GetUserAsync(User);
+            // Opprett rapport
             var report = new ObstacleReportData
             {
-                ObstacleID = obstacle.ObstacleID,
-                UserID = null, // ingen bruker koblet enda
-                ReviewedByUserID = null,
+                ObstacleID = model.ObstacleID,
+                UserId = string.IsNullOrWhiteSpace(currentUserId) ? null : currentUserId,
+                UserName = currentUser?.UserName ?? currentUser?.Email ?? "Anonymous",
                 ObstacleReportComment = "Her skal Registerfører kunne skrive inn kommentar.",
                 ObstacleReportDate = DateTime.UtcNow,
                 ObstacleReportStatus = ObstacleReportData.EnumTypes.New,
-                MapDataID = obstacle.MapData.MapDataID,
+                MapDataID = model.MapData?.MapDataID
             };
-
             _context.ObstacleReports.Add(report);
             await _context.SaveChangesAsync();
 
             return View("MapConfirmation", model.MapData);
         }
+
 
 
         // GET: /Map/ReportListOverview
@@ -194,7 +180,7 @@ namespace NRL_PROJECT.Controllers
                 ObstacleReportDate = DateTime.UtcNow,
                 ObstacleReportStatus = ObstacleReportData.EnumTypes.New,
                 MapDataID = mapData.MapDataID,
-                UserID = null,
+                UserId = null,
                 ReviewedByUserID = null,
             };
 
