@@ -129,7 +129,8 @@ namespace NRL_PROJECT.Controllers
                 ObstacleReportComment = "Her skal Registerfører kunne skrive inn kommentar.",
                 ObstacleReportDate = DateTime.UtcNow,
                 ObstacleReportStatus = ObstacleReportData.EnumTypes.New,
-                MapDataID = model.MapData?.MapDataID
+                MapDataID = model.MapData?.MapDataID,
+                CoordinateSummary = model.MapData?.CoordinateSummary ?? string.Empty
             };
             _context.ObstacleReports.Add(report);
             await _context.SaveChangesAsync();

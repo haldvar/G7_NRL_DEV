@@ -40,6 +40,9 @@ namespace NRL_PROJECT.Models
         public int? MapDataID { get; set; }
         public MapData? MapData { get; set; }
 
+        // Initialize to empty so EF will send a non-null value on INSERT
+        public string CoordinateSummary { get; set; } = string.Empty;
+
         //  Enum for status på rapporten
         public enum EnumTypes
         {

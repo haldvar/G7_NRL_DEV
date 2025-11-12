@@ -10,6 +10,18 @@
 	<p class="text-slate-300 mt-3 text-lg">Fyll inn rapportdetaljer, legg til et bilde og marker posisjon på kartet.</p>
 </div>
 
+<!--  Melding om at du jobber med utkast -->
+<div id="restoreNotice"
+     class="bg-yellow-600/70 text-white text-center p-4 rounded-xl mb-6 font-semibold shadow-md"
+     style="display:none;">
+    ⚠️ Et tidligere utkast ble gjenopprettet. Du kan fortsette der du slapp.
+    <button id="clearDraftBtn"
+            type="button"
+            class="ml-3 bg-red-700 hover:bg-red-800 text-white px-3 py-1 rounded-lg font-semibold shadow-md">
+        Tøm utkast
+    </button>
+</div>
+
 <form asp-action="SubmitObstacleWithLocation" asp-controller="Map" method="post" enctype="multipart/form-data" class="space-y-10">
 	@Html.AntiForgeryToken()
 
@@ -177,5 +189,73 @@
             // Clear hidden field if everything was removed (keep your existing logic)
             document.getElementById('GeoJsonCoordinates').value = '';
         });
+
+                        // ------------------------------------------------------------
+                // LOCAL STORAGE: utkast-funksjon for kommentar og GeoJSON
+                // ------------------------------------------------------------
+                const formKey = "ObstacleReportForm";
+                // Gjenopprett lagrede data når siden lastes
+                window.addEventListener("load", () => {
+                  const notice = document.getElementById("restoreNotice");
+                  const saved = localStorage.getItem(formKey);
+                  notice.style.display = "none";
+                  if (!saved) return;
+                  const data = JSON.parse(saved);
+                  const hasComment = data.comment && data.comment.trim().length > 0;
+                  const hasGeo = data.geoJson && data.geoJson.trim().length > 0;
+                  if (!(hasComment || hasGeo)) {
+                    localStorage.removeItem(formKey);
+                    return;
+                  }
+                  if (hasComment)
+                    document.querySelector('[name="ObstacleComment"]').value = data.comment;
+                  if (hasGeo) {
+                    document.getElementById('GeoJsonCoordinates').value = data.geoJson;
+                    notice.style.display = "block";
+                // Tegn markør eller linje hvis geojson finnes
+                try {
+                  const geom = JSON.parse(data.geoJson);
+                  if (geom.type === "Point" && geom.coordinates?.length === 2) {
+                    const [lng, lat] = geom.coordinates;
+                    const restoredMarker = L.marker([lat, lng]).addTo(map);
+                    map.setView([lat, lng], 15);
+                  }
+                  else if (geom.type === "LineString" && Array.isArray(geom.coordinates)) {
+                    // Konverter koordinatpar til Leaflet-format
+                    const latlngs = geom.coordinates.map(([lng, lat]) => [lat, lng]);
+                    const restoredLine = L.polyline(latlngs, { color: "orange", weight: 4 }).addTo(map);
+                    map.fitBounds(restoredLine.getBounds());
+                  }
+                } catch (err) {
+                  console.warn("Kunne ikke gjenopprette geometri:", err);
+                }
+                  }
+                });
+                // Lagre hvert 5. sekund (bare hvis det finnes data)
+                setInterval(() => {
+                  const comment = document.querySelector('[name="ObstacleComment"]').value || "";
+                  const geo = document.getElementById('GeoJsonCoordinates').value || "";
+                  const hasComment = comment.trim().length > 0;
+                  const hasGeo = geo.trim().length > 0;
+                  if (hasComment || hasGeo) {
+                    localStorage.setItem(formKey, JSON.stringify({ comment, geoJson: geo }));
+                  } else {
+                    localStorage.removeItem(formKey);
+                  }
+                }, 5000);
+                // Fjern ved innsending
+                document.querySelector("form").addEventListener("submit", () => {
+                  localStorage.removeItem(formKey);
+                });
+                // Manuell tømming av utkast
+                document.getElementById("clearDraftBtn").addEventListener("click", () => {
+                  if (confirm("Er du sikker på at du vil slette utkastet?")) {
+                    localStorage.removeItem(formKey);
+                    document.querySelector('[name="ObstacleComment"]').value = "";
+                    document.getElementById('GeoJsonCoordinates').value = "";
+                    map.eachLayer(l => { if (l instanceof L.Marker) map.removeLayer(l); });
+                    document.getElementById("restoreNotice").style.display = "none";
+                  }
+                });
     </script>
 }

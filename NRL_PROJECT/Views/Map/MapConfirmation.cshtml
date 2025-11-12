@@ -56,6 +56,10 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
+        localStorage.removeItem("ObstacleReportForm");
+    </script>
+
+    <script>
         const map = L.map('mapConfirm').setView([@fallbackLat, @fallbackLng], @zoomLevel);
 
         L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {

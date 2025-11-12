@@ -30,6 +30,8 @@ namespace NRL_PROJECT.Models
         public double Latitude { get; set; }
         public double Longitude { get; set; }
 
+        public string CoordinateSummary { get; set; }
+
         // Statusfelt (valgfritt, for registerførervisning)
         public EnumStatus? ReportStatus { get; set; }
 
