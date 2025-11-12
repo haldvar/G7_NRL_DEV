@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
 
@@ -11,8 +13,14 @@ var builder = WebApplication.CreateBuilder(args);
 // ------------------------------------------------------------
 
 // Legg til støtte for MVC (Controllers + Views)
-builder.Services.AddControllersWithViews();
-
+// + Gjør alle sidene/funksjonene utilgjengelig by default, utenom der [AllowAnonymous] finnes (Login)
+builder.Services.AddControllersWithViews(options =>
+{
+    var policy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+    options.Filters.Add(new AuthorizeFilter(policy));
+});
 
 // Database configuration (Entity Framework + MySQL)
 // KOMMENTERES UT UNDER TESTING:

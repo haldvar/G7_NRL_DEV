@@ -1,0 +1,64 @@
+@using Microsoft.AspNetCore.Identity
+@using NRL_PROJECT.Models
+@inject UserManager<User> UserManager
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - NRL_PROJECT</title>
+
+    <!-- Tailwind via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="flex min-h-screen flex-col bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800">
+
+    <!-- HEADER -->
+    <header class="sticky top-0 z-50 bg-white shadow-md">
+        <nav class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+            <!-- Left side: Logo + navigation -->
+            <div class="flex items-center space-x-8">
+                <!-- Logo -->
+                <a class="text-2xl font-bold tracking-wide text-blue-700 transition hover:text-blue-800"
+                   asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/img/kartverket-logo.png" alt="Kartverket" class="h-14 w-auto opacity-90" />
+                </a>
+
+                <!-- Desktop menu -->
+                <div class="hidden space-x-6 font-medium md:flex">
+                    <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                    <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="About">About</a>
+                </div>
+            </div>
+
+            <!-- Right side: Statusbar -->
+            <div class="hidden items-center space-x-6 text-sm font-medium md:flex">
+                <span class="text-gray-600">👤 Logget inn som <strong>@User.Identity.Name</strong></span>
+                <span class="rounded-full bg-green-100 px-3 py-1 text-xs text-green-700">Active Obstacles from your Organisation: /</span>
+                <form asp-controller="Account" asp-action="Logout" method="post" class="inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="rounded-lg bg-red-500 px-4 py-2 text-white transition hover:bg-red-600">Log out</button>
+                </form>
+            </div>
+        </nav>
+      </header>
+   
+
+    <!-- MAIN CONTENT -->
+    <main role="main" class="mx-auto max-w-5xl flex-grow px-6 py-10">
+        @RenderBody()
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="mt-8 border-t bg-white">
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 text-sm text-gray-500">
+            <span>&copy; 2025 - NRL_PROJECT</span>
+            <a class="transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
