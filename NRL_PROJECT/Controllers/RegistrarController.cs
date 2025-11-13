@@ -262,6 +262,7 @@ namespace NRL_PROJECT.Controllers
             var query = _context.ObstacleReports
                 .Include(r => r.Obstacle)
                 .Include(r => r.User)
+                .Include(r => r.Reviewer)
                 .Include(r => r.MapData)
                    .ThenInclude(m => m.Coordinates)
                 .AsQueryable();
@@ -312,6 +313,7 @@ namespace NRL_PROJECT.Controllers
           ObstacleID = r.Obstacle != null ? r.Obstacle.ObstacleID : 0,
           ObstacleType = r.Obstacle != null ? (r.Obstacle.ObstacleType ?? "") : "",
           ObstacleComment = r.Obstacle != null ? (r.Obstacle.ObstacleComment ?? "") : "",
+          ObstacleHeight = r.Obstacle != null ? r.Obstacle.ObstacleHeight : 0,
 
           // Koordinater: MapData kan være null, og lista kan være tom
           Latitude =
@@ -338,7 +340,12 @@ namespace NRL_PROJECT.Controllers
           UserID = r.UserID ?? "",
           UserName = r.User != null
               ? $"{(r.User.FirstName ?? "").Trim()} {(r.User.LastName ?? "").Trim()}".Trim()
-              : "Ukjent"
+              : "Ukjent",
+
+          AssignedRegistrarUserID = r.Reviewer != null
+            ? r.Reviewer.UserName
+            : null,
+
       })
       .ToListAsync();
 

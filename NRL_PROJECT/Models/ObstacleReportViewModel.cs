@@ -37,7 +37,7 @@ namespace NRL_PROJECT.Models
         public bool HasCoordinates => Latitude != 0 && Longitude != 0;
 
         // Registrar 
-        public string AssignedRegistrarUserID { get; set; }
+        public string? AssignedRegistrarUserID { get; set; }
         public string? TransferToUserID { get; set; }
     }
 }

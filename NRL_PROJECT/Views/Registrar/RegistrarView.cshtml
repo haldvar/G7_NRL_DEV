@@ -1,4 +1,4 @@
-@model IEnumerable<NRL_PROJECT.Models.ObstacleReportViewModel>
+﻿@model IEnumerable<NRL_PROJECT.Models.ObstacleReportViewModel>
 @using EnumStatus = NRL_PROJECT.Models.EnumStatus
 @using System.Globalization
 
@@ -127,8 +127,39 @@
                             }
                         </div>
                     </div>
-                    <div class="shrink-0">
+                <div class="flex shrink-0 flex-col items-end gap-1 text-sm text-slate-600">
+
+                    <!-- Status badge -->
+                    <div>
                         @await Html.PartialAsync("_EnumTypes", r.ReportStatus)
+                    </div>
+
+                    <!-- Hindertype -->
+                    <div>
+                        <span class="font-semibold">Type:</span>
+                        @(string.IsNullOrWhiteSpace(r.ObstacleType) ? "Ukjent" : r.ObstacleType)
+                    </div>
+
+                    <!-- Høyde -->
+                    <div>
+                        <span class="font-semibold">Høyde:</span>
+                        @(
+                                                r.ObstacleHeight.HasValue && r.ObstacleHeight > 0
+                                                ? r.ObstacleHeight.Value.ToString("0.##") + " m"
+                                                : "—"
+                                                )
+                    </div>
+
+                    <!-- Registerfører -->
+                    <div>
+                        <span class="font-semibold">Reg.fører:</span>
+                        @(
+                                                string.IsNullOrWhiteSpace(r.AssignedRegistrarUserID)
+                                                ? "Ikke tildelt"
+                                                : r.AssignedRegistrarUserID
+                                                )
+                    </div>
+
                     </div>
                 </div>
             </a>

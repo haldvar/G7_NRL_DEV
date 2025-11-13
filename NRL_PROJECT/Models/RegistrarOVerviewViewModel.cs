@@ -53,7 +53,7 @@ namespace NRL_Prosjekt.Models
         public string Status { get; set; } = string.Empty;
 
         // Valgfritt men ofte nyttig
-        public string? Organization { get; set; }
+        public string? Organisation { get; set; }
 
         public string? LatestComment { get; set; }
         public int CommentCount { get; set; }
