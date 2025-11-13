@@ -82,6 +82,7 @@ var app = builder.Build();
 // - DENNE KOMMENTERES OGSÅ UT VED TESTING
 // ------------------------------------------------------------
 // Apply migrations at startup (Migrations + Seed Data)
+
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
