@@ -74,7 +74,7 @@
                         {
                             <form asp-action="AssignRole" method="post" class="d-inline">
                                 @Html.AntiForgeryToken()
-                                <input type="hidden" name="UserID" value="@user.UserID" />
+                                <input type="hidden" name="UserId" value="@user.UserID" />
                                 <select name="role" class="form-select form-select-sm d-inline" style="width: auto;">
                                     <option value="No Role" selected="@(user.CurrentRole == "No Role")">No Role</option>
                                     @foreach (var role in user.AvailableRoles)
@@ -88,7 +88,7 @@
                             <form asp-action="DeleteUser" method="post" class="d-inline" 
                                   onsubmit="return confirm('Er du sikker på at du vil slette @user.UserName?');">
                                 @Html.AntiForgeryToken()
-                                <input type="hidden" name="UserID" value="@user.UserID" />
+                                <input type="hidden" name="UserId" value="@user.UserID" />
                                 <button type="submit" class="btn btn-sm btn-danger">Slett bruker</button>
                             </form>
                         }
@@ -115,8 +115,8 @@
                 @Html.AntiForgeryToken()
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="Username" class="form-label">Brukernavn</label>
-                        <input type="text" class="form-control" id="Username" name="Username" required />
+                        <label for="UserName" class="form-label">Brukernavn</label>
+                        <input type="text" class="form-control" id="UserName" name="UserName" required />
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="Email" class="form-label">Email</label>
