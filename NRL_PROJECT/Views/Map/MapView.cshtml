@@ -109,13 +109,15 @@
 
         // Keep track of label markers so we can toggle behavior
         const labelMarkers = [];
-        let showLabelClick = false; // user-controlled option: click label to view report popup
+        // Default: checkbox should be checked, enable click-to-open by default
+        let showLabelClick = true;
 
         // Add a simple map control (checkbox) to enable/disable label click-to-view
         const labelControl = L.control({ position: 'topright' });
         labelControl.onAdd = function () {
             const container = L.DomUtil.create('div', 'label-control bg-white rounded shadow p-2');
-            container.innerHTML = '<label><input id="labelToggle" type="checkbox" /> Show report on label click</label>';
+            // Set the checkbox to checked by default
+            container.innerHTML = '<label><input id="labelToggle" type="checkbox" checked /> Show report on label click</label>';
             // Prevent map dragging when interacting with the control
             L.DomEvent.disableClickPropagation(container);
             return container;
@@ -126,6 +128,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             const toggle = document.getElementById('labelToggle');
             if (toggle) {
+                // Ensure internal flag matches the checkbox initial state (checked by default)
+                showLabelClick = toggle.checked;
                 toggle.addEventListener('change', (e) => {
                     showLabelClick = e.target.checked;
                 });
