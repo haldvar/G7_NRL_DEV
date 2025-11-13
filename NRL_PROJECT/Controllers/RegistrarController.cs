@@ -164,7 +164,7 @@ namespace NRL_PROJECT.Controllers
                 ReportStatus = MapToUi(report.ObstacleReportStatus),
 
                 // Bruker
-                UserName = report.UserID != null
+                UserName = report.UserName != null
     ? (
         !string.IsNullOrWhiteSpace(report.User.FirstName) || !string.IsNullOrWhiteSpace(report.User.LastName)
             ? $"{(report.User.FirstName ?? "").Trim()} {(report.User.LastName ?? "").Trim()}".Trim()
@@ -310,8 +310,8 @@ namespace NRL_PROJECT.Controllers
 
                     // Fornavn + etternavn trygt når r.User kan være null
                     (
-                        (r.UserID != null ? r.User.FirstName : "") + " " +
-                        (r.UserID != null ? r.User.LastName : "")
+                        (r.UserName != null ? r.User.FirstName : "") + " " +
+                        (r.UserName != null ? r.User.LastName : "")
                     ).Contains(q)
                 );
             }
@@ -353,7 +353,7 @@ namespace NRL_PROJECT.Controllers
           StatusComment = r.ObstacleReportComment ?? "",
 
           // Bruker
-          UserID = r.User != null
+          UserName = r.User != null
     ? (
         // prøv først Fornavn + Etternavn
         !string.IsNullOrWhiteSpace(r.User.FirstName) || !string.IsNullOrWhiteSpace(r.User.LastName)
