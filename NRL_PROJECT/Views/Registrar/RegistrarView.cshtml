@@ -12,7 +12,7 @@
     int cVenter = list.Count(x => x.ReportStatus == EnumStatus.Venter);
     int cUnderBeh = list.Count(x => x.ReportStatus == EnumStatus.UnderBehandling);
     int cGodkjent = list.Count(x => x.ReportStatus == EnumStatus.Godkjent);
-    int cAvvist = list.Count(x => x.ReportStatus.ToString() == "Avvist"); 
+    int cAvvist = list.Count(x => x.ReportStatus.ToString() == "Avvist");
 
 
     var selectedStatus = (string)Context.Request.Query["status"];
@@ -80,24 +80,24 @@
             <h2 class="text-2xl font-semibold text-slate-900">Innrapporterte hinder</h2>
 
             <!-- Filter-dropdown til høyre -->
-                <form method="get" asp-action="RegistrarView" asp-controller="Registrar" class="flex items-center gap-2">
-                    <label for="statusFilter" class="text-sm text-slate-700">Filtrer:</label>
-                    <select id="statusFilter" name="status"
-                            class="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-slate-400 focus:outline-none"
-                            onchange="this.form.submit()">
+            <form method="get" asp-action="RegistrarView" asp-controller="Registrar" class="flex items-center gap-2">
+                <label for="statusFilter" class="text-sm text-slate-700">Filtrer:</label>
+                <select id="statusFilter" name="status"
+                        class="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-slate-400 focus:outline-none"
+                        onchange="this.form.submit()">
 
-                        <!-- NB: value er ren! Teksten kan ha teller. -->
-                        <option value="Alle" selected="@(selectedStatus == "Alle")">Alle (@list.Count)</option>
-                        <option value="Ny" selected="@(selectedStatus == "Ny")">Ny (@cNy)</option>
-                        <option value="Venter" selected="@(selectedStatus == "Venter")">Venter (@cVenter)</option>
-                        <option value="UnderBehandling" selected="@(selectedStatus == "UnderBehandling")">Under behandling (@cUnderBeh)</option>
-                        <option value="Godkjent" selected="@(selectedStatus == "Godkjent")">Godkjent (@cGodkjent)</option>
-                        <option value="Avvist" selected="@(selectedStatus == "Avvist")">Avvist (@cAvvist)</option>
-                    </select>
+                    <!-- NB: value er ren! Teksten kan ha teller. -->
+                    <option value="Alle" selected="@(selectedStatus == "Alle")">Alle (@list.Count)</option>
+                    <option value="Ny" selected="@(selectedStatus == "Ny")">Ny (@cNy)</option>
+                    <option value="Venter" selected="@(selectedStatus == "Venter")">Venter (@cVenter)</option>
+                    <option value="UnderBehandling" selected="@(selectedStatus == "UnderBehandling")">Under behandling (@cUnderBeh)</option>
+                    <option value="Godkjent" selected="@(selectedStatus == "Godkjent")">Godkjent (@cGodkjent)</option>
+                    <option value="Avvist" selected="@(selectedStatus == "Avvist")">Avvist (@cAvvist)</option>
+                </select>
 
-                    
-                    <input type="hidden" name="q" value="@currentSearch" />
-                </form>
+
+                <input type="hidden" name="q" value="@currentSearch" />
+            </form>
         </div>
 
         @foreach (var r in Model)
@@ -122,7 +122,7 @@
                             <span class="text-slate-500">Innsender:</span> @r.UserName
                             @if (!string.IsNullOrWhiteSpace(r.UserName))
                             {
-                                <span class="text-slate-400"></span> 
+                                <span class="text-slate-400"></span>
                                 @r.UserName
                             }
                         </div>
@@ -134,7 +134,7 @@
                             </div>
                         }
 
-                    </div>
+                </div>
                 <div class="flex shrink-0 flex-col items-end gap-1 text-sm text-slate-600">
 
                     <!-- Status badge -->
@@ -171,8 +171,10 @@
                     </div>
                 </div>
             </a>
-        }
+                }
     </section>
 </div>
+
+
 
 
