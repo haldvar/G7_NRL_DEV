@@ -17,6 +17,7 @@
 
     var selectedStatus = (string)Context.Request.Query["status"];
     if (string.IsNullOrWhiteSpace(selectedStatus)) selectedStatus = "Alle";
+    var SelectedType = (string)Context.Request.Query["type"];
 
     var currentSearch = (string)Context.Request.Query["q"]; // hvis du har fritekstsøk
 }
@@ -31,6 +32,7 @@
             <h3 class="mb-2 text-base font-semibold text-slate-800">Søk</h3>
             <form method="get" asp-action="RegistrarView" asp-controller="Registrar" class="flex items-center gap-2">
                 <input type="hidden" name="status" value="@selectedStatus" />
+                <input type="hidden" name="type" value="@SelectedType" />
                 <input name="q"
                        value="@currentSearch"
                        type="search"

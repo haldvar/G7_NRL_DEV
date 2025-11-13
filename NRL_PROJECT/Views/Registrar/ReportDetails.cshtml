@@ -1,6 +1,7 @@
-@model NRL_PROJECT.Models.ObstacleReportViewModel
+﻿@model NRL_PROJECT.Models.ObstacleReportViewModel
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @using System.Globalization
+
 @{
     ViewData["Title"] = "Rapportdetaljer";
 
@@ -68,9 +69,96 @@
                 </form>
             </div>
 
+            <!--update obstacle information-->
+            @{
+            var typeItems = ViewBag.ObstacleTypes as List<SelectListItem>
+                ?? new();
+             }
+
+                <div class="mt-6 rounded-2xl border bg-white p-4 shadow-sm">
+                    <h6 class="mb-3 font-semibold">Rediger hindring</h6>
+
+                    <form asp-action="UpdateObstacleData" asp-controller="Registrar" method="post" class="space-y-3">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.ObstacleReportID" />
+
+                        <div>
+                            <label class="form-label">Type</label>
+                            <select name="obstacleType" asp-items="typeItems" class="form-select">
+                                <option value="">— Velg type —</option>
+                            </select>
+                            <!-- Valgfritt: fritekst hvis bruker valgte "Annet" -->
+                            <input id="customType" name="obstacleType" type="text" class="form-control mt-2" placeholder="Annen type..."
+                                   style="display:none" />
+                        </div>
+
+                        <div>
+                            <label class="form-label">Høyde (meter)</label>
+                            <input name="obstacleHeight"
+                                   type="number" step="0.01" min="0" max="10000"
+                                   class="form-control"
+                                   value="@(Model.ObstacleHeight?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "")" />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Lagre endringer</button>
+                    </form>
+                </div>
+
+                <script>
+                    // En liten UX: vis fritekstfelt når "Annet" er valgt
+                    (function () {
+                        const select = document.querySelector('select[name="obstacleType"]');
+                        const custom = document.getElementById('customType');
+                        if (!select || !custom) return;
+
+                        const toggle = () => {
+                            if (select.value === 'Annet') {
+                                custom.style.display = 'block';
+                                custom.value = '';
+                            } else {
+                                custom.style.display = 'none';
+                            }
+                        };
+                        select.addEventListener('change', toggle);
+                        toggle();
+                    })();
+                </script>
+
+
+            <!-- Overfør rapport -->
+            @{
+                var registrarList = ViewBag.Registrars as List<SelectListItem> ?? new();
+            }
+
+            <form asp-controller="Registrar" asp-action="TransferReport" method="post" class="row g-2">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.ObstacleReportID" />
+
+                <div class="col-md-7">
+                    <select asp-for="TransferToUserID" asp-items="registrarList" class="form-select">
+                        <option value="">— Velg registerfører —</option>
+                    </select>
+                </div>
+
+                <div class="col-md-5">
+                    <button type="submit" class="btn btn-outline-primary">Overfør</button>
+                </div>
+            </form>
+
+                <div class="text-muted mt-2">
+                    Nå tildelt:
+                    <b>@(registrarList.FirstOrDefault(x => x.Value == Model.AssignedRegistrarUserID)?.Text ?? "Ingen")</b>
+                </div>
+            </div>
+            </div>
+
             <!-- Detaljer -->
             <div class="rounded-2xl border bg-white p-5 shadow-sm">
                 <h2 class="mb-4 text-lg font-semibold text-slate-900">Rapportdetaljer</h2>
+        <div>
+            <dt class="font-semibold text-slate-700">Status</dt>
+            <dd>@await Html.PartialAsync("_EnumTypes", Model.ReportStatus)</dd>
+        </div>
 
                 <dl class="grid grid-cols-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
                     <div>
@@ -78,22 +166,105 @@
                         <dd>@Model.ObstacleReportID</dd>
                     </div>
 
+            
+            <dt class="mt-3 font-semibold text-slate-700">Hindertype</dt>
+            <dd>
+                @{
+                    var typeTxt = string.IsNullOrWhiteSpace(Model.ObstacleType) ? "Ukjent" : Model.ObstacleType;
+                    var harHoyde = Model.ObstacleHeight.HasValue && Model.ObstacleHeight > 0;
+                }
+
+                <div class="flex items-start justify-between gap-2">
                     <div>
-                        <dt class="font-semibold text-slate-700">Hindertype</dt>
-                        <dd>@(Model.ObstacleType ?? "-")</dd>
+                        <div>@typeTxt</div>
+                        @if (harHoyde)
+                        {
+                            <div class="text-sm text-slate-500">
+                                Høyde: @Model.ObstacleHeight?.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) m
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-sm text-slate-400 italic">Høyde ikke satt</div>
+                        }
                     </div>
+
+                    <!-- Én redigeringsknapp -->
+                    <button type="button"
+                            class="rounded border border-slate-300 px-2 py-1 text-xs hover:bg-slate-50"
+                            onclick="document.getElementById('edit-hindring').classList.toggle('hidden')">
+                        Rediger
+                    </button>
+                </div>
+
+                <!-- Felles redigeringsfelt for både Type og Høyde -->
+               
+
+                <div id="edit-hindring" class="mt-3 hidden">
+                    <form asp-controller="Registrar" asp-action="UpdateObstacleData" method="post" class="flex flex-col gap-2">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.ObstacleReportID" />
+
+                        <label class="text-sm text-slate-600">Type</label>
+                        <select id="type-select" name="obstacleType" asp-items="typeItems" class="form-select">
+                            <option value="">— Velg type —</option>
+                        </select>
+
+                        <!-- Fritekstfelt ved valg av "Annet" -->
+                        <input id="customType" name="obstacleType" type="text"
+                               class="form-control mt-1" placeholder="Annen type..."
+                               style="display:none" />
+
+                        <label class="mt-2 text-sm text-slate-600">Høyde (m)</label>
+                        <input name="obstacleHeight"
+                               type="number" step="0.01" min="0" max="10000"
+                               class="w-32 rounded border border-slate-300 px-2 py-1 text-sm"
+                               value="@(Model.ObstacleHeight?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "")" />
+
+                        <div class="mt-2 flex gap-2">
+                            <button type="submit"
+                                    class="rounded bg-blue-600 px-3 py-1 text-xs text-white hover:bg-blue-700">
+                                Lagre
+                            </button>
+                            <button type="button"
+                                    class="rounded border border-slate-300 px-3 py-1 text-xs hover:bg-slate-50"
+                                    onclick="document.getElementById('edit-hindring').classList.add('hidden')">
+                                Avbryt
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </dd>
+
 
                     <div class="sm:col-span-2">
                         <dt class="font-semibold text-slate-700">Lokasjon</dt>
-                        <dd class="font-mono">
-                            @if (hasCoords)
+                        <dd>
+                            @{
+                                // Les [[lat,lng], ...] fra GeoJsonCoordinates (om finnes), ellers tom liste
+                                var pts = new List<double[]>();
+                                if (!string.IsNullOrWhiteSpace(Model.GeoJsonCoordinates))
+                                {
+                                    pts = System.Text.Json.JsonSerializer
+                                    .Deserialize<List<double[]>>(Model.GeoJsonCoordinates) ?? new List<double[]>();
+                                }
+                            }
+
+                            @if (pts.Count > 0)
                             {
-                                @($"{latJs}, {lonJs}")
+                                <ul class="list-unstyled mb-0">
+                                    @for (var i = 0; i < pts.Count; i++)
+                                    {
+                                        var lat = pts[i][0].ToString("0.######", CultureInfo.InvariantCulture);
+                                        var lng = pts[i][1].ToString("0.######", CultureInfo.InvariantCulture);
+                                        <li>Punkt @(i + 1): @lat, @lng</li>
+                                    }
+                                </ul>
                             }
                             else
                             {
-
-                                @(Model.Reported_Location ?? "-")
+                            @Model.Latitude.ToString("0.######", CultureInfo.InvariantCulture)
+                            @Model.Longitude.ToString("0.######", CultureInfo.InvariantCulture)
                             }
                         </dd>
                     </div>
@@ -107,12 +278,7 @@
                         <dt class="font-semibold text-slate-700">Tidspunkt registrert</dt>
                         <dd>@Model.TimeOfSubmittedReport.ToString("dd.MM.yyyy HH:mm")</dd>
                     </div>
-
-                    <div>
-                        <dt class="font-semibold text-slate-700">Status</dt>
-                        <dd>@await Html.PartialAsync("_EnumTypes", Model.ReportStatus)</dd>
-                    </div>
-
+                                        
                     <div class="sm:col-span-2">
                         <dt class="font-semibold text-slate-700">Innsender (UserID)</dt>
                         <dd>
@@ -122,6 +288,10 @@
                                 <span class="text-slate-500"> — @Model.UserName</span>
                             }
                         </dd>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <dt class="font-semibold text-slate-700">Organisasjon</dt>
+                        <dd>@Model.OrgName</dd>
                     </div>
                 </dl>
 
@@ -157,35 +327,68 @@
 @if (hasCoords)
 {
     <!-- Leaflet CSS/JS -->
-    <link rel="stylesheet"
-          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-          crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-            crossorigin=""></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <div id="map" style="height:450px;border-radius:8px;"></div>
 
     <script>
         (function () {
-          // Hent fra server (InvariantCulture)
-          var lat = parseFloat('@latJs');
-          var lon = parseFloat('@lonJs');
+            // Les [[lat,lng], [lat,lng], ...] fra VM
+            const pts = @Html.Raw(string.IsNullOrWhiteSpace(Model.GeoJsonCoordinates) ? "[]" : Model.GeoJsonCoordinates);
 
-          // Opprett kart
-          var map = L.map('map', { zoomControl: true })
-                     .setView([lat, lon], 15);
+            // Fallback for ett punkt (bakoverkompatibilitet)
+            const fallbackLat = parseFloat('@(Model.Latitude.ToString(System.Globalization.CultureInfo.InvariantCulture))');
+            const fallbackLng = parseFloat('@(Model.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture))');
 
-          // Bakgrunnskart
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap'
-          }).addTo(map);
+            const map = L.map('map', { zoomControl: true });
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
 
-          // Marker med popup
-          L.marker([lat, lon]).addTo(map)
-            .bindPopup('@(Model.ObstacleType ?? "Hinder")<br/>Lat: ' + lat + ', Lon: ' + lon)
-            .openPopup();
+            const latlngs = [];
+
+            if (Array.isArray(pts) && pts.length > 0) {
+                pts.forEach(pair => {
+                    const ll = [parseFloat(pair[0]), parseFloat(pair[1])]; // [lat, lng]
+                    if (!isNaN(ll[0]) && !isNaN(ll[1])) {
+                        latlngs.push(ll);
+                        L.marker(ll).addTo(map).bindPopup(`<b>@Model.ObstacleType</b><br/>Lat: ${ll[0]}, Lon: ${ll[1]}`);
+                    }
+                });
+            } else if (!isNaN(fallbackLat) && !isNaN(fallbackLng) && (fallbackLat !== 0 || fallbackLng !== 0)) {
+                const ll = [fallbackLat, fallbackLng];
+                latlngs.push(ll);
+                L.marker(ll).addTo(map).bindPopup(`<b>@Model.ObstacleType</b><br/>Lat: ${ll[0]}, Lon: ${ll[1]}`);
+            }
+
+            if (latlngs.length === 0) {
+                map.setView([65.0, 13.0], 4);
+            } else if (latlngs.length === 1) {
+                map.setView(latlngs[0], 15);
+            } else {
+                L.polyline(latlngs, { weight: 3 }).addTo(map);
+                const bounds = L.latLngBounds(latlngs);
+                map.fitBounds(bounds.pad(0.2));
+            }
+        })();
+              // Viser fritekstfelt hvis "Annet" velges
+        (function () {
+            const select = document.getElementById('type-select');
+            const custom = document.getElementById('customType');
+            if (!select || !custom) return;
+
+            const toggle = () => {
+                if (select.value === 'Annet') {
+                    custom.style.display = 'block';
+                    custom.value = '';
+                } else {
+                    custom.style.display = 'none';
+                }
+            };
+            select.addEventListener('change', toggle);
+            toggle();
         })();
     </script>
+
+
 }
 
