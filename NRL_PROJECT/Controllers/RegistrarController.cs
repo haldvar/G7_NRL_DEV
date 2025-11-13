@@ -15,11 +15,11 @@ using EnumStatus = NRL_PROJECT.Models.ObstacleReportData.EnumTypes;
 using UiStatus = NRL_PROJECT.Models.EnumStatus;
 
 namespace NRL_PROJECT.Controllers
+{
+    [Authorize(Roles = "Admin,Registrar")]
+    public class RegistrarController : Controller
     {
-        [Authorize(Roles = "Admin,Registrar")]
-        public class RegistrarController : Controller
-        {
-            private readonly NRL_Db_Context _context;
+        private readonly NRL_Db_Context _context;
 
         public RegistrarController(NRL_Db_Context context, UserManager<User> userManager)
         {
@@ -27,18 +27,18 @@ namespace NRL_PROJECT.Controllers
             _userManager = userManager;
         }
         private static UiStatus MapToUi(BackendStatus backendStatus)
+        {
+            return backendStatus switch
             {
-                return backendStatus switch
-                {
-                    BackendStatus.New => UiStatus.Ny,
-                    BackendStatus.Open => UiStatus.Venter,
-                    BackendStatus.InProgress => UiStatus.UnderBehandling,
-                    BackendStatus.Resolved => UiStatus.Godkjent,
-                    BackendStatus.Closed => UiStatus.Godkjent,
-                    BackendStatus.Deleted => UiStatus.Avvist,
-                    _ => UiStatus.Ny
-                };
-             }
+                BackendStatus.New => UiStatus.Ny,
+                BackendStatus.Open => UiStatus.Venter,
+                BackendStatus.InProgress => UiStatus.UnderBehandling,
+                BackendStatus.Resolved => UiStatus.Godkjent,
+                BackendStatus.Closed => UiStatus.Godkjent,
+                BackendStatus.Deleted => UiStatus.Avvist,
+                _ => UiStatus.Ny
+            };
+        }
         private static readonly List<string> PredefinedObstacleTypes = new()
             {
                 "Radio/Mobilmast",
@@ -50,8 +50,8 @@ namespace NRL_PROJECT.Controllers
                 "Kran",
                 "Annet"
             };
-        private readonly UserManager<User> _userManager;  // bruk din User-type
-       
+        private readonly UserManager<User> _userManager;  
+
         private async Task<List<(string Id, string Name)>> GetRegistrarsAsync()
         {
             var regs = await _userManager.GetUsersInRoleAsync("Registrar");
@@ -70,13 +70,13 @@ namespace NRL_PROJECT.Controllers
 
             if (report == null) return NotFound();
 
-            
+
             var newBackendStatus = status switch
             {
                 "UnderBehandling" => BackendStatus.InProgress,
-                "Godkjent" => BackendStatus.Resolved,   
-                "Avvist" => BackendStatus.Deleted,    
-                _ => BackendStatus.Open        // “Ny/Venter”
+                "Godkjent" => BackendStatus.Resolved,
+                "Avvist" => BackendStatus.Deleted,
+                _ => BackendStatus.Open      
             };
 
             report.ObstacleReportStatus = newBackendStatus;
@@ -102,17 +102,15 @@ namespace NRL_PROJECT.Controllers
                 return NotFound();
             var OrgName = "Ukjent";
 
-            // ---- Koordinater ----
+            // ---- Coordinates ----
             var orderedCoords = report.MapData?.Coordinates?
-                .OrderBy(c => c.CoordinateId)   
+                .OrderBy(c => c.CoordinateId)
                 .ToList();
 
-            // Første punkt for kompatibilitet (Latitude/Longitude i VM)
             var first = orderedCoords?.FirstOrDefault();
             var lat = first?.Latitude ?? 0;
             var lng = first?.Longitude ?? 0;
 
-            // Lag en liste av [lat, lng]
             var latLngPairs = orderedCoords != null
                 ? orderedCoords.Select(c => new[] { c.Latitude, c.Longitude }).ToList()
                 : new List<double[]>();
@@ -129,7 +127,7 @@ namespace NRL_PROJECT.Controllers
                 {
                     Value = x.Id,
                     Text = x.Name,
-                    Selected = (x.Id == report.ReviewedByUserID) // nåværende eier
+                    Selected = (x.Id == report.ReviewedByUserID) 
                 })
                 .ToList();
 
@@ -140,21 +138,21 @@ namespace NRL_PROJECT.Controllers
                 .OrderBy(t => t)
                 .ToListAsync();
 
-            // ---- Bygg ViewModel null-sikkert ----
+           
             var vm = new ObstacleReportViewModel
             {
-                // Innsender
+                // Sender of the report
                 ObstacleReportID = report.ObstacleReportID,
                 TimeOfSubmittedReport = report.ObstacleReportDate,
 
-                // Hindring
+                // Obstacle Data
                 ObstacleID = report.Obstacle?.ObstacleID ?? 0,
                 ObstacleType = report.Obstacle?.ObstacleType ?? "",
                 ObstacleComment = report.Obstacle?.ObstacleComment ?? "",
                 ObstacleHeight = report.Obstacle?.ObstacleHeight ?? 0,
                 ObstacleWidth = report.Obstacle?.ObstacleWidth ?? 0,
 
-                // Lokasjon
+                // Lokastion
                 Latitude = lat,
                 Longitude = lng,
                 Reported_Location = reportedLocation,
@@ -163,7 +161,7 @@ namespace NRL_PROJECT.Controllers
                 // Status
                 ReportStatus = MapToUi(report.ObstacleReportStatus),
 
-                // Bruker
+                // User
                 UserName = report.UserName != null
     ? (
         !string.IsNullOrWhiteSpace(report.User.FirstName) || !string.IsNullOrWhiteSpace(report.User.LastName)
@@ -188,7 +186,7 @@ namespace NRL_PROJECT.Controllers
         public async Task<IActionResult> UpdateObstacleData(int id, string? obstacleType, double? obstacleHeight)
         {
             var report = await _context.ObstacleReports
-                .Include(r => r.Obstacle)   // <- viktig
+                .Include(r => r.Obstacle)  
                 .FirstOrDefaultAsync(r => r.ObstacleReportID == id);
 
             if (report == null)
@@ -197,18 +195,18 @@ namespace NRL_PROJECT.Controllers
                 return RedirectToAction(nameof(RegistrarView));
             }
 
-            // enkel validering
+            
             if (obstacleHeight is < 0 or > 10000)
             {
                 TempData["Error"] = "Ugyldig høyde (0–10 000).";
                 return RedirectToAction(nameof(ReportDetails), new { id });
             }
 
-            // Opprett Obstacle hvis den mangler (sikkerhetsnett)
+            // Choose Obstacle if not exists
             if (report.Obstacle == null)
                 report.Obstacle = new ObstacleData();
 
-            // Hvis bruker velger “Annet” og skriver tekst selv, lar vi feltet være fritt
+            // If user choose other, free text
             if (!string.IsNullOrWhiteSpace(obstacleType))
                 report.Obstacle.ObstacleType = obstacleType.Trim();
 
@@ -242,7 +240,7 @@ namespace NRL_PROJECT.Controllers
                 return RedirectToAction(nameof(RegistrarView));
             }
 
-            // ✅ Sikkerhetsjekk: sørg for at valgt bruker faktisk ER registerfører
+            // Safetycheck: Ensure target user is a Registrar
             var targetUser = await _userManager.FindByIdAsync(transferToUserId);
             if (targetUser == null || !(await _userManager.IsInRoleAsync(targetUser, "Registrar")))
             {
@@ -250,7 +248,7 @@ namespace NRL_PROJECT.Controllers
                 return RedirectToAction(nameof(ReportDetails), new { id });
             }
 
-            // ✅ Alt OK — overfør rapporten
+            // All OK — transfer report
             report.ReviewedByUserID = transferToUserId;
             await _context.SaveChangesAsync();
 
@@ -272,7 +270,7 @@ namespace NRL_PROJECT.Controllers
                    .ThenInclude(m => m.Coordinates)
                 .AsQueryable();
 
-            // Rens eventuelle "Alle (2)" -> "Alle"
+            // Status filter
             if (!string.IsNullOrWhiteSpace(status) &&
                 status.StartsWith("Alle", StringComparison.OrdinalIgnoreCase))
             {
@@ -305,10 +303,9 @@ namespace NRL_PROJECT.Controllers
                 query = query.Where(r =>
                     r.ObstacleReportID.ToString().Contains(q) ||
 
-                    // ObstacleType trygt når r.Obstacle kan være null
+                    // ObstacleType
                     (r.Obstacle != null ? r.Obstacle.ObstacleType : "").Contains(q) ||
 
-                    // Fornavn + etternavn trygt når r.User kan være null
                     (
                         (r.UserName != null ? r.User.FirstName : "") + " " +
                         (r.UserName != null ? r.User.LastName : "")
@@ -324,14 +321,13 @@ namespace NRL_PROJECT.Controllers
 
           // DateTime? -> DateTime
           TimeOfSubmittedReport = r.ObstacleReportDate,
-
-          // Relasjon kan være null
+                    
           ObstacleID = r.Obstacle != null ? r.Obstacle.ObstacleID : 0,
           ObstacleType = r.Obstacle != null ? (r.Obstacle.ObstacleType ?? "") : "",
           ObstacleComment = r.Obstacle != null ? (r.Obstacle.ObstacleComment ?? "") : "",
           ObstacleHeight = r.Obstacle != null ? r.Obstacle.ObstacleHeight : 0,
 
-          // Koordinater: MapData kan være null, og lista kan være tom
+          // Coordinates
           Latitude =
               (r.MapData != null && r.MapData.Coordinates.Any())
                   ? r.MapData.Coordinates
@@ -348,20 +344,19 @@ namespace NRL_PROJECT.Controllers
                       .FirstOrDefault() ?? 0
                   : 0,
 
-          // Status/kommentar
-          ReportStatus = MapToUi(r.ObstacleReportStatus),       
+          // Status/Comment
+          ReportStatus = MapToUi(r.ObstacleReportStatus),
           StatusComment = r.ObstacleReportComment ?? "",
 
-          // Bruker
+          // User
           UserName = r.User != null
-    ? (
-        // prøv først Fornavn + Etternavn
+            ? (
+        
         !string.IsNullOrWhiteSpace(r.User.FirstName) || !string.IsNullOrWhiteSpace(r.User.LastName)
             ? $"{(r.User.FirstName ?? "").Trim()} {(r.User.LastName ?? "").Trim()}".Trim()
-            // ellers: bruk brukernavn / e-post
-            : r.User.UserName
-      )
-    : "",
+             : r.User.UserName
+            )
+            : "",
 
           OrgName = r.User != null && r.User.Organisation != null
             ? (r.User.Organisation.OrgName ?? "Ukjent")
@@ -383,4 +378,3 @@ namespace NRL_PROJECT.Controllers
     }
 
 }
-
