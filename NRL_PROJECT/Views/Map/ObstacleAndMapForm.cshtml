@@ -6,8 +6,20 @@
 }
 
 <div class="text-center mb-10">
-	<h1 class="text-4xl md:text-5xl font-extrabold text-sky-400 tracking-tight"> Register Obstacle Report</h1>
+	<h1 class="text-4xl md:text-5xl font-extrabold text-sky-400 tracking-tight"> Registrer hinder</h1>
 	<p class="text-slate-300 mt-3 text-lg">Fyll inn rapportdetaljer, legg til et bilde og marker posisjon på kartet.</p>
+</div>
+
+<!--  Melding om at du jobber med utkast -->
+<div id="restoreNotice"
+     class="bg-yellow-600/70 text-white text-center p-4 rounded-xl mb-6 font-semibold shadow-md"
+     style="display:none;">
+    ⚠️ Et tidligere utkast ble gjenopprettet. Du kan fortsette der du slapp.
+    <button id="clearDraftBtn"
+            type="button"
+            class="ml-3 bg-red-700 hover:bg-red-800 text-white px-3 py-1 rounded-lg font-semibold shadow-md">
+        Tøm utkast
+    </button>
 </div>
 
 <form asp-action="SubmitObstacleWithLocation" asp-controller="Map" method="post" enctype="multipart/form-data" class="space-y-10">
@@ -15,11 +27,11 @@
 
 	<!--  OBSTACLE INFORMATION -->
 	<div class="bg-slate-700/60 rounded-2xl p-8 shadow-lg border border-slate-600">
-        <h2 class="text-2xl font-bold text-sky-300 mb-6"> Obstacle Information</h2>
+        <h2 class="text-2xl font-bold text-sky-300 mb-6"> Informasjon om hinderet</h2>
         
         <!--  MAP SECTION -->
         <div class="bg-slate-700/60 rounded-2xl p-8 shadow-lg border border-slate-600">
-            <h2 class="text-2xl md:text-3xl font-bold text-amber-400 mb-4 text-center">🗺️ Draw Obstacle Location</h2>
+            <h2 class="text-2xl md:text-3xl font-bold text-amber-400 mb-4 text-center">🗺️ Marker hinder i kartet</h2>
             <p class="text-center text-slate-300 mb-8 text-lg">Bruk kartverktøyene for å markere hinderet.</p>
 
             <div id="mapDraw" class="z-10" style="height: 400px;"></div>
@@ -27,13 +39,13 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 			<div>
-				<label asp-for="ObstacleComment" class="block text-sm font-medium text-sky-200">Comment</label>
+				<label asp-for="ObstacleComment" class="block text-sm font-medium text-sky-200">Kommentar</label>
 				<textarea asp-for="ObstacleComment" rows="3" class="mt-1 block w-full bg-slate-900 border-slate-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-400 focus:outline-none"></textarea>
 				<span asp-validation-for="ObstacleComment" class="text-red-500 text-sm"></span>
 			</div>
 
 			<div>
-				<label asp-for="ImageFile" class="block text-sm font-medium text-sky-200">Upload Image</label>
+				<label asp-for="ImageFile" class="block text-sm font-medium text-sky-200">Last opp bilde</label>
 				<input asp-for="ImageFile"
 					   type="file"
 					   accept="image/*"
@@ -176,6 +188,86 @@
 
             // Clear hidden field if everything was removed (keep your existing logic)
             document.getElementById('GeoJsonCoordinates').value = '';
+        });
+
+                        // LOCAL STORAGE: utkast-funksjon for kommentar og GeoJSON
+        // ------------------------------------------------------------
+        const formKey = "ObstacleReportForm";
+
+        // Gjenopprett lagrede data når siden lastes
+        window.addEventListener("load", () => {
+          const notice = document.getElementById("restoreNotice");
+          const saved = localStorage.getItem(formKey);
+          notice.style.display = "none";
+          if (!saved) return;
+
+          const data = JSON.parse(saved);
+          const hasComment = data.comment && data.comment.trim().length > 0;
+          const hasGeo = data.geoJson && data.geoJson.trim().length > 0;
+
+          if (!(hasComment || hasGeo)) {
+            localStorage.removeItem(formKey);
+            return;
+          }
+
+          if (hasComment) {
+            document.querySelector('[name="ObstacleComment"]').value = data.comment;
+          }
+          if (hasGeo) {
+            document.getElementById('GeoJsonCoordinates').value = data.geoJson; // ✅ riktig sted
+            notice.style.display = "block";
+          }
+
+          // Tegn markør eller linje hvis geojson finnes
+          try {
+            const geom = JSON.parse(data.geoJson);
+            if (geom.type === "Point" && geom.coordinates?.length === 2) {
+              const [lng, lat] = geom.coordinates;
+              const restoredMarker = L.marker([lat, lng]).addTo(map);
+              map.setView([lat, lng], 15);
+            }
+            else if (geom.type === "LineString" && Array.isArray(geom.coordinates)) {
+              const latlngs = geom.coordinates.map(([lng, lat]) => [lat, lng]);
+              const restoredLine = L.polyline(latlngs, { color: "orange", weight: 4 }).addTo(map);
+              map.fitBounds(restoredLine.getBounds());
+            }
+          } catch (err) {
+            console.warn("Kunne ikke gjenopprette geometri:", err);
+          }
+        });
+
+        // Lagre hvert 5. sekund (bare hvis det finnes data)
+        setInterval(() => {
+          const comment = document.querySelector('[name="ObstacleComment"]').value || "";
+          const geo = document.getElementById('GeoJsonCoordinates').value || "";
+          const hasComment = comment.trim().length > 0;
+          const hasGeo = geo.trim().length > 0;
+
+          if (hasComment || hasGeo) {
+            localStorage.setItem(formKey, JSON.stringify({ comment, geoJson: geo }));
+          } else {
+            localStorage.removeItem(formKey);
+          }
+        }, 5000);
+
+        // Fjern ved innsending
+        document.querySelector("form").addEventListener("submit", () => {
+          localStorage.removeItem(formKey);
+        });
+
+        // Manuell tømming av utkast
+        document.getElementById("clearDraftBtn").addEventListener("click", () => {
+          if (confirm("Er du sikker på at du vil slette utkastet?")) {
+            localStorage.removeItem(formKey);
+            document.querySelector('[name="ObstacleComment"]').value = "";
+            document.getElementById('GeoJsonCoordinates').value = "";
+            map.eachLayer(l => {
+              if (l instanceof L.Marker || l instanceof L.Polyline) {
+                map.removeLayer(l);
+              }
+            });
+            document.getElementById("restoreNotice").style.display = "none";
+          }
         });
     </script>
 }

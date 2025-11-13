@@ -6,7 +6,7 @@ namespace NRL_PROJECT.Models
     public class ObstacleReportViewModel
     {
         //innsender
-        public string? UserID { get; set; }
+        // public string? UserID { get; set; }
         public string? UserName { get; set; }
 
         public int ObstacleReportID { get; set; }                 // ID til rapporten
@@ -17,7 +17,7 @@ namespace NRL_PROJECT.Models
         public string? ObstacleType { get; set; }
         public double? ObstacleHeight { get; set; }
         public double? ObstacleWidth { get; set; }
-        public string? ObstacleComment { get; set; }
+        public string ObstacleComment { get; set; } = "";
         public int ObstacleID { get; set; }
 
 
@@ -29,6 +29,8 @@ namespace NRL_PROJECT.Models
         public string? GeoJsonCoordinates { get; set; }   
         public double Latitude { get; set; }
         public double Longitude { get; set; }
+
+        public string CoordinateSummary { get; set; }
 
         // Statusfelt (valgfritt, for registerførervisning)
         public EnumStatus? ReportStatus { get; set; }

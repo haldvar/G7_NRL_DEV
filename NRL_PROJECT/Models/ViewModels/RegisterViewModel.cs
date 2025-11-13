@@ -6,7 +6,7 @@ namespace NRL_PROJECT.Models.ViewModels
     {
         [Required]
         [Display(Name = "Brukernavn")]
-        public string Username { get; set; }
+        public string UserName { get; set; }
 
         [Required]
         [EmailAddress]

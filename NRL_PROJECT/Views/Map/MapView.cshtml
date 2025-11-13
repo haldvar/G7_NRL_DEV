@@ -15,30 +15,39 @@
 <partial name="_MapDrawPartial" model="Model" />
 
 <h1 class="text-5xl md:text-6xl font-extrabold text-purple-700 text-center mb-4 tracking-wide">
-    🗺️ Register Map Location
+    🗺️ Nylig innrapporterte luftfartshindre
 </h1>
 <p class="text-gray-600 text-center text-lg md:text-xl mb-12">
-    Draw a point or a line on the map below and submit your obstacle.
+    Her vises luftfartshindre som er innmeldt den siste måneden. 
 </p>
 
 <form method="post" asp-action="Submit" asp-controller="Map"
       class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-6 z-10">
     <input type="hidden" id="geoInput" name="GeoJsonCoordinates" />
 
-    <button type="submit"
+    <a asp-action="ReportListOverview" asp-controller="Map"
             class="bg-green-600 text-white px-12 py-5 rounded-2xl font-semibold text-2xl md:text-3xl shadow-xl hover:bg-green-700 hover:shadow-2xl transition">
-        ✅ Submit Drawing
-    </button>
+        📋Rapportoversikt
+    </a>
 
-    <a asp-action="Index" asp-controller="Home"
-       class="bg-gray-600 text-white px-12 py-5 rounded-2xl font-semibold text-2xl md:text-3xl shadow-xl hover:bg-gray-700 hover:shadow-2xl transition">
-        ❌ Cancel
+    <a asp-action="ObstacleAndMapForm" asp-controller="Map"
+       class="bg-green-600 text-white px-12 py-5 rounded-2xl font-semibold text-2xl md:text-3xl shadow-xl hover:bg-green-700 hover:shadow-2xl transition">
+       ✅ Registrer nytt hinder
     </a>
 </form>
 
 @section Styles {
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
+ 
+    <!-- small styling for report tooltips / label marker and control -->
+    <style>
+        .report-tooltip { font-weight: 700; font-size: 0.95rem; color: #111; }
+        .label-control { font-size: 0.9rem; padding: 6px; }
+        .label-control input { margin-right: 6px; vertical-align: middle; }
+        .report-label-icon { pointer-events: auto; } /* ensure label reacts to clicks */
+        .report-label-div { background: rgba(255,255,255,0.9); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.06); }
+    </style>
 }
 
 @section Scripts {
@@ -78,5 +87,135 @@
         map.on('pm:remove', () => {
             document.getElementById('geoInput').value = '';
         });
+
+        // ---- Render reported obstacles (points and lines) ----
+        // Build a JS array of reports with available geometry on the server side.
+        const reportedItems = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            (Model.ObstacleReports ?? Enumerable.Empty<NRL_PROJECT.Models.ObstacleReportData>())
+                .Where(r => r.MapData != null && !string.IsNullOrWhiteSpace(r.MapData.GeoJsonCoordinates))
+                .Select(r => new {
+                    id = r.ObstacleReportID,
+                    geometry = r.MapData.GeoJsonCoordinates,
+                    geometryType = r.MapData.GeometryType,
+                    comment = r.ObstacleReportComment,
+                    user = string.IsNullOrEmpty(r.UserName) ? r.UserId : r.UserName,
+                    date = r.ObstacleReportDate
+                })
+                .ToList()
+        ));
+
+        // Feature group to collect layers for fitBounds
+        const reportsGroup = L.featureGroup().addTo(map);
+
+        // Keep track of label markers so we can toggle behavior
+        const labelMarkers = [];
+        // Default: checkbox should be checked, enable click-to-open by default
+        let showLabelClick = true;
+
+        // Add a simple map control (checkbox) to enable/disable label click-to-view
+        const labelControl = L.control({ position: 'topright' });
+        labelControl.onAdd = function () {
+            const container = L.DomUtil.create('div', 'label-control bg-white rounded shadow p-2');
+            // Set the checkbox to checked by default
+            container.innerHTML = '<label><input id="labelToggle" type="checkbox" checked /> Show report on label click</label>';
+            // Prevent map dragging when interacting with the control
+            L.DomEvent.disableClickPropagation(container);
+            return container;
+        };
+        labelControl.addTo(map);
+
+        // Update the showLabelClick flag when user toggles
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggle = document.getElementById('labelToggle');
+            if (toggle) {
+                // Ensure internal flag matches the checkbox initial state (checked by default)
+                showLabelClick = toggle.checked;
+                toggle.addEventListener('change', (e) => {
+                    showLabelClick = e.target.checked;
+                });
+            }
+        });
+
+        for (const rep of reportedItems) {
+            try {
+                // rep.geometry is a JSON string of the geometry object (e.g. {"type":"Point","coordinates":[lng,lat]})
+                const geom = JSON.parse(rep.geometry);
+
+                if (!geom || !geom.type) continue;
+
+                // Build popup content once and reuse for marker/poly/label
+                const popupHtml = `<strong>Report #${rep.id}</strong><br/>${rep.comment ? rep.comment : ''}<br/>${rep.user ? rep.user : ''}`;
+                const tooltipHtml = `<span class="report-tooltip">Report #${rep.id}</span>`;
+
+                if (geom.type === "Point") {
+                    const coords = geom.coordinates; // [lng, lat]
+                    if (Array.isArray(coords) && coords.length >= 2) {
+                        const latlng = [coords[1], coords[0]];
+                        const marker = L.marker(latlng, { title: `Report #${rep.id}` });
+                        marker.bindPopup(popupHtml);
+
+                        // Show id on hover
+                        marker.bindTooltip(tooltipHtml, { sticky: true, direction: 'top', className: '' });
+
+                        marker.addTo(reportsGroup);
+                    }
+                } else if (geom.type === "LineString") {
+                    const coords = geom.coordinates; // array of [lng, lat]
+                    if (Array.isArray(coords) && coords.length > 0) {
+                        const latlngs = coords.map(p => [p[1], p[0]]);
+                        const poly = L.polyline(latlngs, { color: 'red', weight: 3, opacity: 0.8 });
+                        poly.bindPopup(popupHtml);
+
+                        // Tooltip on hover
+                        poly.bindTooltip(tooltipHtml, { sticky: true, direction: 'center', className: '' });
+
+                        // Add midpoint label marker for quick identification.
+                        const midIndex = Math.floor(latlngs.length / 2);
+                        if (latlngs[midIndex]) {
+                            const mid = latlngs[midIndex];
+
+                            // Div icon so we can style the label. Make it interactive so it can be clicked.
+                            const label = L.marker(mid, {
+                                interactive: true,
+                                icon: L.divIcon({
+                                    className: 'report-label-div report-label-icon',
+                                    html: `<div class="report-label-div">#${rep.id}</div>`,
+                                    iconSize: [40, 18]
+                                })
+                            });
+
+                            // Click handler opens report popup if the user enabled the option.
+                            label.on('click', function (ev) {
+                                if (showLabelClick) {
+                                    // Open a popup at the label position with the same report info.
+                                    L.popup({ offset: [0, -10] })
+                                        .setLatLng(label.getLatLng())
+                                        .setContent(popupHtml)
+                                        .openOn(map);
+                                }
+                            });
+
+                            // Store label for potential future use (toggle styling, remove, etc.)
+                            labelMarkers.push({ marker: label, popup: popupHtml });
+
+                            // Add the label marker to the group so fitBounds includes it and it renders
+                            label.addTo(reportsGroup);
+                        }
+
+                        poly.addTo(reportsGroup);
+                    }
+                } else {
+                    // optionally handle MultiPoint, MultiLineString etc.
+                }
+            } catch (ex) {
+                // Ignore invalid geometry for robustness, but you can log via an endpoint if needed.
+                console.warn('Invalid geometry for report', rep.id, ex);
+            }
+        }
+
+        // If we added any reported layers, adjust view to include them
+        if (reportsGroup.getLayers().length > 0) {
+            map.fitBounds(reportsGroup.getBounds().pad(0.15));
+        }
     </script>
 }

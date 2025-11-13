@@ -38,14 +38,19 @@
 
                 <!-- Desktop menu -->
                 <div class="hidden space-x-6 font-medium md:flex">
-                    <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                    <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="MapView">Map</a>
-                    <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="About">About</a>
-                    <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                    <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Meny</a>
+                    <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ObstacleAndMapForm">Meld hinder</a>
+                    <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="MapView">Situasjonskart</a>
+                    <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="About">Om oss</a>
                     
                     @if (User.IsInRole("Admin"))
                     {
-                        <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Admin" asp-action="ManageUsers">User Management</a>
+                        <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Admin" asp-action="ManageUsers">Brukerhåndtering</a>
+                    }
+
+                    @if (User.IsInRole("Registrar"))
+                    {
+                        <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Registrar" asp-action="RegistrarView">Rapporthåndtering</a>
                     }
                 </div>
             </div>
@@ -53,10 +58,13 @@
             <!-- Right side: Statusbar -->
             <div class="hidden items-center space-x-6 text-sm font-medium md:flex">
                 <span class="text-gray-600">👤 Logget inn som <strong>@User.Identity.Name</strong></span>
-                <span class="rounded-full bg-green-100 px-3 py-1 text-xs text-green-700">Active Obstacles: 12</span>
+                <span class="text-gray-600">
+                    Antall rapporter:
+                    <span class="ml-2 text-sm font-medium md:flex">@ViewBag.ReportCount</span>
+                </span>
                 <form asp-controller="Account" asp-action="Logout" method="post" class="inline">
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="rounded-lg bg-red-500 px-4 py-2 text-white transition hover:bg-red-600">Log out</button>
+                    <button type="submit" class="rounded-lg bg-red-500 px-4 py-2 text-white transition hover:bg-red-600">Logg ut</button>
                 </form>
             </div>
 
@@ -72,10 +80,11 @@
         <!-- Mobile dropdown -->
         <div id="mobile-menu" class="hidden border-t bg-white shadow-sm md:hidden">
             <div class="space-y-2 px-6 py-4">
-                <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="MapView">Map</a>
-                <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="About">About</a>
-                <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Meny</a>
+                <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ObstacleAndMapForm">Meld hinder</a>
+                <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="MapView">Situasjonskart</a>
+                <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="About">Om oss</a>
+                
                 
                 @if (User.IsInRole("Admin"))
                 {

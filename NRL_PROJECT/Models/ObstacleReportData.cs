@@ -18,8 +18,10 @@ namespace NRL_PROJECT.Models
 
         //  Brukeren som opprettet rapporten
         [ForeignKey(nameof(User))]
-        public string? UserID { get; set; }
+        public string? UserId { get; set; }
         public User? User { get; set; }
+
+        public string UserName { get; set; }
 
         [Required]
         public string ObstacleReportComment { get; set; } = string.Empty;
@@ -37,6 +39,9 @@ namespace NRL_PROJECT.Models
         [ForeignKey(nameof(MapData))]
         public int? MapDataID { get; set; }
         public MapData? MapData { get; set; }
+
+        // Initialize to empty so EF will send a non-null value on INSERT
+        public string CoordinateSummary { get; set; } = string.Empty;
 
         //  Enum for status på rapporten
         public enum EnumTypes

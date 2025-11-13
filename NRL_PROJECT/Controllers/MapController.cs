@@ -1,9 +1,10 @@
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
 using System.Text.Json;
-using Microsoft.AspNetCore.Hosting;
 
 namespace NRL_PROJECT.Controllers
 {
@@ -11,11 +12,13 @@ namespace NRL_PROJECT.Controllers
     {
         private readonly NRL_Db_Context _context;
         private readonly IWebHostEnvironment _environment;
+        private readonly UserManager<User> _userManager;
 
-        public MapController(NRL_Db_Context context, IWebHostEnvironment environment)
+        public MapController(NRL_Db_Context context, IWebHostEnvironment environment, UserManager<User> userManager)
         {
             _context = context;
             _environment = environment;
+            _userManager = userManager;
         }
 
         // GET: /Map/ObstacleAndMapForm
@@ -31,20 +34,19 @@ namespace NRL_PROJECT.Controllers
                 }
             };
 
-            return View(new ObstacleData());
+            return View(model);
         }
 
         // POST: /Map/SubmitObstacleWithLocation
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SubmitObstacleWithLocation(ObstacleData model, ObstacleReportData model2)
+        public async Task<IActionResult> SubmitObstacleWithLocation(ObstacleData model)
         {
-            if (model.MapData == null)
-            { 
-                model.MapData = new MapData();
-                return View("ObstacleAndMapForm", model);
-            }
+            // Sikre at MapData alltid finnes
             model.MapData ??= new MapData();
+
+            if (string.IsNullOrWhiteSpace(model.ObstacleComment))
+                model.ObstacleComment = "Missing";
 
             if (string.IsNullOrWhiteSpace(model.MapData.GeoJsonCoordinates))
             {
@@ -93,8 +95,8 @@ namespace NRL_PROJECT.Controllers
             // ✅ Lagre MapData
             _context.MapDatas.Add(model.MapData);
             await _context.SaveChangesAsync();
-            
-            //  Håndter bildeopplasting
+
+            // Håndter bildeopplasting
             string? imagePath = null;
             if (model.ImageFile != null && model.ImageFile.Length > 0)
             {
@@ -113,44 +115,32 @@ namespace NRL_PROJECT.Controllers
                 imagePath = "/uploads/" + uniqueFileName;
             }
 
-            
-
-            // ✅ Lagre Obstacle
-            var obstacle = new ObstacleData
-            {
-                ObstacleType = model.ObstacleType,
-                ObstacleHeight = model.ObstacleHeight,
-                ObstacleWidth = model.ObstacleWidth,
-                ObstacleComment = model.ObstacleComment,
-                ObstacleImageURL = imagePath,                 // ✅ ASSIGN THE URL
-                MapData = model.MapData
-            };
-            if (obstacle.ObstacleComment == null)
-            {
-                obstacle.ObstacleComment = "Empty";
-            }
-            _context.Obstacles.Add(obstacle);
+            // ✅ Oppdater obstacle direkte (ingen duplisering)
+            model.ObstacleImageURL = imagePath;
+            _context.Obstacles.Add(model);
             await _context.SaveChangesAsync();
 
-            
-
-            //  Opprett rapport-oppføring
+            // Hent innlogget bruker
+            var currentUserId = _userManager.GetUserId(User);
+            var currentUser = await _userManager.GetUserAsync(User);
+            // Opprett rapport
             var report = new ObstacleReportData
             {
-                ObstacleID = obstacle.ObstacleID,
-                UserID = null, // ingen bruker koblet enda
-                ReviewedByUserID = null,
+                ObstacleID = model.ObstacleID,
+                UserId = string.IsNullOrWhiteSpace(currentUserId) ? null : currentUserId,
+                UserName = currentUser?.UserName ?? currentUser?.Email ?? "Anonymous",
                 ObstacleReportComment = "Her skal Registerfører kunne skrive inn kommentar.",
                 ObstacleReportDate = DateTime.UtcNow,
                 ObstacleReportStatus = ObstacleReportData.EnumTypes.New,
-                MapDataID = obstacle.MapData.MapDataID,
+                MapDataID = model.MapData?.MapDataID,
+                CoordinateSummary = model.MapData?.CoordinateSummary ?? string.Empty
             };
-
             _context.ObstacleReports.Add(report);
             await _context.SaveChangesAsync();
 
             return View("MapConfirmation", model.MapData);
         }
+
 
 
         // GET: /Map/ReportListOverview
@@ -194,7 +184,7 @@ namespace NRL_PROJECT.Controllers
                 ObstacleReportDate = DateTime.UtcNow,
                 ObstacleReportStatus = ObstacleReportData.EnumTypes.New,
                 MapDataID = mapData.MapDataID,
-                UserID = null,
+                UserId = null,
                 ReviewedByUserID = null,
             };
 
@@ -263,21 +253,33 @@ namespace NRL_PROJECT.Controllers
         }
 
         // GET: /Map/MapView
-        [HttpGet]
-        public IActionResult MapView()
+        public async Task<IActionResult> MapView(int? id)
         {
-            var defaultMapData = new MapData
+            // Load the MapData to use as base model (if id provided), otherwise create empty
+            MapData model;
+            if (id.HasValue)
             {
-                GeometryType = "Point",
-                MapZoomLevel = 12,
-                Coordinates = new List<MapCoordinate>
-                {
-                    new MapCoordinate { Latitude = 60.3913, Longitude = 5.3221, OrderIndex = 0 }
-                }
-            };
+                model = await _context.MapDatas
+                    .Include(m => m.Coordinates)
+                    .FirstOrDefaultAsync(m => m.MapDataID == id.Value) ?? new MapData();
+            }
+            else
+            {
+                model = new MapData();
+            }
 
-            return View(defaultMapData);
+            // Populate ObstacleReports (load reports that have MapData with geometry)
+            var reportsWithGeometry = await _context.ObstacleReports
+                .Include(r => r.MapData)
+                .Where(r => r.MapData != null && !string.IsNullOrWhiteSpace(r.MapData.GeoJsonCoordinates))
+                .ToListAsync();
+
+            // Attach for the view (so Model.ObstacleReports is available to the Razor)
+            model.ObstacleReports = reportsWithGeometry;
+
+            return View(model);
         }
+
 
         // POST: /Map/Submit
         [HttpPost]
