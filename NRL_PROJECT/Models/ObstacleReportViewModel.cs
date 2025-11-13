@@ -8,9 +8,9 @@ namespace NRL_PROJECT.Models
         //innsender
         // public string? UserID { get; set; }
         public string? UserName { get; set; }
-
-        public int ObstacleReportID { get; set; }                 // ID til rapporten
-        public DateTime TimeOfSubmittedReport { get; set; } // tidspunkt
+        public string OrgName { get; set; } = string.Empty;
+        public int ObstacleReportID { get; set; }                 
+        public DateTime TimeOfSubmittedReport { get; set; } 
 
         // Kobling til hindring
         public string? ObstacleName { get; set; }
@@ -37,6 +37,10 @@ namespace NRL_PROJECT.Models
 
         // For enkel sjekk i view
         public bool HasCoordinates => Latitude != 0 && Longitude != 0;
+
+        // Registrar 
+        public string? AssignedRegistrarUserID { get; set; }
+        public string? TransferToUserID { get; set; }
     }
 }
 
