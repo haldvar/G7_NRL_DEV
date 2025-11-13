@@ -1,9 +1,72 @@
 @model NRL_PROJECT.Models.ObstacleData
 
 @section Styles {
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+	<link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
+
+	<style>
+		<!-- Norgeskart-stil knapper -->
+		<div id="mapButtons" class="absolute bottom-6 right-4 flex flex-col gap-3 z-20" >
+		<button type="button" id="btnLocate" class="map-btn-norge" title="Finn min posisjon" aria-label="Finn min posisjon" >
+		<img src="~/icons/helicopter.svg" alt="Finn posisjon" width="26" height="26" >
+		</button >
+		<button type="button" id="btnDrawPoint" class="map-btn-norge" title="Marker hinder" aria-label="Marker hinder" >
+		<img src="~/map-pin.svg" alt="Marker hinder" width="26" height="26" >
+		</button >
+		<button type="button" id="btnDrawLine" class="map-btn-norge" title="Tegn linje" aria-label="Tegn linje" >
+		<img src="~/icons/line.svg" alt="Tegn linje" width="26" height="26" >
+		</button >
+		</div >
+		<!-- Sletteknapp alene oppe til venstre -->
+		<div id="mapButtonsLeft" class="absolute top-6 left-4 z-20" >
+		<button type="button" id="btnClearDraw" class="map-btn-norge" title="Fjern tegning" aria-label="Fjern tegning" >
+		<img src="~/icons/trash-x.svg" alt="Fjern tegning" width="26" height="26" >
+		</button >
+		</div >
+	</style>
+
+	<style>
+		.map-btn-norge {
+			width: 56px;
+			height: 56px;
+			background-color: rgba(255, 255, 255, 0.85);
+			border: none;
+			border-radius: 50%;
+			backdrop-filter: blur(6px);
+			box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.map-btn-norge img {
+			width: 26px;
+			height: 26px;
+			opacity: 0.9;
+			user-select: none;
+		}
+
+
+		.map-btn-norge:hover {
+			transform: scale(1.08);
+			box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+		}
+
+		.map-btn-norge:active {
+			transform: scale(0.95);
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+		}
+
+		.map-btn-norge img {
+			width: 28px;
+			height: 28px;
+			opacity: 0.9;
+			pointer-events: none;
+		}
+	</style>
+
 }
+
 
 <div class="text-center mb-10">
 	<h1 class="text-4xl md:text-5xl font-extrabold text-sky-400 tracking-tight"> Registrer hinder</h1>
@@ -12,14 +75,14 @@
 
 <!--  Melding om at du jobber med utkast -->
 <div id="restoreNotice"
-     class="bg-yellow-600/70 text-white text-center p-4 rounded-xl mb-6 font-semibold shadow-md"
-     style="display:none;">
-    ⚠️ Et tidligere utkast ble gjenopprettet. Du kan fortsette der du slapp.
-    <button id="clearDraftBtn"
-            type="button"
-            class="ml-3 bg-red-700 hover:bg-red-800 text-white px-3 py-1 rounded-lg font-semibold shadow-md">
-        Tøm utkast
-    </button>
+	 class="bg-yellow-600/70 text-white text-center p-4 rounded-xl mb-6 font-semibold shadow-md"
+	 style="display:none;">
+	⚠️ Et tidligere utkast ble gjenopprettet. Du kan fortsette der du slapp.
+	<button id="clearDraftBtn"
+			type="button"
+			class="ml-3 bg-red-700 hover:bg-red-800 text-white px-3 py-1 rounded-lg font-semibold shadow-md">
+		Tøm utkast
+	</button>
 </div>
 
 <form asp-action="SubmitObstacleWithLocation" asp-controller="Map" method="post" enctype="multipart/form-data" class="space-y-10">
@@ -27,17 +90,57 @@
 
 	<!--  OBSTACLE INFORMATION -->
 	<div class="bg-slate-700/60 rounded-2xl p-8 shadow-lg border border-slate-600">
-        <h2 class="text-2xl font-bold text-sky-300 mb-6"> Informasjon om hinderet</h2>
-        
-        <!--  MAP SECTION -->
-        <div class="bg-slate-700/60 rounded-2xl p-8 shadow-lg border border-slate-600">
-            <h2 class="text-2xl md:text-3xl font-bold text-amber-400 mb-4 text-center">🗺️ Marker hinder i kartet</h2>
-            <p class="text-center text-slate-300 mb-8 text-lg">Bruk kartverktøyene for å markere hinderet.</p>
+		<h2 class="text-2xl font-bold text-sky-300 mb-6"> Informasjon om hinderet</h2>
 
-            <div id="mapDraw" class="z-10" style="height: 400px;"></div>
-        </div>
+		<!-- MAP SECTION -->
+		<div class="bg-slate-700/60 rounded-2xl p-8 shadow-lg border border-slate-600">
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+			<h2 class="text-2xl md:text-3xl font-bold text-amber-400 mb-4 text-center">🗺️ Marker hinderposisjon</h2>
+			<p class="text-center text-slate-300 mb-6 text-lg">Bruk helikopterknappen for å finne din posisjon.</p>
+
+			<!-- STABIL KART-CONTAINER -->
+			<div id="mapWrapper" class="relative rounded-xl overflow-hidden" style="height: 400px;">
+
+				<!-- Leaflet-kartet -->
+				<div id="mapDraw" class="absolute inset-0 z-0"></div>
+
+				<!-- Finn posisjon-knapp -->
+				<button id="btnLocate"
+						type="button"
+						class="map-btn-norge absolute bottom-4 right-4 z-[9999]"
+						aria-label="Finn min posisjon">
+					<img src="~/icons/helicopter.svg" alt="Finn posisjon" />
+				</button>
+
+				<!-- Marker punkt-knapp -->
+				<button id="btnDrawPoint"
+						type="button"
+						class="map-btn-norge absolute bottom-[84px] right-4 z-[9999]"
+						aria-label="Marker punkt">
+					<img src="/icons/map-pin.svg" alt="Marker punkt">
+				</button>
+
+				<!-- Tegn linje-knapp -->
+				<button id="btnDrawLine"
+						type="button"
+						class="map-btn-norge absolute bottom-[148px] right-4 z-[9999]"
+						aria-label="Tegn linje">
+					<img src="/icons/line.svg" alt="Tegn linje">
+				</button>
+				<!-- Sletteknapp -->
+				<button id="btnClearDraw"
+						type="button"
+						class="map-btn-norge absolute top-4 left-4 z-[9999]"
+						aria-label="Fjern tegning">
+					<img src="~/icons/trash-x.svg" alt="Fjern tegning" />
+				</button>
+
+			</div>
+		</div>
+
+
+
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
 			<div>
 				<label asp-for="ObstacleComment" class="block text-sm font-medium text-sky-200">Kommentar</label>
 				<textarea asp-for="ObstacleComment" rows="3" class="mt-1 block w-full bg-slate-900 border-slate-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-400 focus:outline-none"></textarea>
@@ -53,27 +156,24 @@
 					   class="mt-1 block w-full bg-slate-900 border-slate-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-400 focus:outline-none" />
 				<span asp-validation-for="ImageFile" class="text-red-500 text-sm"></span>
 			</div>
-
 		</div>
 
 		<!-- Hidden map fields -->
-        <input type="hidden" asp-for="MapData.GeoJsonCoordinates" id="GeoJsonCoordinates" />
-
+		<input type="hidden" asp-for="MapData.GeoJsonCoordinates" id="GeoJsonCoordinates" />
 	</div>
-    
+
 	<!--  SUBMIT / CANCEL BUTTONS -->
 	<div class="flex flex-col md:flex-row justify-center gap-6 mt-10">
 		<button type="submit"
 				class="bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-4 rounded-2xl font-bold text-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all">
-			 Submit Report
+			Submit Report
 		</button>
 		<a asp-action="Index" asp-controller="Home"
 		   class="bg-red-600 hover:bg-red-700 text-white px-10 py-4 rounded-2xl font-bold text-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all text-center">
-			 Cancel
+			Cancel
 		</a>
 	</div>
 </form>
-
 
 @if (!ViewData.ModelState.IsValid)
 {
@@ -88,174 +188,204 @@
 }
 
 @section Scripts {
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
-    <script>
-        // Init kartet med fallback til et standardpunkt
-        const map = L.map('mapDraw', {zoomControl: false }).setView([58.333, 8.233], 13);
+	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+	<script src="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
+	<script>
 
-        L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {
-            layers: 'topo',
-            format: 'image/png',
-            transparent: false,
-            attribution: '© Kartverket'
-        }).addTo(map);
+		// ------------------------------------------------------------
+		// HELIKOPTER-IKON SOM "MIN POSISJON"
+		// ------------------------------------------------------------
+		const helicopterIcon = L.icon({
+			iconUrl: '/icons/helicopter.svg',
+			iconSize: [38, 38],
+			iconAnchor: [19, 19],  // midten av ikonet
+			popupAnchor: [0, -12]
+		});
 
-        // Zoom control (already created at bottom-right)
-        const zoomCtl = L.control.zoom({ position: 'bottomright' }).addTo(map);
+		// ------------------------------------------------------------
+		// INITIALISER KART – touch optimalisert, uten Leaflet/Geoman toolbar
+		// ------------------------------------------------------------
+		const map = L.map('mapDraw', {
+			zoomControl: false,
+			touchZoom: true,
+			scrollWheelZoom: true,
+			doubleClickZoom: true,
+			boxZoom: false
+		}).setView([58.333, 8.233], 13);
 
-        map.pm.addControls({
-            position: 'bottomright',
-            drawText: false,
-            drawMarker: true,
-            drawPolyline: true,
-            drawPolygon: false,
-            drawCircle: false,
-            drawCircleMarker: false,
-            drawRectangle: false,
-            editMode: false,
-            removalMode: false,
-            cutPolygon: false,
-            dragMode: false,
-            rotateMode: false,
-        });
+		L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {
+			layers: 'topo',
+			format: 'image/png',
+			transparent: false,
+			attribution: '© Kartverket'
+		}).addTo(map);
 
-        // A feature group to track user-drawn layers (so we can enforce "one at a time")
-        const drawn = L.featureGroup().addTo(map);
+		// Fjern alle Geoman-knapper (vi bruker våre egne)
+		map.pm.addControls({ drawMarker: false, drawPolyline: false, editMode: false, removalMode: false });
+		if (map.pm?.Toolbar) map.pm.Toolbar.removeControls();
 
-        // 1) Limit Polyline to TWO points (finish draw on second click)
-        map.on('pm:drawstart', ({ shape, workingLayer }) => {
-            if (shape === 'Line') {
-                workingLayer.on('pm:vertexadded', () => {
-                    const pts = workingLayer.getLatLngs();
-                    if (pts.length >= 2) {
-                        // finish current line immediately after the 2nd point
-                        if (map.pm?.Draw?.Line?._finishShape) {
-                            map.pm.Draw.Line._finishShape(); // adds the finished layer to the map
-                        } else {
-                            // Fallback: stop draw mode; the second click will have created the layer already
-                            map.pm.disableDraw();
-                        }
-                    }
-                });
-            }
-});
+		// Fiks for Leaflet inside flex / Tailwind container
+		setTimeout(() => {
+			map.invalidateSize();
+		}, 300);
 
-        // 2) Allow only ONE Marker total (replace previous or disable the button)
-        let currentMarker = null;
 
-        map.on('pm:create', (e) => {
-            const { layer, shape } = e;
+		// ------------------------------------------------------------
+		// POSISJON – BRUK HELIKOPTER SOM MARKØR
+		// ------------------------------------------------------------
+		function locateUser() {
+			map.locate({
+				setView: true,
+				maxZoom: 18,
+				enableHighAccuracy: true,
+				timeout: 10000,
+				maximumAge: 0
+			});
+		}
 
-            // Put new layers into our tracking group
-            drawn.addLayer(layer);
+		map.on("locationfound", (e) => {
+			// Fjern forrige posisjonsmarkør
+			if (window.currentPosMarker) map.removeLayer(window.currentPosMarker);
+			if (window.currentPosCircle) map.removeLayer(window.currentPosCircle);
 
-            if (shape === 'Marker') {
-                // If there's already a marker, remove it (keeping only the newest)
-                if (currentMarker && map.hasLayer(currentMarker)) {
-                    map.removeLayer(currentMarker);
-                }
-                currentMarker = layer;
+			// Nøyaktighetssjekk
+			if (e.accuracy > 200) {
+				L.popup()
+					.setLatLng(e.latlng)
+					.setContent(`⚠️ Posisjon for upresis (±${Math.round(e.accuracy)} m).`)
+					.openOn(map);
+				return;
+			}
 
-                // Optionally disable the "drawMarker" button after one is placed
-                if (map.pm?.Toolbar?.setButtonDisabled) {
-                    map.pm.Toolbar.setButtonDisabled('drawMarker', true);
-                }
-            }
+			// Helikopter-markør (min posisjon)
+			window.currentPosMarker = L.marker(e.latlng, { icon: helicopterIcon })
+				.addTo(map)
+				.bindPopup(`🚁 Helikopterposisjon<br>Nøyaktighet: ±${Math.round(e.accuracy)} m`)
+				.openPopup();
 
-            if (shape === 'Line') {
-                // Ensure any existing polylines are removed so only one line is kept
-                drawn.eachLayer((l) => {
-                    if (l !== layer && l instanceof L.Polyline && !(l instanceof L.Polygon)) {
-                        map.removeLayer(l);
-                    }
-                });
-            }
+			// Nøyaktighetssirkel (kan fjernes hvis du ikke vil ha den)
+			window.currentPosCircle = L.circle(e.latlng, {
+				radius: Math.min(e.accuracy / 2, 100),
+				color: "blue",
+				weight: 2,
+				opacity: 0.6,
+				fillOpacity: 0.15
+			}).addTo(map);
+		});
 
-            // Update your hidden input (keep your existing logic)
-            const geojson = layer.toGeoJSON();
-            document.getElementById('GeoJsonCoordinates').value = JSON.stringify(geojson.geometry);
-        });
+		map.on("locationerror", () => {
+			console.warn("Posisjon ikke tilgjengelig – marker manuelt.");
+		});
 
-        // Re-enable marker drawing if the marker gets removed
-        map.on('pm:remove', (e) => {
-            if (e.layer === currentMarker) {
-                currentMarker = null;
-                if (map.pm?.Toolbar?.setButtonDisabled) {
-                    map.pm.Toolbar.setButtonDisabled('drawMarker', false);
-                }
-            }
+		// ------------------------------------------------------------
+		// TEGNING – via egne knapper (ett objekt om gangen)
+		// ------------------------------------------------------------
+		const drawn = L.featureGroup().addTo(map);
 
-            // Clear hidden field if everything was removed (keep your existing logic)
-            document.getElementById('GeoJsonCoordinates').value = '';
-        });
+		function startDrawPoint() {
+			map.pm.disableDraw();
+			map.pm.enableDraw('Marker', { snappable: false });
+		}
 
-                        // ------------------------------------------------------------
-                // LOCAL STORAGE: utkast-funksjon for kommentar og GeoJSON
-                // ------------------------------------------------------------
-                const formKey = "ObstacleReportForm";
-                // Gjenopprett lagrede data når siden lastes
-                window.addEventListener("load", () => {
-                  const notice = document.getElementById("restoreNotice");
-                  const saved = localStorage.getItem(formKey);
-                  notice.style.display = "none";
-                  if (!saved) return;
-                  const data = JSON.parse(saved);
-                  const hasComment = data.comment && data.comment.trim().length > 0;
-                  const hasGeo = data.geoJson && data.geoJson.trim().length > 0;
-                  if (!(hasComment || hasGeo)) {
-                    localStorage.removeItem(formKey);
-                    return;
-                  }
-                  if (hasComment)
-                    document.querySelector('[name="ObstacleComment"]').value = data.comment;
-                  if (hasGeo) {
-                    document.getElementById('GeoJsonCoordinates').value = data.geoJson;
-                    notice.style.display = "block";
-                // Tegn markør eller linje hvis geojson finnes
-                try {
-                  const geom = JSON.parse(data.geoJson);
-                  if (geom.type === "Point" && geom.coordinates?.length === 2) {
-                    const [lng, lat] = geom.coordinates;
-                    const restoredMarker = L.marker([lat, lng]).addTo(map);
-                    map.setView([lat, lng], 15);
-                  }
-                  else if (geom.type === "LineString" && Array.isArray(geom.coordinates)) {
-                    // Konverter koordinatpar til Leaflet-format
-                    const latlngs = geom.coordinates.map(([lng, lat]) => [lat, lng]);
-                    const restoredLine = L.polyline(latlngs, { color: "orange", weight: 4 }).addTo(map);
-                    map.fitBounds(restoredLine.getBounds());
-                  }
-                } catch (err) {
-                  console.warn("Kunne ikke gjenopprette geometri:", err);
-                }
-                  }
-                });
-                // Lagre hvert 5. sekund (bare hvis det finnes data)
-                setInterval(() => {
-                  const comment = document.querySelector('[name="ObstacleComment"]').value || "";
-                  const geo = document.getElementById('GeoJsonCoordinates').value || "";
-                  const hasComment = comment.trim().length > 0;
-                  const hasGeo = geo.trim().length > 0;
-                  if (hasComment || hasGeo) {
-                    localStorage.setItem(formKey, JSON.stringify({ comment, geoJson: geo }));
-                  } else {
-                    localStorage.removeItem(formKey);
-                  }
-                }, 5000);
-                // Fjern ved innsending
-                document.querySelector("form").addEventListener("submit", () => {
-                  localStorage.removeItem(formKey);
-                });
-                // Manuell tømming av utkast
-                document.getElementById("clearDraftBtn").addEventListener("click", () => {
-                  if (confirm("Er du sikker på at du vil slette utkastet?")) {
-                    localStorage.removeItem(formKey);
-                    document.querySelector('[name="ObstacleComment"]').value = "";
-                    document.getElementById('GeoJsonCoordinates').value = "";
-                    map.eachLayer(l => { if (l instanceof L.Marker) map.removeLayer(l); });
-                    document.getElementById("restoreNotice").style.display = "none";
-                  }
-                });
-    </script>
+		function startDrawLine() {
+			map.pm.disableDraw();
+			map.pm.enableDraw('Line', { snappable: false });
+		}
+
+		function clearDraw() {
+			drawn.clearLayers();
+			document.getElementById('GeoJsonCoordinates').value = '';
+			map.pm.disableDraw();
+		}
+
+		map.on('pm:create', (e) => {
+			drawn.clearLayers();
+			drawn.addLayer(e.layer);
+			map.pm.disableDraw();
+
+			document.getElementById('GeoJsonCoordinates').value =
+				JSON.stringify(e.layer.toGeoJSON().geometry);
+		});
+
+		// ------------------------------------------------------------
+		// KOBLE TIL EGNE KNAPPER (type="button" viktig!)
+		// ------------------------------------------------------------
+		document.getElementById("btnLocate").addEventListener("click", locateUser);
+		document.getElementById("btnDrawPoint").addEventListener("click", startDrawPoint);
+		document.getElementById("btnDrawLine").addEventListener("click", startDrawLine);
+		document.getElementById("btnClearDraw").addEventListener("click", clearDraw);
+
+		// ------------------------------------------------------------
+		// LOCAL STORAGE – utkast (kommentar + geometri)
+		// ------------------------------------------------------------
+		const formKey = "ObstacleReportForm";
+
+		window.addEventListener("load", () => {
+			const notice = document.getElementById("restoreNotice");
+			const saved = localStorage.getItem(formKey);
+			notice.style.display = "none";
+			if (!saved) return;
+
+			let data = null;
+			try { data = JSON.parse(saved); }
+			catch { localStorage.removeItem(formKey); return; }
+
+			const hasComment = data.comment && data.comment.trim().length > 0;
+			const hasGeo = data.geoJson && data.geoJson.trim().length > 0;
+
+			if (!(hasComment || hasGeo)) { localStorage.removeItem(formKey); return; }
+
+			if (hasComment)
+				document.querySelector('[name="ObstacleComment"]').value = data.comment;
+
+			if (hasGeo) {
+				document.getElementById('GeoJsonCoordinates').value = data.geoJson;
+				notice.style.display = "block";
+
+				// Tegn markør eller linje hvis geojson finnes
+				try {
+					const geom = JSON.parse(data.geoJson);
+					if (geom.type === "Point" && geom.coordinates?.length === 2) {
+						const [lng, lat] = geom.coordinates;
+						const restoredMarker = L.marker([lat, lng]).addTo(map);
+						drawn.clearLayers();
+						drawn.addLayer(restoredMarker);
+						map.setView([lat, lng], 15);
+					} else if (geom.type === "LineString" && Array.isArray(geom.coordinates)) {
+						const latlngs = geom.coordinates.map(([lng, lat]) => [lat, lng]);
+						const restoredLine = L.polyline(latlngs, { color: "orange", weight: 4 }).addTo(map);
+						drawn.clearLayers();
+						drawn.addLayer(restoredLine);
+						map.fitBounds(restoredLine.getBounds());
+					}
+				} catch (err) {
+					console.warn("Kunne ikke gjenopprette geometri:", err);
+				}
+			}
+		});
+
+		// Autosave hvert 5. sekund
+		setInterval(() => {
+			const comment = document.querySelector('[name="ObstacleComment"]').value || "";
+			const geo = document.getElementById('GeoJsonCoordinates').value || "";
+			if (comment.trim() || geo.trim())
+				localStorage.setItem(formKey, JSON.stringify({ comment, geoJson: geo }));
+			else
+				localStorage.removeItem(formKey);
+		}, 5000);
+
+		// Fjern ved innsending
+		document.querySelector("form").addEventListener("submit", () => localStorage.removeItem(formKey));
+
+		// Manuell tømming av utkast
+		document.getElementById("clearDraftBtn").addEventListener("click", () => {
+			if (confirm("Er du sikker på at du vil slette utkastet?")) {
+				localStorage.removeItem(formKey);
+				document.querySelector('[name="ObstacleComment"]').value = "";
+				document.getElementById('GeoJsonCoordinates').value = "";
+				drawn.clearLayers();
+				document.getElementById("restoreNotice").style.display = "none";
+			}
+		});
+	</script>
 }
