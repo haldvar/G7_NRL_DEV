@@ -1,4 +1,4 @@
-﻿@model NRL_PROJECT.Models.ObstacleReportViewModel
+@model NRL_PROJECT.Models.ObstacleReportViewModel
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @using System.Globalization
 
@@ -222,12 +222,12 @@
                     </div>
                                         
                     <div class="sm:col-span-2">
-                        <dt class="font-semibold text-slate-700">Innsender (UserID)</dt>
+                        <dt class="font-semibold text-slate-700">Innsender:</dt>
                         <dd>
                             @Model.UserID
                             @if (!string.IsNullOrWhiteSpace(Model.UserName))
                             {
-                                <span class="text-slate-500"> — @Model.UserName</span>
+                                <span class="text-slate-500"> @Model.UserName</span>
                             }
                         </dd>
                     </div>

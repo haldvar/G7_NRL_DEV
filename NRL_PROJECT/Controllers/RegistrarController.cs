@@ -164,10 +164,13 @@ namespace NRL_PROJECT.Controllers
                 ReportStatus = MapToUi(report.ObstacleReportStatus),
 
                 // Bruker
-                UserID = report.User?.Id ?? "",
-                UserName = report.User != null
-                    ? $"{(report.User.FirstName ?? "").Trim()} {(report.User.LastName ?? "").Trim()}".Trim()
-                    : "Ukjent",
+                UserName = report.UserID != null
+    ? (
+        !string.IsNullOrWhiteSpace(report.User.FirstName) || !string.IsNullOrWhiteSpace(report.User.LastName)
+            ? $"{(report.User.FirstName ?? "").Trim()} {(report.User.LastName ?? "").Trim()}".Trim()
+            : report.User.UserName
+      )
+    : "Ukjent",
                 OrgName = report.User?.Organisation != null
                     ? (report.User.Organisation.OrgName ?? "Ukjent")
                     : "Ukjent",
@@ -307,8 +310,8 @@ namespace NRL_PROJECT.Controllers
 
                     // Fornavn + etternavn trygt når r.User kan være null
                     (
-                        (r.User != null ? r.User.FirstName : "") + " " +
-                        (r.User != null ? r.User.LastName : "")
+                        (r.UserID != null ? r.User.FirstName : "") + " " +
+                        (r.UserID != null ? r.User.LastName : "")
                     ).Contains(q)
                 );
             }
@@ -350,10 +353,16 @@ namespace NRL_PROJECT.Controllers
           StatusComment = r.ObstacleReportComment ?? "",
 
           // Bruker
-          UserID = r.UserID ?? "",
-          UserName = r.User != null
-              ? $"{(r.User.FirstName ?? "").Trim()} {(r.User.LastName ?? "").Trim()}".Trim()
-              : "Ukjent",
+          UserID = r.User != null
+    ? (
+        // prøv først Fornavn + Etternavn
+        !string.IsNullOrWhiteSpace(r.User.FirstName) || !string.IsNullOrWhiteSpace(r.User.LastName)
+            ? $"{(r.User.FirstName ?? "").Trim()} {(r.User.LastName ?? "").Trim()}".Trim()
+            // ellers: bruk brukernavn / e-post
+            : r.User.UserName
+      )
+    : "",
+
           OrgName = r.User != null && r.User.Organisation != null
             ? (r.User.Organisation.OrgName ?? "Ukjent")
             : "Ukjent",
