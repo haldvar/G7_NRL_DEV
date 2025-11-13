@@ -44,10 +44,10 @@ namespace NRL_PROJECT.Controllers
         {
             // Sikre at MapData alltid finnes
             model.MapData ??= new MapData();
-
+            
             if (string.IsNullOrWhiteSpace(model.ObstacleComment))
                 model.ObstacleComment = "Missing";
-
+        
             if (string.IsNullOrWhiteSpace(model.MapData.GeoJsonCoordinates))
             {
                 ModelState.AddModelError("", "Du må minst angi ett punkt på kartet.");
