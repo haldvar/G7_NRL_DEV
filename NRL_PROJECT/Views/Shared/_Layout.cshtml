@@ -38,14 +38,19 @@
 
                 <!-- Desktop menu -->
                 <div class="hidden space-x-6 font-medium md:flex">
-                    <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Meny</a>
-                    <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="MapView">Situasjonskart</a>
-                    <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="About">Om prosjektet</a>
-                    <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Privacy">Personvern</a>
+                    <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Meny</a>
+                    <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ObstacleAndMapForm">Meld hinder</a>
+                    <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="MapView">Situasjonskart</a>
+                    <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="About">Om oss</a>
                     
                     @if (User.IsInRole("Admin"))
                     {
                         <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Admin" asp-action="ManageUsers">Brukerhåndtering</a>
+                    }
+
+                    @if (User.IsInRole("Registrar"))
+                    {
+                        <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Registrar" asp-action="RegistrarView">Rapporthåndtering</a>
                     }
                 </div>
             </div>
@@ -76,9 +81,10 @@
         <div id="mobile-menu" class="hidden border-t bg-white shadow-sm md:hidden">
             <div class="space-y-2 px-6 py-4">
                 <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Meny</a>
+                <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ObstacleAndMapForm">Meld hinder</a>
                 <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="MapView">Situasjonskart</a>
-                <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="About">Om prosjektet</a>
-                <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Privacy">Personvern</a>
+                <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="About">Om oss</a>
+                
                 
                 @if (User.IsInRole("Admin"))
                 {
