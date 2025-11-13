@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using static NRL_PROJECT.Models.ObstacleReportData;
 using BackendStatus = NRL_PROJECT.Models.ObstacleReportData.EnumTypes;
 using EnumStatus = NRL_PROJECT.Models.ObstacleReportData.EnumTypes;
 using UiStatus = NRL_PROJECT.Models.EnumStatus;
@@ -262,6 +263,7 @@ namespace NRL_PROJECT.Controllers
             var query = _context.ObstacleReports
                 .Include(r => r.Obstacle)
                 .Include(r => r.User)
+                    .ThenInclude(u => u.Organisation)
                 .Include(r => r.Reviewer)
                 .Include(r => r.MapData)
                    .ThenInclude(m => m.Coordinates)
@@ -274,12 +276,23 @@ namespace NRL_PROJECT.Controllers
                 status = "Alle";
             }
 
-            // Bare filtrer hvis status er IKKE "Alle" og faktisk matcher enum
             if (!string.IsNullOrWhiteSpace(status) &&
-                !string.Equals(status, "Alle", StringComparison.OrdinalIgnoreCase) &&
-                Enum.TryParse<EnumStatus>(status, ignoreCase: true, out var parsed))
+                !string.Equals(status, "Alle", StringComparison.OrdinalIgnoreCase))
             {
-                query = query.Where(r => r.ObstacleReportStatus == parsed);
+                EnumTypes? filterStatus = status switch
+                {
+                    "Ny" => EnumTypes.New,
+                    "Venter" => EnumTypes.Open,
+                    "UnderBehandling" => EnumTypes.InProgress,
+                    "Godkjent" => EnumTypes.Resolved,
+                    "Avvist" => EnumTypes.Deleted,
+                    _ => null
+                };
+
+                if (filterStatus.HasValue)
+                {
+                    query = query.Where(r => r.ObstacleReportStatus == filterStatus.Value);
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(q))
@@ -341,6 +354,9 @@ namespace NRL_PROJECT.Controllers
           UserName = r.User != null
               ? $"{(r.User.FirstName ?? "").Trim()} {(r.User.LastName ?? "").Trim()}".Trim()
               : "Ukjent",
+          OrgName = r.User != null && r.User.Organisation != null
+            ? (r.User.Organisation.OrgName ?? "Ukjent")
+            : "Ukjent",
 
           AssignedRegistrarUserID = r.Reviewer != null
             ? r.Reviewer.UserName

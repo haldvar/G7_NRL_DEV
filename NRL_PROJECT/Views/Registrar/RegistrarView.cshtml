@@ -1,4 +1,4 @@
-﻿@model IEnumerable<NRL_PROJECT.Models.ObstacleReportViewModel>
+@model IEnumerable<NRL_PROJECT.Models.ObstacleReportViewModel>
 @using EnumStatus = NRL_PROJECT.Models.EnumStatus
 @using System.Globalization
 
@@ -119,13 +119,21 @@
                             @r.TimeOfSubmittedReport.ToString("dd.MM.yyyy HH:mm")
                         </div>
                         <div class="mt-1 text-sm text-slate-600">
-                            <span class="text-slate-500">Innsender (UserID):</span> @r.UserID
+                            <span class="text-slate-500">Innsender:</span> @r.UserID
                             @if (!string.IsNullOrWhiteSpace(r.UserName))
                             {
-                                <span class="text-slate-400">—</span> 
+                                <span class="text-slate-400"></span> 
                                 @r.UserName
                             }
                         </div>
+                        @if (!string.IsNullOrWhiteSpace(r.OrgName))
+                        {
+                            <div class="text-sm text-slate-600">
+                                <span class="text-slate-500">Organisasjon:</span>
+                                @r.OrgName
+                            </div>
+                        }
+
                     </div>
                 <div class="flex shrink-0 flex-col items-end gap-1 text-sm text-slate-600">
 
