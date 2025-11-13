@@ -12,8 +12,8 @@ using NRL_PROJECT.Data;
 namespace NRL_PROJECT.Migrations
 {
     [DbContext(typeof(NRL_Db_Context))]
-    [Migration("20251112174704_InitialCreate81")]
-    partial class InitialCreate81
+    [Migration("20251113124510_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -248,10 +248,6 @@ namespace NRL_PROJECT.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ObstacleComment")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("ObstacleDescription")
                         .HasColumnType("longtext");
 
                     b.Property<double>("ObstacleHeight")

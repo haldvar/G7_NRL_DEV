@@ -9,14 +9,14 @@ namespace NRL_PROJECT.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ObstacleID { get; set; }
-        public string? ObstacleDescription { get; set; }
+        // public string? ObstacleDescription { get; set; }
 
         [Required]
         public string ObstacleType { get; set; } = "Ukjent";
 
         public double ObstacleHeight { get; set; }
         public double ObstacleWidth { get; set; }
-        public string ObstacleComment { get; set; } = "";
+        public string? ObstacleComment { get; set; }
         
         //  URL / filsti til bilde lagret i wwwroot/uploads
         [StringLength(255)]

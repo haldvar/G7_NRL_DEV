@@ -162,13 +162,11 @@ namespace NRL_PROJECT.Migrations
                 {
                     ObstacleID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    ObstacleDescription = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
                     ObstacleType = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ObstacleHeight = table.Column<double>(type: "double", nullable: false),
                     ObstacleWidth = table.Column<double>(type: "double", nullable: false),
-                    ObstacleComment = table.Column<string>(type: "longtext", nullable: false)
+                    ObstacleComment = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ObstacleImageURL = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -359,7 +357,9 @@ namespace NRL_PROJECT.Migrations
                     ObstacleReportStatus = table.Column<int>(type: "int", nullable: false),
                     ReviewedByUserID = table.Column<string>(type: "varchar(255)", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    MapDataID = table.Column<int>(type: "int", nullable: true)
+                    MapDataID = table.Column<int>(type: "int", nullable: true),
+                    CoordinateSummary = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {

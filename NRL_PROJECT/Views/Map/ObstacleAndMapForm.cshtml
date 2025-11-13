@@ -194,6 +194,7 @@
                 // LOCAL STORAGE: utkast-funksjon for kommentar og GeoJSON
                 // ------------------------------------------------------------
                 const formKey = "ObstacleReportForm";
+                
                 // Gjenopprett lagrede data når siden lastes
                 window.addEventListener("load", () => {
                   const notice = document.getElementById("restoreNotice");
@@ -207,11 +208,11 @@
                     localStorage.removeItem(formKey);
                     return;
                   }
-                  if (hasComment)
-                    document.querySelector('[name="ObstacleComment"]').value = data.comment;
-                  if (hasGeo) {
-                    document.getElementById('GeoJsonCoordinates').value = data.geoJson;
+
+                  if (hasComment || hasGeo) {
                     notice.style.display = "block";
+                  }
+
                 // Tegn markør eller linje hvis geojson finnes
                 try {
                   const geom = JSON.parse(data.geoJson);
@@ -229,8 +230,9 @@
                 } catch (err) {
                   console.warn("Kunne ikke gjenopprette geometri:", err);
                 }
-                  }
+                  
                 });
+
                 // Lagre hvert 5. sekund (bare hvis det finnes data)
                 setInterval(() => {
                   const comment = document.querySelector('[name="ObstacleComment"]').value || "";
@@ -243,19 +245,22 @@
                     localStorage.removeItem(formKey);
                   }
                 }, 5000);
+
                 // Fjern ved innsending
                 document.querySelector("form").addEventListener("submit", () => {
                   localStorage.removeItem(formKey);
                 });
+
                 // Manuell tømming av utkast
                 document.getElementById("clearDraftBtn").addEventListener("click", () => {
                   if (confirm("Er du sikker på at du vil slette utkastet?")) {
                     localStorage.removeItem(formKey);
                     document.querySelector('[name="ObstacleComment"]').value = "";
                     document.getElementById('GeoJsonCoordinates').value = "";
-                    map.eachLayer(l => { if (l instanceof L.Marker) map.removeLayer(l); });
+                    map.eachLayer(l => {
+                     if (l instanceof L.Marker || l instanceof L.Polyline) {map.removeLayer(l);}});
                     document.getElementById("restoreNotice").style.display = "none";
-                  }
-                });
+                    }
+                    });
     </script>
 }
