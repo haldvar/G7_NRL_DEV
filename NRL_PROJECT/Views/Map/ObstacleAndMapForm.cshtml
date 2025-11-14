@@ -5,7 +5,7 @@
 	<link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
 
 	<style>
-		/* STORE, NORGESKART-LIGNENDE KNAPPER */
+		/* STORE KNAPPER */
 		.map-btn-norge {
 			width: 120px;
 			height: 120px;
@@ -41,7 +41,37 @@
 				transition: all 0.2s ease;
 			}
 
+		/* Større popup-boble */
+		.leaflet-popup-content-wrapper {
+			padding: 20px 26px;
+			font-size: 1.2rem;
+			line-height: 1.4;
+		}
+
+		/* Tykkere kant og rundere hjørner */
+		.leaflet-popup-content-wrapper,
+		.leaflet-popup-tip {
+			background: white;
+			border-radius: 14px;
+			box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+		}
+
+		/* Popup-tekst */
+		.popup-heading {
+			font-size: 1.4rem;
+			font-weight: 700;
+			margin-bottom: 8px;
+		}
+
+		.popup-accuracy {
+			font-size: 1.2rem;
+			opacity: 0.8;
+		}
+
+
 	</style>
+
+
 }
 
 
@@ -146,6 +176,7 @@
 			Submit Report
 		</button>
 		<a asp-action="Index" asp-controller="Home"
+		   id="cancelBtn"
 		   class="bg-red-600 hover:bg-red-700 text-white px-10 py-4 rounded-2xl font-bold text-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all text-center">
 			Cancel
 		</a>
@@ -188,7 +219,17 @@
 			scrollWheelZoom: true,
 			doubleClickZoom: true,
 			boxZoom: false
-		}).setView([58.333, 8.233], 13);
+		});
+
+		// Første posisjonsforsøk – setView = true
+		map.locate({
+			setView: true,
+			maxZoom: 18,
+			enableHighAccuracy: true,
+			timeout: 10000,
+			maximumAge: 0
+		});
+
 
 		L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {
 			layers: 'topo',
@@ -224,21 +265,42 @@
 			// Fjern forrige posisjonsmarkør
 			if (window.currentPosMarker) map.removeLayer(window.currentPosMarker);
 			if (window.currentPosCircle) map.removeLayer(window.currentPosCircle);
+		// Nøyaktighetssjekk – vis stor advarsel og lukk automatisk etter 3 sek
+		if (e.accuracy > 200) {
 
-			// Nøyaktighetssjekk
-			if (e.accuracy > 200) {
-				L.popup()
-					.setLatLng(e.latlng)
-					.setContent(`⚠️ Posisjon for upresis (±${Math.round(e.accuracy)} m).`)
-					.openOn(map);
-				return;
-			}
+			const popup = L.popup({
+				closeButton: false,
+				autoPan: true,
+				className: 'accuracy-popup'
+			})
+			.setLatLng(e.latlng)
+			.setContent(`
+				<div class="popup-warning-heading">⚠️ Posisjon for upresis</div>
+				<div class="popup-warning-text">Nøyaktighet: ±${Math.round(e.accuracy)} m</div>
+			`)
+			.openOn(map);
+
+			// Auto-close etter 3 sek
+			setTimeout(() => map.closePopup(popup), 3000);
+
+			return;
+		}
+
 
 			// Helikopter-markør (min posisjon)
 			window.currentPosMarker = L.marker(e.latlng, { icon: helicopterIcon })
 				.addTo(map)
-				.bindPopup(`🚁 Helikopterposisjon<br>Nøyaktighet: ±${Math.round(e.accuracy)} m`)
+				.bindPopup(`
+					<div class="popup-heading">🚁 Helikopterposisjon</div>
+					<div class="popup-accuracy">Nøyaktighet: ±${Math.round(e.accuracy)} m</div>
+				`)
 				.openPopup();
+
+			// Lukk popup etter 3 sekunder
+			setTimeout(() => {
+				window.currentPosMarker.closePopup();
+			}, 3000);
+
 
 			// Nøyaktighetssirkel (kan fjernes hvis du ikke vil ha den)
 			window.currentPosCircle = L.circle(e.latlng, {
@@ -313,7 +375,7 @@
 		// ------------------------------------------------------------
 		// KOBLE TIL EGNE KNAPPER (type="button" viktig!)
 		// ------------------------------------------------------------
-			const btnLocate = document.getElementById("btnLocate");
+		const btnLocate = document.getElementById("btnLocate");
 		const btnPoint = document.getElementById("btnDrawPoint");
 		const btnLine = document.getElementById("btnDrawLine");
 		const btnClear = document.getElementById("btnClearDraw");
@@ -420,6 +482,14 @@
 
 		// Fjern ved innsending
 		document.querySelector("form").addEventListener("submit", () => localStorage.removeItem(formKey));
+
+		// Fjern ved cancel
+		const cancelBtn = document.getElementById("cancelBtn");
+			if (cancelBtn) {
+				cancelBtn.addEventListener("click", () => {
+					localStorage.removeItem("ObstacleReportForm");
+			});
+		}
 
 		// Manuell tømming av utkast
 		document.getElementById("clearDraftBtn").addEventListener("click", () => {
