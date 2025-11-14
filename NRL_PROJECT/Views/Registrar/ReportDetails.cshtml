@@ -65,7 +65,7 @@
 
                     <textarea name="comment" rows="3"
                               class="w-full rounded-xl border px-3 py-2 text-sm"
-                              placeholder="Kommentar (valgfritt)"></textarea>
+                              placeholder="Kommentar (valgfritt)">@Model.StatusComment</textarea>
 
                     <div class="flex flex-wrap gap-3 pt-1">
                         <button name="status" value="UnderBehandling" type="submit"
@@ -195,13 +195,20 @@
             <div class="sm:col-span-2">
                 <dt class="font-semibold text-slate-700">Lokasjon</dt>
                 <dd>
-                    @if (!string.IsNullOrWhiteSpace(Model.GeoJsonCoordinates))
+                    @if (Model.MapData?.Coordinates?.Any() == true)
                     {
-                        <span>Data fra kart</span>
+                        foreach (var c in Model.MapData.Coordinates.OrderBy(c => c.OrderIndex))
+                        {
+                            <div>@c.Latitude.ToString("F6"), @c.Longitude.ToString("F6")</div>
+                        }
+                    }
+                    else if (Model.Latitude != 0 && Model.Longitude != 0)
+                    {
+                        <div>@Model.Latitude.ToString("F6"), @Model.Longitude.ToString("F6")</div>
                     }
                     else
                     {
-                        <span>@Model.Latitude, @Model.Longitude</span>
+                        <span class="text-slate-400">Ingen koordinater</span>
                     }
                 </dd>
             </div>
@@ -257,13 +264,17 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
+    <!-- ⭐ NYTT KARTSCRIPT – MINSTE MULIGE ENDRING -->
     <script>
         (function () {
 
-            const geometry = @safeGeometryJson;
-
-            const fallbackLat = parseFloat('@(Model.Latitude.ToString(inv))');
-            const fallbackLng = parseFloat('@(Model.Longitude.ToString(inv))');
+            // Hent koordinater fra mapdata
+            const latlngs = [
+                @foreach (var c in Model.MapData.Coordinates.OrderBy(c => c.OrderIndex))
+                {
+                        <text>[ @c.Latitude, @c.Longitude ],</text>
+                }
+            ];
 
             const map = L.map('map', { zoomControl: true });
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -271,65 +282,17 @@
                 attribution: '&copy; OpenStreetMap'
             }).addTo(map);
 
-            const latlngs = [];
-
-            if (geometry && geometry.type === "Point") {
-
-                const [lng, lat] = geometry.coordinates;
-                const ll = [lat, lng];
-
-                latlngs.push(ll);
-                L.marker(ll)
-                    .addTo(map)
-                    .bindPopup(`<b>@Model.ObstacleType</b><br/>Lat: ${lat}, Lon: ${lng}`);
-
-            } else if (geometry && geometry.type === "LineString") {
-
-                geometry.coordinates.forEach(pair => {
-                    const [lng, lat] = pair;
-                    const ll = [lat, lng];
-                    latlngs.push(ll);
-
-                    L.marker(ll)
-                        .addTo(map)
-                        .bindPopup(`<b>@Model.ObstacleType</b><br/>Lat: ${lat}, Lon: ${lng}`);
-                });
-
-                L.polyline(latlngs, { weight: 3 }).addTo(map);
-            }
-            else if (!isNaN(fallbackLat) && !isNaN(fallbackLng)) {
-
-                const ll = [fallbackLat, fallbackLng];
-                latlngs.push(ll);
-
-                L.marker(ll)
-                    .addTo(map)
-                    .bindPopup(`<b>@Model.ObstacleType</b><br/>Lat: ${fallbackLat}, Lon: ${fallbackLng}`);
-            }
-
-            // Centering
-            if (latlngs.length === 0) {
-                map.setView([65, 13], 4);
-            } else if (latlngs.length === 1) {
+            if (latlngs.length === 1) {
+                L.marker(latlngs[0]).addTo(map);
                 map.setView(latlngs[0], 15);
-            } else {
+            }
+            else if (latlngs.length > 1) {
+                latlngs.forEach(ll => L.marker(ll).addTo(map));
+                L.polyline(latlngs, { weight: 3 }).addTo(map);
                 map.fitBounds(L.latLngBounds(latlngs).pad(0.2));
             }
 
         })();
-
-        // "Annet"-toggle
-        (function () {
-            const select = document.getElementById('type-select');
-            const custom = document.getElementById('customType');
-            if (!select || !custom) return;
-
-            const toggle = () => {
-                custom.style.display = (select.value === 'Annet') ? 'block' : 'none';
-            };
-
-            select.addEventListener('change', toggle);
-            toggle();
-        })();
     </script>
 }
+
