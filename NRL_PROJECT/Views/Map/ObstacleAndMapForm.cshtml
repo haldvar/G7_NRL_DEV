@@ -5,66 +5,43 @@
 	<link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
 
 	<style>
-		<!-- Norgeskart-stil knapper -->
-		<div id="mapButtons" class="absolute bottom-6 right-4 flex flex-col gap-3 z-20" >
-		<button type="button" id="btnLocate" class="map-btn-norge" title="Finn min posisjon" aria-label="Finn min posisjon" >
-		<img src="~/icons/helicopter.svg" alt="Finn posisjon" width="45" height="45" >
-		</button >
-		<button type="button" id="btnDrawPoint" class="map-btn-norge" title="Marker hinder" aria-label="Marker hinder" >
-		<img src="~/map-pin.svg" alt="Marker hinder" width="26" height="26" >
-		</button >
-		<button type="button" id="btnDrawLine" class="map-btn-norge" title="Tegn linje" aria-label="Tegn linje" >
-		<img src="~/icons/line.svg" alt="Tegn linje" width="26" height="26" >
-		</button >
-		</div >
-		<!-- Sletteknapp alene oppe til venstre -->
-		<div id="mapButtonsLeft" class="absolute top-6 left-4 z-20" >
-		<button type="button" id="btnClearDraw" class="map-btn-norge" title="Fjern tegning" aria-label="Fjern tegning" >
-		<img src="~/icons/trash-x.svg" alt="Fjern tegning" width="26" height="26" >
-		</button >
-		</div >
-	</style>
-
-	<style>
+		/* STORE, NORGESKART-LIGNENDE KNAPPER */
 		.map-btn-norge {
-			width: 56px;
-			height: 56px;
+			width: 120px;
+			height: 120px;
 			background-color: rgba(255, 255, 255, 0.85);
 			border: none;
 			border-radius: 50%;
 			backdrop-filter: blur(6px);
-			box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+			box-shadow: 0 4px 12px rgba(0,0,0,0.30);
 			display: flex;
 			align-items: center;
 			justify-content: center;
+			transition: transform 0.15s ease, box-shadow 0.2s ease;
 		}
 
-		.map-btn-norge img {
-			width: 26px;
-			height: 26px;
-			opacity: 0.9;
-			user-select: none;
-		}
+			.map-btn-norge img {
+				width: 90px;
+				height: 90px;
+				pointer-events: none;
+				opacity: 0.95;
+			}
 
+			.map-btn-norge:active {
+				transform: scale(0.92);
+				background-color: rgba(0, 200, 100, 0.9);
+				box-shadow: 0 0 20px rgba(0, 200, 100, 0.6);
+				box-shadow: 0 2px 6px rgba(0,0,0,0.40);
+			}
 
-		.map-btn-norge:hover {
-			transform: scale(1.08);
-			box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
-		}
+			.active-map-btn {
+				background-color: rgba(0, 200, 100, 0.9) !important;
+				box-shadow: 0 0 25px rgba(0, 200, 100, 0.6) !important;
+				transform: scale(1.05);
+				transition: all 0.2s ease;
+			}
 
-		.map-btn-norge:active {
-			transform: scale(0.95);
-			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-		}
-
-		.map-btn-norge img {
-			width: 28px;
-			height: 28px;
-			opacity: 0.9;
-			pointer-events: none;
-		}
 	</style>
-
 }
 
 
@@ -104,39 +81,38 @@
 				<!-- Leaflet-kartet -->
 				<div id="mapDraw" class="absolute inset-0 z-0"></div>
 
-				<!-- Finn posisjon-knapp -->
-				<button id="btnLocate"
-						type="button"
-						class="map-btn-norge absolute bottom-4 right-4 z-[9999]"
-						aria-label="Finn min posisjon">
-					<img src="~/icons/helicopter.svg" alt="Finn posisjon" />
-				</button>
+				<!-- KNAPPESTACK (punkt, linje) -->
+				<div id="mapButtons" class="absolute bottom-6 right-4 flex flex-col gap-3 z-[9999]">
 
-				<!-- Marker punkt-knapp -->
-				<button id="btnDrawPoint"
-						type="button"
-						class="map-btn-norge absolute bottom-[84px] right-4 z-[9999]"
-						aria-label="Marker punkt">
-					<img src="/icons/map-pin.svg" alt="Marker punkt">
-				</button>
+					<button id="btnDrawPoint" type="button" class="map-btn-norge" aria-label="Marker punkt">
+						<img src="/icons/map-pin.svg" alt="Marker hinder" />
+					</button>
 
-				<!-- Tegn linje-knapp -->
-				<button id="btnDrawLine"
-						type="button"
-						class="map-btn-norge absolute bottom-[148px] right-4 z-[9999]"
-						aria-label="Tegn linje">
-					<img src="/icons/line.svg" alt="Tegn linje">
-				</button>
+					<button id="btnDrawLine" type="button" class="map-btn-norge" aria-label="Tegn linje">
+						<img src="/icons/line.svg" alt="Tegn linje" />
+					</button>
 
-				<!-- Sletteknapp -->
-				<button id="btnClearDraw"
-						type="button"
-						class="map-btn-norge absolute top-4 left-4 z-[9999]"
-						aria-label="Fjern tegning">
-					<img src="~/icons/trash-x.svg" alt="Fjern tegning" />
-				</button>
 
+				</div>
+
+
+				<!-- Finn poisjonsknapp -->
+				<div id="mapButtonsLeft" class="absolute bottom-6 left-4 z-[9999]">
+					<button id="btnLocate" type="button" class="map-btn-norge" aria-label="Finn min posisjon">
+						<img src="/icons/helicopter.svg" alt="Finn posisjon" />
+					</button>
+				</div>
+
+				@*
+				<!-- Sletteknapp  -->
+				<div id="mapButtonsLeft" class="absolute top-6 left-4 z-[9999]">
+					<button id="btnClearDraw" type="button" class="map-btn-norge" aria-label="Fjern tegning">
+						<img src="/icons/trash-x.svg" alt="Fjern tegning" />
+					</button>
+				</div>
+				*@
 			</div>
+
 		</div>
 
 
@@ -299,6 +275,32 @@
 			map.pm.disableDraw();
 		}
 
+		// ------------------------------------------------------------
+		// Begrens polyline til KUN 2 punkter
+		// ------------------------------------------------------------
+		map.on('pm:drawstart', ({ shape, workingLayer }) => {
+			// Vi er kun interessert i linjer (Line = polyline i Geoman)
+			if (shape === 'Line') {
+				// Hver gang et nytt punkt legges til linjen
+				workingLayer.on('pm:vertexadded', () => {
+					const pts = workingLayer.getLatLngs();
+
+					// Enkel polyline: pts er en array med LatLng
+					// Når vi har 2 punkter -> avslutt linja
+					if (pts.length >= 2) {
+
+						// Foretrukket måte: bruk Geoman sin interne "finish"
+						if (map.pm?.Draw?.Line?._finishShape) {
+							map.pm.Draw.Line._finishShape();
+						} else {
+							// Fallback hvis API endres: slå av tegning
+							map.pm.disableDraw();
+						}
+					}
+				});
+			}
+		});
+
 		map.on('pm:create', (e) => {
 			drawn.clearLayers();
 			drawn.addLayer(e.layer);
@@ -311,10 +313,51 @@
 		// ------------------------------------------------------------
 		// KOBLE TIL EGNE KNAPPER (type="button" viktig!)
 		// ------------------------------------------------------------
-		document.getElementById("btnLocate").addEventListener("click", locateUser);
-		document.getElementById("btnDrawPoint").addEventListener("click", startDrawPoint);
-		document.getElementById("btnDrawLine").addEventListener("click", startDrawLine);
-		document.getElementById("btnClearDraw").addEventListener("click", clearDraw);
+			const btnLocate = document.getElementById("btnLocate");
+		const btnPoint = document.getElementById("btnDrawPoint");
+		const btnLine = document.getElementById("btnDrawLine");
+		const btnClear = document.getElementById("btnClearDraw");
+
+		// Fjern aktiv-stil fra alle tegneknapper
+		function resetActiveButtons() {
+			btnPoint?.classList.remove("active-map-btn");
+			btnLine?.classList.remove("active-map-btn");
+		}
+
+		// Aktiver en av knappene
+		function setActiveButton(btn) {
+			resetActiveButtons();
+			btn?.classList.add("active-map-btn");
+		}
+
+		// Koble knapper
+		btnLocate?.addEventListener("click", () => {
+			resetActiveButtons();     // posisjonsknappen skal ikke få aktiv-stil
+			locateUser();
+		});
+
+		btnPoint?.addEventListener("click", () => {
+			setActiveButton(btnPoint);
+			startDrawPoint();
+		});
+
+		btnLine?.addEventListener("click", () => {
+			setActiveButton(btnLine);
+			startDrawLine();
+		});
+
+		if (btnClear) {
+			btnClear.addEventListener("click", () => {
+				resetActiveButtons();
+				clearDraw();
+			});
+		}
+
+		// Fjern grønn knapp etter ferdig tegning
+		map.on("pm:create", () => {
+			resetActiveButtons();
+		});
+
 
 		// ------------------------------------------------------------
 		// LOCAL STORAGE – utkast (kommentar + geometri)
