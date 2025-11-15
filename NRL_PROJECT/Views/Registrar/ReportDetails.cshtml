@@ -4,6 +4,8 @@
 
 @{
     ViewData["Title"] = "Rapportdetaljer";
+    
+    Layout = "_Layout";
 
     // Bygg lat/lon som tekst for JS (Leaflet)
     var inv = CultureInfo.InvariantCulture;
@@ -31,7 +33,7 @@
     var hasCoords = !string.IsNullOrWhiteSpace(latJs) && !string.IsNullOrWhiteSpace(lonJs);
 }
 
-<div class="container mx-auto max-w-6xl px-4 py-6">
+<div class="container mx-auto max-w-6xl px-10 py-10">
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
         <!-- VENSTRE: Status/handling + detaljer -->
@@ -248,7 +250,7 @@
 </div>
 
 <!-- HØYRE: Kart -->
-<div class="lg:col-span-1">
+<div class="lg:col-span-1 px-10 py-10">
     <div class="rounded-2xl border bg-white p-4 shadow-sm">
         <h3 class="mb-3 text-base font-semibold text-slate-900">Kart</h3>
 
