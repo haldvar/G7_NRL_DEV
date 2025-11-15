@@ -75,7 +75,7 @@ namespace NRL_PROJECT.Migrations
                 {
                     OrgID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    OrgName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                    OrgName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     OrgContactEmail = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
@@ -197,6 +197,8 @@ namespace NRL_PROJECT.Migrations
                     LastName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     OrgID = table.Column<int>(type: "int", nullable: true),
+                    OrgName = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     RoleID = table.Column<int>(type: "int", nullable: true),
                     UserRoleRoleID = table.Column<int>(type: "int", nullable: true),
                     UserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
@@ -351,6 +353,10 @@ namespace NRL_PROJECT.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     UserName = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    SubmittedByUserName = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    SubmittedByUserId = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     ObstacleReportComment = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ObstacleReportDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -370,6 +376,12 @@ namespace NRL_PROJECT.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ObstacleReports_AspNetUsers_SubmittedByUserId",
+                        column: x => x.SubmittedByUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_ObstacleReports_AspNetUsers_UserId",
                         column: x => x.UserId,
@@ -455,6 +467,11 @@ namespace NRL_PROJECT.Migrations
                 name: "IX_ObstacleReports_ReviewedByUserID",
                 table: "ObstacleReports",
                 column: "ReviewedByUserID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ObstacleReports_SubmittedByUserId",
+                table: "ObstacleReports",
+                column: "SubmittedByUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ObstacleReports_UserId",

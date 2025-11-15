@@ -573,6 +573,10 @@ namespace NRL_PROJECT.Controllers
                     {
                         return RedirectToAction("Index", "Home");
                     }
+                    else if (roles.Contains("ExternalOrg"))
+                    {
+                        return RedirectToAction("OrgView", "Org");
+                    }
                 }
                 return RedirectToAction(nameof(HomeController.Index), "Home");
             }

@@ -34,6 +34,7 @@
                 <th>Brukernavn</th>
                 <th>Email</th>
                 <th>Fullt navn</th>
+                <th>Organisasjonsnavn</th>
                 <th>Nåværende rolle</th>
                 <th>Roller</th>
             </tr>
@@ -47,6 +48,7 @@
                     <td>@user.UserName</td>
                     <td>@user.Email</td>
                     <td>@user.FirstName @user.LastName</td>
+                    <td>@user.OrgName</td>
                     <td>
                         @if (user.CurrentRole == "No Role")
                         {
@@ -61,6 +63,10 @@
                             <span class="badge bg-primary">@user.CurrentRole</span>
                         }
                         else if (user.CurrentRole == "Registrar")
+                        {
+                            <span class="badge bg-success">@user.CurrentRole</span>
+                        }
+                        else if (user.CurrentRole == "ExternalOrg")
                         {
                             <span class="badge bg-success">@user.CurrentRole</span>
                         }
@@ -132,6 +138,10 @@
                         <label for="LastName" class="form-label">Etternavn</label>
                         <input type="text" class="form-control" id="LastName" name="LastName" required />
                     </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="OrgName" class="form-label">Organisasjon</label>
+                        <input type="text" class="form-control" id="OrgName" name="OrgName" required />
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-3">
@@ -154,6 +164,7 @@
                             <option value="Admin">Admin</option>
                             <option value="Pilot">Pilot</option>
                             <option value="Registrar">Registrar</option>
+                            <option value="ExternalOrg">ExternalOrg</option>
                         </select>
                     </div>
                 </div>

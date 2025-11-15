@@ -7,6 +7,7 @@ namespace NRL_PROJECT.Models.ViewModels
         public string Email { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public string? OrgName { get; set; }
         public string CurrentRole { get; set; }
         public List<string> AvailableRoles { get; set; }
     }

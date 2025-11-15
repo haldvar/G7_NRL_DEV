@@ -23,6 +23,11 @@ namespace NRL_PROJECT.Models
 
         public string UserName { get; set; }
 
+      
+        public string SubmittedByUserName { get; set; }
+        public User SubmittedByUser { get; set; }
+
+
         [Required]
         public string ObstacleReportComment { get; set; } = string.Empty;
 
