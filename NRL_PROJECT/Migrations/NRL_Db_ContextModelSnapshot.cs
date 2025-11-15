@@ -299,6 +299,12 @@ namespace NRL_PROJECT.Migrations
                     b.Property<string>("ReviewedByUserID")
                         .HasColumnType("varchar(255)");
 
+                    b.Property<string>("SubmittedByUserId")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("SubmittedByUserName")
+                        .HasColumnType("longtext");
+
                     b.Property<string>("UserId")
                         .HasColumnType("varchar(255)");
 
@@ -313,6 +319,8 @@ namespace NRL_PROJECT.Migrations
                     b.HasIndex("ObstacleID");
 
                     b.HasIndex("ReviewedByUserID");
+
+                    b.HasIndex("SubmittedByUserId");
 
                     b.HasIndex("UserId");
 
@@ -387,6 +395,9 @@ namespace NRL_PROJECT.Migrations
 
                     b.Property<int?>("OrgID")
                         .HasColumnType("int");
+
+                    b.Property<string>("OrgName")
+                        .HasColumnType("longtext");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("longtext");
@@ -540,6 +551,10 @@ namespace NRL_PROJECT.Migrations
                         .HasForeignKey("ReviewedByUserID")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("NRL_PROJECT.Models.User", "SubmittedByUser")
+                        .WithMany()
+                        .HasForeignKey("SubmittedByUserId");
+
                     b.HasOne("NRL_PROJECT.Models.User", "User")
                         .WithMany("ObstacleReportsSubmitted")
                         .HasForeignKey("UserId")
@@ -550,6 +565,8 @@ namespace NRL_PROJECT.Migrations
                     b.Navigation("Obstacle");
 
                     b.Navigation("Reviewer");
+
+                    b.Navigation("SubmittedByUser");
 
                     b.Navigation("User");
                 });

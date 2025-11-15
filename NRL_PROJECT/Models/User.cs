@@ -17,6 +17,7 @@ namespace NRL_PROJECT.Models
         public string LastName { get; set; }
         
         public int? OrgID { get; set; }
+        public string? OrgName { get; set; }
 
         [ForeignKey(nameof(OrgID))]
         public Organisation Organisation { get; set; }
