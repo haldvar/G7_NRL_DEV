@@ -49,7 +49,7 @@
                     <td>@user.FirstName @user.LastName</td>
                     <td>@user.OrgName</td>
 
-                    <!-- Rollen vises kun som ren tekst -->
+                    <!-- Vis rollen som tekst -->
                     <td>@user.CurrentRole</td>
 
                     <td class="text-end">
@@ -60,29 +60,24 @@
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="UserId" value="@user.UserID" />
 
-                                <!-- Rolle kan endres *kun hvis brukeren IKKE er ExternalOrg* -->
-                                @if (user.CurrentRole != "ExternalOrg")
-                                {
-                                    <select name="role" class="form-select form-select-sm d-inline w-auto">
-                                        <option value="No Role" selected="@(user.CurrentRole == "No Role")">Ingen</option>
-                                        @foreach (var role in user.AvailableRoles)
-                                        {
-                                            <option value="@role" selected="@(role == user.CurrentRole)">
-                                                @role
-                                            </option>
-                                        }
-                                    </select>
-                                }
-                                else
-                                {
-                                    <!-- For ExternalOrg: behold rollen uten mulighet for å endre -->
-                                    <input type="hidden" name="role" value="ExternalOrg" />
-                                }
+                                <!-- ALLTID dropdown for roller -->
+                                <select name="role" class="form-select form-select-sm d-inline w-auto">
+                                    <option value="No Role" selected="@(user.CurrentRole == "No Role")">
+                                        Ingen
+                                    </option>
 
-                                <!-- Organisasjon skal kun vises, ikke endres -->
+                                    @foreach (var role in user.AvailableRoles)
+                                    {
+                                        <option value="@role" selected="@(role == user.CurrentRole)">
+                                            @role
+                                        </option>
+                                    }
+                                </select>
+
+                                <!-- Organisasjon vises kun, ikke endres -->
                                 <input type="hidden" name="OrgName" value="@user.OrgName" />
 
-                                <button type="submit" class="btn btn-sm btn-outline-primary">
+                                <button type="submit" class="btn btn-sm btn-outline-primary mt-1">
                                     Lagre
                                 </button>
                             </form>
@@ -91,7 +86,7 @@
                                   onsubmit="return confirm('Slette @user.UserName?');">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="UserId" value="@user.UserID" />
-                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <button type="submit" class="btn btn-sm btn-outline-danger mt-1">
                                     Slett
                                 </button>
                             </form>
@@ -106,6 +101,7 @@
             }
         </tbody>
     </table>
+
 
 
     <!-- Opprett ny bruker knapp -->

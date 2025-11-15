@@ -17,7 +17,7 @@ using UiStatus = NRL_PROJECT.Models.EnumStatus;
 namespace NRL_PROJECT.Controllers
 
 {
-    [Authorize(Roles = "Organisation, Admin, Registrar")]
+    [Authorize(Roles = "ExternalOrg, Admin, Registrar")]
     public class OrgController : Controller
     {
         private readonly NRL_Db_Context _context;
@@ -35,10 +35,9 @@ namespace NRL_PROJECT.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
 
-            if (user?.OrgID == null)
+            if (user == null)
                 return Unauthorized();
 
-            // Send kun brukerobjektet videre til viewet
             return View(user);
         }
 

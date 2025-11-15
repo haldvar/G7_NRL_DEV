@@ -16,7 +16,13 @@ namespace NRL_PROJECT.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
-        
+
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
         public AccountController(UserManager<User> userManager,
             SignInManager<User> signInManager,
             IEmailSender emailSender,

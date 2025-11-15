@@ -1,16 +1,23 @@
-@model User
+@model NRL_PROJECT.Models.User
 
-<h1 class="text-3xl font-bold text-blue-700 mb-4">
+<h1 class="text-3xl font-bold mb-4">
     Velkommen, @Model.UserName!
 </h1>
 
 <p class="text-lg mb-6">
-    Du er logget inn som ekstern organisasjonsbruker fra 
-    <strong>@Model.OrgName</strong>.
+    Du er logget inn som ekstern organisasjonsbruker
+    @if (!string.IsNullOrWhiteSpace(Model.OrgName))
+    {
+        <text>fra <strong>@Model.OrgName</strong>.</text>
+    }
+    else
+    {
+        <text>fra en organisasjon.</text>
+    }
 </p>
 
 <a asp-controller="Org"
-   asp-action="OrgReportView"
-   class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">
+   asp-action="OrgView"
+   class="px-4 py-2 bg-primary text-white rounded">
     Gå til organisasjonens rapporter
 </a>
