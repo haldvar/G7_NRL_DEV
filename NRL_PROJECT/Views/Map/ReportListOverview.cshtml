@@ -1,130 +1,42 @@
 @model List<NRL_PROJECT.Models.ObstacleReportData>
 
-<div class="min-h-screen w-full bg-gradient-to-b from-green-100 to-blue-100">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+<h1 class="text-3xl font-bold text-blue-700 mb-6 text-center">📋 Hinderlogg</h1>
 
-        <!-- Card: Rapportoversikt -->
-        <section class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-            <!-- Header -->
-            <div class="flex items-center justify-between p-6 border-b border-gray-100">
-                <div>
-                    <h1 class="text-2xl font-bold text-green-700">Rapportoversikt</h1>
-                    <p class="text-sm text-gray-600">fil: <span class="font-medium">ReportListOverview</span></p>
-                </div>
-                <div class="h-2 w-40 rounded-full bg-gradient-to-r from-green-600 to-blue-600"></div>
-            </div>
+<table class="table-auto w-full border border-gray-300 rounded-lg shadow-md">
+    <thead class="bg-gray-100 text-left">
+        <tr>
+            <th class="px-4 py-2">ObstacleReportID</th>
+            <th class="px-4 py-2">Innmelder</th>
+            <th class="px-4 py-2">Saksbehandler</th>
+            <th class="px-4 py-2">ObstacleID</th>
+            <th class="px-4 py-2">ObstacleType</th>
+            <th class="px-4 py-2">Kommentar fra innmelder</th>
+            <th class="px-4 py-2">Kommentar fra saksbehandler</th>
+            <th class="px-4 py-2">Rapportdato</th>
+            <th class="px-4 py-2">Rapportstatus</th>
+            <th class="px-4 py-2">Koordinater</th>
+            <th class="px-4 py-2">Bildefil</th>
+            
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var report in Model)
+        {
+            <tr class="border-t">
+                <td class="px-4 py-2">@report.ObstacleReportID</td>
+                <td class="px-4 py-2">@report.UserName</td>
+                <td class="px-4 py-2">@report.ReviewedByUserID</td>
+                <td class="px-4 py-2">@report.ObstacleID</td>
+                <td class="px-4 py-2">@report.Obstacle?.ObstacleType</td>
+                <td class="px-4 py-2">@report.Obstacle?.ObstacleComment</td>
+                <td class="px-4 py-2">@report.ObstacleReportComment</td>
+                <td class="px-4 py-2">@report.ObstacleReportDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td class="px-4 py-2">@report.ObstacleReportStatus</td>
+                <td class="px-4 py-2">@report.MapData.CoordinateSummary</td>
+                <td class="px-4 py-2">@report.Obstacle?.ObstacleImageURL</td>   <!-- bør endres til å vise et ikon i de tilfellene det er ei tilknytta fil -->
+                
+            </tr>
+        }
+    </tbody>
+</table>
 
-            <!-- Table -->
-            <div class="p-6">
-                <div class="overflow-x-auto rounded-xl border border-gray-200">
-                    <table class="min-w-full text-sm text-gray-800">
-                        <thead class="bg-gray-50 text-gray-700">
-                            <tr class="text-left">
-                                <th class="px-4 py-3 font-semibold">ObstacleReportID</th>
-                                <th class="px-4 py-3 font-semibold">UserName</th>
-                                <th class="px-4 py-3 font-semibold">ReviewedByUserID</th>
-                                <th class="px-4 py-3 font-semibold">ObstacleID</th>
-                                <th class="px-4 py-3 font-semibold">ObstacleReportComment</th>
-                                <th class="px-4 py-3 font-semibold">ObstacleReportDate</th>
-                                <th class="px-4 py-3 font-semibold">ObstacleReportStatus</th>
-                                <th class="px-4 py-3 font-semibold">MapDataID</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            @if (Model == null || !Model.Any())
-                            {
-                                <tr>
-                                    <td colspan="8" class="px-4 py-6 text-center text-gray-500">Ingen rapporter funnet.</td>
-                                </tr>
-                            }
-                            else
-                            {
-                                foreach (var report in Model)
-                                {
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-4 py-3 font-medium text-gray-900">@report.ObstacleReportID</td>
-                                        <td class="px-4 py-3">@report.UserName</td>
-                                        <td class="px-4 py-3">@report.ReviewedByUserID</td>
-                                        <td class="px-4 py-3">@report.ObstacleID</td>
-                                        <td class="px-4 py-3">@report.ObstacleReportComment</td>
-                                        <td class="px-4 py-3">@report.ObstacleReportDate.ToString("yyyy-MM-dd HH:mm")</td>
-                                        <td class="px-4 py-3">
-                                            <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold
-                                                border-blue-200 text-blue-700 bg-blue-50">
-                                                @report.ObstacleReportStatus
-                                            </span>
-                                        </td>
-                                        <td class="px-4 py-3">@report.MapDataID</td>
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- Card: Innrapporterte hindre -->
-        <section class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-            <!-- Header -->
-            <div class="flex items-center justify-between p-6 border-b border-gray-100">
-                <div>
-                    <h2 class="text-2xl font-bold text-green-700">Innrapporterte hindre</h2>
-                    <p class="text-sm text-gray-600">fil: <span class="font-medium">ReportListOverview</span></p>
-                </div>
-                <div class="h-2 w-40 rounded-full bg-gradient-to-r from-green-600 to-blue-600"></div>
-            </div>
-
-            <!-- Table -->
-            <div class="p-6">
-                <div class="overflow-x-auto rounded-xl border border-gray-200">
-                    <table class="min-w-full text-sm text-gray-800">
-                        <thead class="bg-gray-50 text-gray-700">
-                            <tr class="text-left">
-                                <th class="px-4 py-3 font-semibold">ObstacleID</th>
-                                <th class="px-4 py-3 font-semibold">UserName</th>
-                                <th class="px-4 py-3 font-semibold">ObstacleType</th>
-                                <th class="px-4 py-3 font-semibold">ObstacleComment</th>
-                                <th class="px-4 py-3 font-semibold">ObstacleReportDate</th>
-                                <th class="px-4 py-3 font-semibold">Coordinates</th>
-                                <th class="px-4 py-3 font-semibold">ObstacleImageURL</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            @if (Model == null || !Model.Any())
-                            {
-                                <tr>
-                                    <td colspan="7" class="px-4 py-6 text-center text-gray-500">Ingen hindre funnet.</td>
-                                </tr>
-                            }
-                            else
-                            {
-                                foreach (var report in Model)
-                                {
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-4 py-3 font-medium text-gray-900">@report.ObstacleID</td>
-                                        <td class="px-4 py-3">@report.UserName</td>
-                                        <td class="px-4 py-3">@report.Obstacle?.ObstacleType</td>
-                                        <td class="px-4 py-3">@report.Obstacle?.ObstacleComment</td>
-                                        <td class="px-4 py-3">@report.ObstacleReportDate.ToString("yyyy-MM-dd HH:mm")</td>
-                                        <td class="px-4 py-3">@report.MapData.CoordinateSummary</td>
-                                        <td class="px-4 py-3 truncate">
-                                            @if (!string.IsNullOrWhiteSpace(report.Obstacle?.ObstacleImageURL))
-                                            {
-                                                <a href="@report.Obstacle?.ObstacleImageURL"
-                                                   class="text-blue-700 hover:text-blue-800 underline break-all">
-                                                    @report.Obstacle?.ObstacleImageURL
-                                                </a>
-                                            }
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-    </div>
-</div>
