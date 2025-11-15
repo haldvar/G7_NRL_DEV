@@ -300,11 +300,9 @@ namespace NRL_PROJECT.Migrations
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("SubmittedByUserId")
-                        .IsRequired()
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("SubmittedByUserName")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("UserId")
@@ -343,6 +341,7 @@ namespace NRL_PROJECT.Migrations
                         .HasColumnType("varchar(100)");
 
                     b.Property<string>("OrgName")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
@@ -554,9 +553,7 @@ namespace NRL_PROJECT.Migrations
 
                     b.HasOne("NRL_PROJECT.Models.User", "SubmittedByUser")
                         .WithMany()
-                        .HasForeignKey("SubmittedByUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("SubmittedByUserId");
 
                     b.HasOne("NRL_PROJECT.Models.User", "User")
                         .WithMany("ObstacleReportsSubmitted")

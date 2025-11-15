@@ -75,7 +75,7 @@ namespace NRL_PROJECT.Migrations
                 {
                     OrgID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    OrgName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true)
+                    OrgName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     OrgContactEmail = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
@@ -353,9 +353,9 @@ namespace NRL_PROJECT.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     UserName = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    SubmittedByUserName = table.Column<string>(type: "longtext", nullable: false)
+                    SubmittedByUserName = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    SubmittedByUserId = table.Column<string>(type: "varchar(255)", nullable: false)
+                    SubmittedByUserId = table.Column<string>(type: "varchar(255)", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ObstacleReportComment = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -380,8 +380,7 @@ namespace NRL_PROJECT.Migrations
                         name: "FK_ObstacleReports_AspNetUsers_SubmittedByUserId",
                         column: x => x.SubmittedByUserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_ObstacleReports_AspNetUsers_UserId",
                         column: x => x.UserId,
