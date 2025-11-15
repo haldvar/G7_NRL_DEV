@@ -46,7 +46,7 @@ namespace NRL_PROJECT.Controllers
             model.MapData ??= new MapData();
 
             if (string.IsNullOrWhiteSpace(model.ObstacleComment))
-                model.ObstacleComment = "Missing";
+                model.ObstacleComment = "No comment registred";
 
             if (string.IsNullOrWhiteSpace(model.MapData.GeoJsonCoordinates))
             {
@@ -54,30 +54,41 @@ namespace NRL_PROJECT.Controllers
                 return View("ObstacleAndMapForm", model);
             }
 
-            // ✅ Parse GeoJSON og bygg koordinater
+            // ================================
+            // 1) Parse GeoJSON
+            // ================================
             var coords = new List<MapCoordinate>();
+
             using (var doc = JsonDocument.Parse(model.MapData.GeoJsonCoordinates))
             {
                 var root = doc.RootElement;
+
+                // FIX 🚨: Lagre ren GeoJSON (slik MapConfirmation forventer)
+                model.MapData.GeoJsonCoordinates = root.GetRawText();
+
                 var type = root.GetProperty("type").GetString();
 
                 if (type == "Point")
                 {
                     var arr = root.GetProperty("coordinates").EnumerateArray().ToList();
+
                     coords.Add(new MapCoordinate
                     {
                         Longitude = arr[0].GetDouble(),
                         Latitude = arr[1].GetDouble(),
                         OrderIndex = 0
                     });
+
                     model.MapData.GeometryType = "Point";
                 }
                 else if (type == "LineString")
                 {
                     var arr = root.GetProperty("coordinates").EnumerateArray().ToList();
+
                     for (int i = 0; i < arr.Count; i++)
                     {
                         var pair = arr[i].EnumerateArray().ToList();
+
                         coords.Add(new MapCoordinate
                         {
                             Longitude = pair[0].GetDouble(),
@@ -85,45 +96,65 @@ namespace NRL_PROJECT.Controllers
                             OrderIndex = i
                         });
                     }
+
                     model.MapData.GeometryType = "LineString";
+                }
+                else
+                {
+                    ModelState.AddModelError("", $"Ugyldig eller ustøttet GeoJSON-type: {type}");
+                    return View("ObstacleAndMapForm", model);
                 }
             }
 
+            // ================================
+            // 2) Lagre koordinatene
+            // ================================
             model.MapData.Coordinates = coords;
-            model.MapData.MapZoomLevel = model.MapData.MapZoomLevel != 0 ? model.MapData.MapZoomLevel : 13;
+            model.MapData.MapZoomLevel = model.MapData.MapZoomLevel != 0
+                ? model.MapData.MapZoomLevel
+                : 13;
 
-            // ✅ Lagre MapData
+            // ================================
+            // 3) Lagre MapData
+            // ================================
             _context.MapDatas.Add(model.MapData);
             await _context.SaveChangesAsync();
 
-            // Håndter bildeopplasting
+            // ================================
+            // 4) Håndter bildeopplasting
+            // ================================
             string? imagePath = null;
+
             if (model.ImageFile != null && model.ImageFile.Length > 0)
             {
                 var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
+
                 if (!Directory.Exists(uploadsFolder))
                     Directory.CreateDirectory(uploadsFolder);
 
-                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(model.ImageFile.FileName);
+                var uniqueFileName = Guid.NewGuid() + Path.GetExtension(model.ImageFile.FileName);
                 var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await model.ImageFile.CopyToAsync(stream);
-                }
+                using var stream = new FileStream(filePath, FileMode.Create);
+                await model.ImageFile.CopyToAsync(stream);
 
                 imagePath = "/uploads/" + uniqueFileName;
             }
 
-            // ✅ Oppdater obstacle direkte (ingen duplisering)
+            // ================================
+            // 5) Lagre Obstacle
+            // ================================
             model.ObstacleImageURL = imagePath;
+
             _context.Obstacles.Add(model);
             await _context.SaveChangesAsync();
 
-            // Hent innlogget bruker
+            // ================================
+            // 6) Lagre rapport
+            // ================================
             var currentUserId = _userManager.GetUserId(User);
             var currentUser = await _userManager.GetUserAsync(User);
-            // Opprett rapport
+
             var report = new ObstacleReportData
             {
                 ObstacleID = model.ObstacleID,
@@ -135,11 +166,16 @@ namespace NRL_PROJECT.Controllers
                 MapDataID = model.MapData?.MapDataID,
                 CoordinateSummary = model.MapData?.CoordinateSummary ?? string.Empty
             };
+
             _context.ObstacleReports.Add(report);
             await _context.SaveChangesAsync();
 
+            // ================================
+            // 7) Til MapConfirmation
+            // ================================
             return View("MapConfirmation", model.MapData);
         }
+
 
 
 

@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
 
@@ -11,8 +13,20 @@ var builder = WebApplication.CreateBuilder(args);
 // ------------------------------------------------------------
 
 // Legg til støtte for MVC (Controllers + Views)
-builder.Services.AddControllersWithViews();
+// + Gjør alle sidene/funksjonene utilgjengelig by default, utenom der [AllowAnonymous] finnes (Login)
+builder.Services.AddControllersWithViews(options =>
+{
+    var policy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+    options.Filters.Add(new AuthorizeFilter(policy));
+});
 
+// hide server header
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.AddServerHeader = false;
+});
 
 // Database configuration (Entity Framework + MySQL)
 // KOMMENTERES UT UNDER TESTING:
@@ -75,6 +89,22 @@ builder.Services.AddControllersWithViews();
 // BYGG APPEN
 // ------------------------------------------------------------
 var app = builder.Build();
+
+// Content security policy CSP
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Add("X-Frame-Options", "DENY");
+    context.Response.Headers.Add("X-XSS-Protection", "1; mode=block");
+    context.Response.Headers.Add("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+    context.Response.Headers.Add("Referrer-Policy", "no-referrer");
+    
+    // Klæsjer med _LoginLayout
+    //context.Response.Headers.Add("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';");
+    
+    // Add other headers as needed
+    await next();
+});
 
 // DB-migrasjoner flyttet hit!
 // ------------------------------------------------------------

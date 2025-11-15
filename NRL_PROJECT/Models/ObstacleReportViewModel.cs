@@ -25,6 +25,7 @@ namespace NRL_PROJECT.Models
 
 
         // Kart / koordinater
+        public MapData? MapData { get; set; }
         public string? Reported_Location { get; set; }
         public string? GeoJsonCoordinates { get; set; }   
         public double Latitude { get; set; }
