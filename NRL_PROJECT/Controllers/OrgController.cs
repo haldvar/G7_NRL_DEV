@@ -35,7 +35,7 @@ namespace NRL_PROJECT.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
 
-            if (user == null)
+            if (string.IsNullOrWhiteSpace(user?.OrgName))
                 return Unauthorized();
 
             return View(user);
@@ -51,7 +51,7 @@ namespace NRL_PROJECT.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
 
-            if (user?.OrgID == null)
+            if (string.IsNullOrWhiteSpace(user?.OrgName))
                 return Unauthorized();
 
             var query = _context.ObstacleReports
