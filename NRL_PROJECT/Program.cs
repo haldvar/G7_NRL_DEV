@@ -135,7 +135,7 @@ using (var scope = app.Services.CreateScope())
 
         // 2. Create roles
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-        var roles = new[] { "Admin", "Pilot", "Registrar" };
+        var roles = new[] { "Admin", "Pilot", "Registrar", "ExternalOrg" };
 
         foreach (var roleName in roles)
         {

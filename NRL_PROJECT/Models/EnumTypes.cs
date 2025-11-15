@@ -19,6 +19,23 @@ namespace NRL_PROJECT.Models
         ExternalOrg = 3
     }
 
-    public enum EnumStatus { Ny = 0, UnderBehandling = 1, Godkjent = 2, Avvist = 3, Venter = 4 }
+    public enum EnumStatus 
+    { 
+        Ny = 0, 
+        UnderBehandling = 1, 
+        Godkjent = 2, 
+        Avvist = 3, 
+        Venter = 4 
+    }
+
+    public enum OrgName
+    {
+        NLA,
+        Politiet,
+        Avinor,
+        Lufttransport,
+        Helitrans,
+        Forsvaret       
+    }
 
 }

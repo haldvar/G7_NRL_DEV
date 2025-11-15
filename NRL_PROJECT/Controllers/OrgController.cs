@@ -69,7 +69,7 @@ namespace NRL_PROJECT.Controllers
             {
                 query = query.Where(r =>
                     r.Obstacle.ObstacleType.Contains(search) ||
-                    r.ObstacleReportStatus.Contains(search) ||
+                    r.ObstacleReportStatus.ToString().Contains(search) ||
                     r.SubmittedByUser.Email.Contains(search) ||
                     r.SubmittedByUser.OrgName.Contains(search) ||
                     r.MapData.CoordinateSummary.Contains(search)
@@ -80,7 +80,12 @@ namespace NRL_PROJECT.Controllers
             // 🎚️ FILTER: STATUS
             // -----------------------------
             if (!string.IsNullOrWhiteSpace(status))
-                query = query.Where(r => r.ObstacleReportStatus == status);
+            {
+                if (Enum.TryParse(status, out ObstacleReportData.EnumTypes statusEnum))
+                {
+                    query = query.Where(r => r.ObstacleReportStatus == statusEnum);
+                }
+            }
 
             // -----------------------------
             // 🛑 FILTER: TYPE

@@ -1,193 +1,191 @@
 @model List<NRL_PROJECT.Models.ViewModels.UserManagementViewModel>
 @{
-    ViewData["Title"] = "Manage Users";
+    ViewData["Title"] = "Brukerhåndtering";
     var adminCount = ViewBag.AdminCount;
 }
-<div class="container mt-4" xmlns="http://www.w3.org/1999/html">
+
+<div class="container mt-4">
+
     <h2 class="mb-4">Brukerhåndtering</h2>
-    
+
+    <!-- Meldinger -->
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+        <div class="alert alert-success">@TempData["Success"]</div>
     }
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            @TempData["Error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+        <div class="alert alert-danger">@TempData["Error"]</div>
     }
-    
+
     @if (adminCount <= 1)
     {
         <div class="alert alert-warning">
-            <strong>Obs!</strong> Det må alltid finnes en Adminbruker. Med bare én igjen, kan ikke rollen endres eller slettes.
+            <strong>Obs!</strong> Det må alltid finnes minst én administrator.
         </div>
     }
-    
-    <table class="table table-striped table-hover">
-        <thead class="table-dark">
+
+    <!-- Brukertabell -->
+    <table class="table table-bordered align-middle">
+        <thead class="table-light">
             <tr>
                 <th>Brukernavn</th>
                 <th>Email</th>
-                <th>Fullt navn</th>
-                <th>Organisasjonsnavn</th>
-                <th>Nåværende rolle</th>
-                <th>Roller</th>
+                <th>Navn</th>
+                <th>Organisasjon</th>
+                <th>Rolle</th>
+                <th class="text-end">Handling</th>
             </tr>
         </thead>
+
         <tbody>
             @foreach (var user in Model)
             {
                 var isLastAdmin = (user.CurrentRole == "Admin" && adminCount <= 1);
-                
+
                 <tr>
                     <td>@user.UserName</td>
                     <td>@user.Email</td>
                     <td>@user.FirstName @user.LastName</td>
                     <td>@user.OrgName</td>
-                    <td>
-                        @if (user.CurrentRole == "No Role")
-                        {
-                            <span class="badge bg-secondary">@user.CurrentRole</span>
-                        }
-                        else if (user.CurrentRole == "Admin")
-                        {
-                            <span class="badge bg-danger">@user.CurrentRole</span>
-                        }
-                        else if (user.CurrentRole == "Pilot")
-                        {
-                            <span class="badge bg-primary">@user.CurrentRole</span>
-                        }
-                        else if (user.CurrentRole == "Registrar")
-                        {
-                            <span class="badge bg-success">@user.CurrentRole</span>
-                        }
-                        else if (user.CurrentRole == "ExternalOrg")
-                        {
-                            <span class="badge bg-success">@user.CurrentRole</span>
-                        }
-                    </td>
-                    <td>
-                        @if (isLastAdmin)
-                        {
-                            <span class="text-muted small">Adminrolle låst</span>
-                        }
-                        else
+
+                    <!-- Rollen vises kun som ren tekst -->
+                    <td>@user.CurrentRole</td>
+
+                    <td class="text-end">
+
+                        @if (!isLastAdmin)
                         {
                             <form asp-action="AssignRole" method="post" class="d-inline">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="UserId" value="@user.UserID" />
-                                <select name="role" class="form-select form-select-sm d-inline" style="width: auto;">
-                                    <option value="No Role" selected="@(user.CurrentRole == "No Role")">No Role</option>
-                                    @foreach (var role in user.AvailableRoles)
-                                    {
-                                        <option value="@role" selected="@(role == user.CurrentRole)">@role</option>
-                                    }
-                                </select>
-                                <button type="submit" class="btn btn-sm btn-primary">Oppdater</button>
+
+                                <!-- Rolle kan endres *kun hvis brukeren IKKE er ExternalOrg* -->
+                                @if (user.CurrentRole != "ExternalOrg")
+                                {
+                                    <select name="role" class="form-select form-select-sm d-inline w-auto">
+                                        <option value="No Role" selected="@(user.CurrentRole == "No Role")">Ingen</option>
+                                        @foreach (var role in user.AvailableRoles)
+                                        {
+                                            <option value="@role" selected="@(role == user.CurrentRole)">
+                                                @role
+                                            </option>
+                                        }
+                                    </select>
+                                }
+                                else
+                                {
+                                    <!-- For ExternalOrg: behold rollen uten mulighet for å endre -->
+                                    <input type="hidden" name="role" value="ExternalOrg" />
+                                }
+
+                                <!-- Organisasjon skal kun vises, ikke endres -->
+                                <input type="hidden" name="OrgName" value="@user.OrgName" />
+
+                                <button type="submit" class="btn btn-sm btn-outline-primary">
+                                    Lagre
+                                </button>
                             </form>
-                            
-                            <form asp-action="DeleteUser" method="post" class="d-inline" 
-                                  onsubmit="return confirm('Er du sikker på at du vil slette @user.UserName?');">
+
+                            <form asp-action="DeleteUser" method="post" class="d-inline"
+                                  onsubmit="return confirm('Slette @user.UserName?');">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="UserId" value="@user.UserID" />
-                                <button type="submit" class="btn btn-sm btn-danger">Slett bruker</button>
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    Slett
+                                </button>
                             </form>
                         }
+                        else
+                        {
+                            <span class="text-muted small">Adminrolle kan ikke endres</span>
+                        }
+
                     </td>
                 </tr>
             }
         </tbody>
     </table>
 
-    <!-- Create New User Button -->
-    <div class="mb-4">
-        <button type="button" class="btn btn-primary" onclick="toggleCreateUserForm()">
-            <i class="bi bi-plus-circle"></i> Opprett ny bruker
-        </button>
-    </div>
 
-    <!-- Create User Form (Hidden by default) -->
-    <div id="createUserForm" class="card mb-4" style="display: none;">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Opprett ny bruker</h5>
+    <!-- Opprett ny bruker knapp -->
+    <button type="button" class="btn btn-outline-primary mb-4" onclick="toggleCreateUserForm()">
+        Opprett ny bruker
+    </button>
+
+
+    <!-- Ny bruker form -->
+    <div id="createUserForm" class="card shadow-sm mb-4" style="display: none;">
+        <div class="card-header bg-light">
+            <strong>Opprett ny bruker</strong>
         </div>
+
         <div class="card-body">
+
             <form asp-action="CreateUser" method="post">
                 @Html.AntiForgeryToken()
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="UserName" class="form-label">Brukernavn</label>
-                        <input type="text" class="form-control" id="UserName" name="UserName" required />
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Brukernavn</label>
+                        <input type="text" class="form-control" name="UserName" required />
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="Email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="Email" name="Email" required />
+                    <div class="col-md-6">
+                        <label class="form-label">E-post</label>
+                        <input type="email" class="form-control" name="Email" required />
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="FirstName" class="form-label">Fornavn</label>
-                        <input type="text" class="form-control" id="FirstName" name="FirstName" required />
+
+                    <div class="col-md-6">
+                        <label class="form-label">Fornavn</label>
+                        <input type="text" class="form-control" name="FirstName" required />
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="LastName" class="form-label">Etternavn</label>
-                        <input type="text" class="form-control" id="LastName" name="LastName" required />
+                    <div class="col-md-6">
+                        <label class="form-label">Etternavn</label>
+                        <input type="text" class="form-control" name="LastName" required />
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="OrgName" class="form-label">Organisasjon</label>
-                        <input type="text" class="form-control" id="OrgName" name="OrgName" required />
+
+                    <div class="col-md-6">
+                        <label class="form-label">Organisasjon</label>
+                        <input type="text" class="form-control" name="OrgName" required />
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="Password" class="form-label">Passord</label>
-                        <input type="password" class="form-control" id="Password" name="Password" required />
-                        <small class="form-text text-muted">
-                            At least 8 characters with uppercase, lowercase, digit, and special character.
-                        </small>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="ConfirmPassword" class="form-label">Gjenta passord</label>
-                        <input type="password" class="form-control" id="ConfirmPassword" name="ConfirmPassword" required />
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="RoleName" class="form-label">Rolle</label>
-                        <select class="form-select" id="RoleName" name="RoleName" required>
-                            <option value="">-- Velg rolle --</option>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Rolle</label>
+                        <select class="form-select" name="RoleName" required>
+                            <option value="">Velg rolle</option>
                             <option value="Admin">Admin</option>
                             <option value="Pilot">Pilot</option>
                             <option value="Registrar">Registrar</option>
                             <option value="ExternalOrg">ExternalOrg</option>
                         </select>
                     </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Passord</label>
+                        <input type="password" class="form-control" name="Password" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Bekreft passord</label>
+                        <input type="password" class="form-control" name="ConfirmPassword" required />
+                    </div>
                 </div>
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-success">Lag bruker</button>
-                    <button type="button" class="btn btn-secondary" onclick="toggleCreateUserForm()">Avbryt</button>
+
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-outline-success">Opprett</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="toggleCreateUserForm()">Avbryt</button>
                 </div>
             </form>
+
         </div>
     </div>
+
 </div>
 
 @section Scripts {
     <script>
         function toggleCreateUserForm() {
-            var form = document.getElementById('createUserForm');
-            if (form.style.display === 'none' || form.style.display === '') {
-                form.style.display = 'block';
-                // Scroll to the form
-                form.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            } else {
-                form.style.display = 'none';
-            }
+            const form = document.getElementById('createUserForm');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
         }
     </script>
 }
