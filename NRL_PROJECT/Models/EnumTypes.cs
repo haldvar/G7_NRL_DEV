@@ -28,6 +28,7 @@ namespace NRL_PROJECT.Models
         Venter = 4 
     }
 
+    /*
     public enum OrgName
     {
         NLA,
@@ -37,5 +38,5 @@ namespace NRL_PROJECT.Models
         Helitrans,
         Forsvaret       
     }
-
+    */
 }
