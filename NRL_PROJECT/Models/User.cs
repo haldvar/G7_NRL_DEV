@@ -23,8 +23,7 @@ namespace NRL_PROJECT.Models
         public Organisation Organisation { get; set; }
 
         
-        [ForeignKey("UserRole")]
-        public int? RoleID { get; set; } // nullable
+       
         
         public ICollection<ObstacleReportData> ObstacleReportsSubmitted { get; set; }
         public ICollection<ObstacleReportData> ObstacleReportsReviewed { get; set; }

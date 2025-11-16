@@ -16,23 +16,6 @@ namespace NRL_PROJECT.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "AccessLevels",
-                columns: table => new
-                {
-                    AccessLevelID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    AccessLevelName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    AccessLevelDescription = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AccessLevels", x => x.AccessLevelID);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
                 {
@@ -83,28 +66,6 @@ namespace NRL_PROJECT.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Organisations", x => x.OrgID);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "UserRoles",
-                columns: table => new
-                {
-                    RoleID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    RoleName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    AccessLevelID = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserRoles", x => x.RoleID);
-                    table.ForeignKey(
-                        name: "FK_UserRoles_AccessLevels_AccessLevelID",
-                        column: x => x.AccessLevelID,
-                        principalTable: "AccessLevels",
-                        principalColumn: "AccessLevelID",
-                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -197,8 +158,6 @@ namespace NRL_PROJECT.Migrations
                     LastName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     OrgID = table.Column<int>(type: "int", nullable: true),
-                    RoleID = table.Column<int>(type: "int", nullable: true),
-                    UserRoleRoleID = table.Column<int>(type: "int", nullable: true),
                     UserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     NormalizedUserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
@@ -230,11 +189,6 @@ namespace NRL_PROJECT.Migrations
                         column: x => x.OrgID,
                         principalTable: "Organisations",
                         principalColumn: "OrgID");
-                    table.ForeignKey(
-                        name: "FK_AspNetUsers_UserRoles_UserRoleRoleID",
-                        column: x => x.UserRoleRoleID,
-                        principalTable: "UserRoles",
-                        principalColumn: "RoleID");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -433,11 +387,6 @@ namespace NRL_PROJECT.Migrations
                 column: "OrgID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUsers_UserRoleRoleID",
-                table: "AspNetUsers",
-                column: "UserRoleRoleID");
-
-            migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
@@ -477,11 +426,6 @@ namespace NRL_PROJECT.Migrations
                 name: "IX_Obstacles_MapDataID",
                 table: "Obstacles",
                 column: "MapDataID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserRoles_AccessLevelID",
-                table: "UserRoles",
-                column: "AccessLevelID");
         }
 
         /// <inheritdoc />
@@ -521,13 +465,7 @@ namespace NRL_PROJECT.Migrations
                 name: "Organisations");
 
             migrationBuilder.DropTable(
-                name: "UserRoles");
-
-            migrationBuilder.DropTable(
                 name: "MapDatas");
-
-            migrationBuilder.DropTable(
-                name: "AccessLevels");
         }
     }
 }
