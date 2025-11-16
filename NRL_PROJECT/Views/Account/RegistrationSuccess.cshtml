@@ -2,6 +2,11 @@
     ViewData["Title"] = "Registration Success";
 }
 
+@{
+    ViewData["Title"] = "Logg inn";
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+}
+
 <h2>@TempData["RegistrationSuccess"]</h2>
 
 <p> Du vil bli sendt til logg inn-siden straks... <span id="countdown">7</span> seconds...</p>
