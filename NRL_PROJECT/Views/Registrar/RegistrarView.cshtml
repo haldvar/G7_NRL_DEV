@@ -126,11 +126,18 @@
                                 @r.UserName
                             }
                         </div>
-                        @if (!string.IsNullOrWhiteSpace(r.OrgName))
+                        @if (!string.IsNullOrWhiteSpace(@r.OrgName))
                         {
-                            <div class="text-sm text-slate-600">
-                                <span class="text-slate-500">Organisasjon:</span>
-                                @r.OrgName
+                            <div class="mt-1 text-sm text-slate-600">
+                                <span class="text-slate-500">Innsender:</span>
+                                @r.UserName
+                                @if (!string.IsNullOrWhiteSpace(r.OrgName))
+                                {
+                                    <span class="text-slate-500"> (</span>
+                                    @r.OrgName
+                        
+                                    <span class="text-slate-500">)</span>
+                                }
                             </div>
                         }
 

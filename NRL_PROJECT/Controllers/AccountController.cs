@@ -16,7 +16,13 @@ namespace NRL_PROJECT.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
-        
+
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
         public AccountController(UserManager<User> userManager,
             SignInManager<User> signInManager,
             IEmailSender emailSender,
@@ -572,6 +578,10 @@ namespace NRL_PROJECT.Controllers
                     else if (roles.Contains("Pilot"))
                     {
                         return RedirectToAction("Index", "Home");
+                    }
+                    else if (roles.Contains("ExternalOrg"))
+                    {
+                        return RedirectToAction("OrgView", "Org");
                     }
                 }
                 return RedirectToAction(nameof(HomeController.Index), "Home");

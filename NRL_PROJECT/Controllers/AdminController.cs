@@ -28,6 +28,7 @@ namespace NRL_PROJECT.Controllers
             var admins = 0;
             var pilots = 0;
             var registrars = 0;
+            var externalorgs = 0;
             var noRole = 0;
 
             foreach (var user in await _userManager.Users.ToListAsync())
@@ -36,6 +37,7 @@ namespace NRL_PROJECT.Controllers
                 if (roles.Contains("Admin")) admins++;
                 else if (roles.Contains("Pilot")) pilots++;
                 else if (roles.Contains("Registrar")) registrars++;
+                else if (roles.Contains("ExternalOrg")) externalorgs++;
                 else noRole++;
             }
 
@@ -43,6 +45,7 @@ namespace NRL_PROJECT.Controllers
             ViewBag.Admins = admins;
             ViewBag.Pilots = pilots;
             ViewBag.Registrars = registrars;
+            ViewBag.Registrars = externalorgs;
             ViewBag.NoRole = noRole;
 
             return View();
@@ -78,8 +81,9 @@ namespace NRL_PROJECT.Controllers
                     Email = user.Email,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
+                    OrgName = user.OrgName,
                     CurrentRole = roles.FirstOrDefault() ?? "No Role",
-                    AvailableRoles = new List<string> { "Admin", "Pilot", "Registrar" }
+                    AvailableRoles = new List<string> { "Admin", "Pilot", "Registrar", "ExternalOrg" }
                 });
             }
             
@@ -164,7 +168,8 @@ namespace NRL_PROJECT.Controllers
                 Email = model.Email,
                 EmailConfirmed = true,
                 FirstName = model.FirstName,
-                LastName = model.LastName
+                LastName = model.LastName,
+                OrgName = model.OrgName
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);

@@ -1,3 +1,4 @@
+using static NRL_PROJECT.Models.ObstacleReportData;
 using EnumStatus = NRL_PROJECT.Models.ObstacleReportData.EnumTypes;
 
 namespace NRL_PROJECT.Models
@@ -8,7 +9,7 @@ namespace NRL_PROJECT.Models
         //innsender
         // public string? UserID { get; set; }
         public string? UserName { get; set; }
-        public string OrgName { get; set; } = string.Empty;
+        public string? OrgName { get; set; } = string.Empty;
         public int ObstacleReportID { get; set; }                 
         public DateTime TimeOfSubmittedReport { get; set; } 
 
@@ -20,6 +21,11 @@ namespace NRL_PROJECT.Models
         public string ObstacleComment { get; set; } = "";
         public int ObstacleID { get; set; }
 
+        // Kobling til rapporten
+        public string ReportedByUserName { get; set; } = string.Empty;
+        public DateTime ObstacleReportDate { get; set; }
+        public EnumTypes ObstacleReportStatus { get; set; }
+        public User SubmittedByUser { get; set; }
 
         public string? StatusComment { get; set; }      // kommentaren du skriver i ReportDetails
 
