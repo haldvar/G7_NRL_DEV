@@ -23,6 +23,11 @@ namespace NRL_PROJECT.Models
 
         public string UserName { get; set; }
 
+      
+        public string? SubmittedByUserName { get; set; }
+        public User? SubmittedByUser { get; set; }
+
+
         [Required]
         public string ObstacleReportComment { get; set; } = string.Empty;
 
@@ -32,7 +37,7 @@ namespace NRL_PROJECT.Models
 
         //  Brukeren som har vurdert rapporten (kan være null)
         [ForeignKey(nameof(Reviewer))]
-        public string? ReviewedByUserID { get; set; }
+        public string? ReviewedByUserID { get; set; } // burde vært ReviewedByUserName? ID'en er så himla lang.
         public User? Reviewer { get; set; }
 
         //  Kobling til MapData (kan være null)

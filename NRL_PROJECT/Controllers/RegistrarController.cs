@@ -152,7 +152,8 @@ namespace NRL_PROJECT.Controllers
                 ObstacleHeight = report.Obstacle?.ObstacleHeight ?? 0,
                 ObstacleWidth = report.Obstacle?.ObstacleWidth ?? 0,
 
-                // Lokastion
+                // Lokasjon
+                MapData = report.MapData,
                 Latitude = lat,
                 Longitude = lng,
                 Reported_Location = reportedLocation,
@@ -160,6 +161,9 @@ namespace NRL_PROJECT.Controllers
 
                 // Status
                 ReportStatus = MapToUi(report.ObstacleReportStatus),
+                
+                // Kommentar inn i ReportDetails
+                StatusComment = report.ObstacleReportComment ?? "",
 
                 // User
                 UserName = report.UserName != null

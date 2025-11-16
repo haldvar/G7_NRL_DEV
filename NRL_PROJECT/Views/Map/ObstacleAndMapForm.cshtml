@@ -25,6 +25,14 @@
 <form asp-action="SubmitObstacleWithLocation" asp-controller="Map" method="post" enctype="multipart/form-data" class="space-y-10">
 	@Html.AntiForgeryToken()
 
+    <script>
+        // Nullstill utkast hvis brukeren kommer fra en annen side
+        if (performance.navigation.type !== performance.navigation.TYPE_RELOAD) {
+            localStorage.removeItem("ObstacleReportForm");
+        }
+    </script>
+
+
 	<!--  OBSTACLE INFORMATION -->
 	<div class="bg-slate-700/60 rounded-2xl p-8 shadow-lg border border-slate-600">
         <h2 class="text-2xl font-bold text-sky-300 mb-6"> Informasjon om hinderet</h2>
