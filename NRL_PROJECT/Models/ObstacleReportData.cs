@@ -16,15 +16,15 @@ namespace NRL_PROJECT.Models
         public int? ObstacleID { get; set; }
         public ObstacleData? Obstacle { get; set; }
 
-        //  Brukeren som opprettet rapporten
-        [ForeignKey(nameof(User))]
+       [ForeignKey(nameof(User))]
         public string? UserId { get; set; }
         public User? User { get; set; }
 
         public string UserName { get; set; }
 
-      
-        public string? SubmittedByUserName { get; set; }
+        // Brukeren som opprettet rapporten
+        [ForeignKey(nameof(SubmittedByUser))]
+        public string? SubmittedByUserId { get; set; }
         public User? SubmittedByUser { get; set; }
 
 

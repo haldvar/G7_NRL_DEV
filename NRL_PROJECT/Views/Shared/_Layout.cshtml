@@ -45,23 +45,24 @@
                     @if (User.IsInRole("Admin"))
                     {
                         <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ObstacleAndMapForm">Meld hinder</a>
-                        <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Admin" asp-action="ManageUsers">Brukerhåndtering</a>
-                        <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ReportListOverview">Hinderlogg</a>
+                        <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Admin" asp-action="ManageUsers">Brukerhåndtering</a>
+                        <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ReportListOverview">Hinderlogg</a>
                         <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="MapView">Situasjonskart</a>
+                        <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Registrar" asp-action="RegistrarView">Rapporthåndtering</a>
                     }
 
                     @if (User.IsInRole("Registrar"))
                     {
                         <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ObstacleAndMapForm">Meld hinder</a>
-                        <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Registrar" asp-action="RegistrarView">Rapporthåndtering</a>
-                        <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ReportListOverview">Hinderlogg</a>
+                        <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ReportListOverview">Hinderlogg</a>
                         <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="MapView">Situasjonskart</a>
+                        <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Registrar" asp-action="RegistrarView">Rapporthåndtering</a>
                     }
 
                     @if (User.IsInRole("Pilot"))
                     {
                         <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ObstacleAndMapForm">Meld hinder</a>
-                        <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ReportListOverview">Hinderlogg</a>
+                        <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ReportListOverview">Hinderlogg</a>
                         <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="MapView">Situasjonskart</a>
                     }
                 </div>

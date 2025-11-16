@@ -1,48 +1,65 @@
 @model NRL_PROJECT.Models.ViewModels.RegisterViewModel
 
-<h1>Ny bruker</h1>
-<br/>
+@{
+    ViewData["Title"] = "Registrer";
+}
+
+<h2>Registrer ny bruker</h2>
+
 <form asp-action="Register" method="post">
     @Html.AntiForgeryToken()
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-    
+
     <div class="form-group">
-        <label asp-for="UserName"></label><br />
+        <label asp-for="UserName"></label>
         <input asp-for="UserName" class="form-control" />
         <span asp-validation-for="UserName" class="text-danger"></span>
     </div>
+
     <div class="form-group">
-        <label asp-for="Email"></label><br />
-        <input asp-for="Email" class="form-control"/>
+        <label asp-for="Email"></label>
+        <input asp-for="Email" class="form-control" />
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
+
     <div class="form-group">
-        <label asp-for="Password"></label><br />
-        <input asp-for="Password" type="password" class="form-control"/>
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="ConfirmPassword"></label><br />
-        <input asp-for="ConfirmPassword" type="password" class="form-control"/>
-        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="FirstName"></label><br />
-        <input asp-for="FirstName" class="form-control"/>
+        <label asp-for="FirstName"></label>
+        <input asp-for="FirstName" class="form-control" />
         <span asp-validation-for="FirstName" class="text-danger"></span>
     </div>
+
     <div class="form-group">
-        <label asp-for="LastName"></label><br />
-        <input asp-for="LastName" class="form-control"/>
+        <label asp-for="LastName"></label>
+        <input asp-for="LastName" class="form-control" />
         <span asp-validation-for="LastName" class="text-danger"></span>
     </div>
+
+    <!-- 🚫 INGEN ORGANISASJONSFELT HER (Alternativ A) -->
+
     <div class="form-group">
-        <label asp-for="OrgName"></label><br />
-        <input asp-for="OrgName" class="form-control" />
-        <span asp-validation-for="OrgName" class="text-danger"></span>
+        <label asp-for="RoleName"></label>
+        <select asp-for="RoleName" class="form-control">
+            <option value="">Velg rolle</option>
+            <option value="Admin">Admin</option>
+            <option value="Pilot">Pilot</option>
+            <option value="Registrar">Registrar</option>
+            <option value="ExternalOrg">ExternalOrg</option>
+        </select>
+        <span asp-validation-for="RoleName" class="text-danger"></span>
     </div>
-    <br/>
-    <button type="submit" class="btn btn-primary">Opprett ny bruker</button>
+
+    <div class="form-group">
+        <label asp-for="Password"></label>
+        <input asp-for="Password" class="form-control" type="password" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="ConfirmPassword"></label>
+        <input asp-for="ConfirmPassword" class="form-control" type="password" />
+        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Registrer</button>
 </form>
 
 <!-- Login Redirect -->

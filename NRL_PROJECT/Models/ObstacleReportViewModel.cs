@@ -10,8 +10,9 @@ namespace NRL_PROJECT.Models
         // public string? UserID { get; set; }
         public string? UserName { get; set; }
         public string? OrgName { get; set; } = string.Empty;
-        public int ObstacleReportID { get; set; }                 
-        public DateTime TimeOfSubmittedReport { get; set; } 
+        public int ObstacleReportID { get; set; }        
+        
+        // public DateTime TimeOfSubmittedReport { get; set; } // - overflødig?
 
         // Kobling til hindring
         public string? ObstacleName { get; set; }
@@ -27,7 +28,8 @@ namespace NRL_PROJECT.Models
         public EnumTypes ObstacleReportStatus { get; set; }
         public User SubmittedByUser { get; set; }
 
-        public string? StatusComment { get; set; }      // kommentaren du skriver i ReportDetails
+
+        public string? ObstacleReportComment { get; set; }      // kommentaren du skriver i ReportDetails - overflødig?
 
 
         // Kart / koordinater

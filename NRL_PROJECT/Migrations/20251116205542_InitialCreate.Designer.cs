@@ -12,7 +12,7 @@ using NRL_PROJECT.Data;
 namespace NRL_PROJECT.Migrations
 {
     [DbContext(typeof(NRL_Db_Context))]
-    [Migration("20251115175805_InitialCreate")]
+    [Migration("20251116205542_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -305,9 +305,6 @@ namespace NRL_PROJECT.Migrations
                     b.Property<string>("SubmittedByUserId")
                         .HasColumnType("varchar(255)");
 
-                    b.Property<string>("SubmittedByUserName")
-                        .HasColumnType("longtext");
-
                     b.Property<string>("UserId")
                         .HasColumnType("varchar(255)");
 
@@ -344,7 +341,6 @@ namespace NRL_PROJECT.Migrations
                         .HasColumnType("varchar(100)");
 
                     b.Property<string>("OrgName")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
@@ -398,9 +394,6 @@ namespace NRL_PROJECT.Migrations
 
                     b.Property<int?>("OrgID")
                         .HasColumnType("int");
-
-                    b.Property<string>("OrgName")
-                        .HasColumnType("longtext");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("longtext");

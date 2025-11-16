@@ -1,17 +1,4 @@
-@model List<NRL_PROJECT.Models.ObstacleReportViewModel>
-
-@{
-    ViewData["Title"] = "Rapporter fra din organisasjon";
-    var sortField = ViewBag.SortField as string ?? "date";
-    var sortDir = ViewBag.SortDir as string ?? "desc";
-
-    string NextSortDir(string field)
-    {
-        if (sortField == field)
-            return sortDir == "asc" ? "desc" : "asc";
-        return "asc";
-    }
-}
+@model List<NRL_PROJECT.Models.ViewModels.OrgExternalViewModel>
 
 <h1 class="text-3xl font-bold text-blue-700 mb-6 text-center">
     📋 Rapporter fra din organisasjon
@@ -19,15 +6,22 @@
 
 <!-- FILTER SKJEMA -->
 <form method="get" class="mb-6 flex flex-wrap gap-4 items-end">
-
     <!-- Søk -->
-    <div>
-        <label class="block text-sm mb-1">Søk</label>
-        <input type="text"
-               name="search"
-               value="@Context.Request.Query["search"]"
-               placeholder="Søk i type, innmelder, status, lokasjon..."
-               class="border px-3 py-2 rounded w-72" />
+    <div class="flex items-center gap-2">
+        <div>
+            <label class="block text-sm mb-1">Søk</label>
+            <input type="text"
+                   name="search"
+                   value="@Context.Request.Query["search"]"
+                   placeholder="Søk i type, innmelder, status, lokasjon..."
+                   class="border px-3 py-2 rounded w-72" />
+        </div>
+
+        <!-- 🔍 Knapp ved siden av søkefeltet -->
+        <button type="submit"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">
+            Søk
+        </button>
     </div>
 
     <!-- Type -->
@@ -49,84 +43,53 @@
         <label class="block text-sm mb-1">Status</label>
         <select name="status" class="border px-3 py-2 rounded w-40">
             <option value="">Alle</option>
-            <option value="Open" selected="@(Context.Request.Query["status"] == "Open")">Open</option>
-            <option value="Closed" selected="@(Context.Request.Query["status"] == "Closed")">Closed</option>
+            @foreach (var statusValue in Enum.GetNames(typeof(NRL_PROJECT.Models.ObstacleReportData.EnumTypes)))
+            {
+                var isSelected = Context.Request.Query["status"] == statusValue;
+                <option value="@statusValue" selected="@(isSelected ? "selected" : null)">
+                    @statusValue
+                </option>
+            }
         </select>
     </div>
 
     <div>
-        <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">
+        <button type="submit"
+                class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded">
             Filtrer
         </button>
     </div>
-
 </form>
-
-
-
 <!-- RAPPORTTABELL -->
 <table class="table-auto w-full border border-gray-300 rounded-lg shadow-md">
     <thead class="bg-gray-100 text-left">
         <tr>
-
-            <th class="px-4 py-2">
-                <a asp-route-sortField="date" asp-route-sortDir="@NextSortDir("date")">Dato</a>
-            </th>
-
-            <th class="px-4 py-2">
-                <a asp-route-sortField="type" asp-route-sortDir="@NextSortDir("type")">Type</a>
-            </th>
-
-            <th class="px-4 py-2">
-                <a asp-route-sortField="status" asp-route-sortDir="@NextSortDir("status")">Status</a>
-            </th>
-
-            <th class="px-4 py-2">
-                <a asp-route-sortField="email" asp-route-sortDir="@NextSortDir("email")">Innmelder</a>
-            </th>
-
-            <th class="px-4 py-2">
-                <a asp-route-sortField="org" asp-route-sortDir="@NextSortDir("org")">Org</a>
-            </th>
-
-            <th class="px-4 py-2">Lokasjon</th>
-            <th></th>
+            <th class="px-4 py-2">ObstacleReportID</th>
+            <th class="px-4 py-2">Innmelder</th>
+            <th class="px-4 py-2">ObstacleID</th>
+            <th class="px-4 py-2">ObstacleType</th>
+            <th class="px-4 py-2">Rapportdato</th>
+            <th class="px-4 py-2">Rapportstatus</th>
+            <th class="px-4 py-2">OrgName</th>
+            <th class="px-4 py-2">Koordinater</th>
         </tr>
     </thead>
-
     <tbody>
         @foreach (var report in Model)
         {
-            <tr class="border-t hover:bg-gray-50 cursor-pointer"
-                onclick="location.href='@Url.Action("Details", "Report", new { id = report.ObstacleReportID })'">
-
-                <td class="px-4 py-2">@report.ObstacleReportDate.ToString("yyyy-MM-dd HH:mm")</td>
+            <tr class="border-t hover:bg-gray-50">
+                <td class="px-4 py-2">@report.ObstacleReportID</td>
+                <td class="px-4 py-2">@report.UserName</td>
+                <td class="px-4 py-2">@report.ObstacleID</td>
                 <td class="px-4 py-2">@report.ObstacleType</td>
+                <td class="px-4 py-2">@report.ObstacleReportDate?.ToString("yyyy-MM-dd HH:mm")</td>
                 <td class="px-4 py-2">@report.ObstacleReportStatus</td>
-                <td class="px-4 py-2">@report.SubmittedByUser.Email</td>
                 <td class="px-4 py-2">@report.OrgName</td>
-
-                <!-- Klikkbar lokasjon -->
-                <td class="px-4 py-2">
-                    <a class="text-blue-600 hover:underline"
-                       asp-controller="Map"
-                       asp-action="ViewOnMap"
-                       asp-route-id="@report.ObstacleReportID">
-                        @report.MapData.CoordinateSummary
-                    </a>
-                </td>
-
-                <!-- Separat detalj-lenke -->
-                <td class="px-4 py-2">
-                    <a asp-controller="Report"
-                       asp-action="Details"
-                       asp-route-id="@report.ObstacleReportID"
-                       class="text-blue-600 hover:underline">
-                        Detaljer
-                    </a>
-                </td>
-
+                <td class="px-4 py-2">@report.CoordinateSummary</td>
             </tr>
         }
     </tbody>
+
+
+
 </table>

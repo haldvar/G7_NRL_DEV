@@ -14,7 +14,6 @@ namespace NRL_PROJECT.Data
         public DbSet<ObstacleReportData> ObstacleReports { get; set; }
         public DbSet<AccessLevel> AccessLevels { get; set; }
         public DbSet<Organisation> Organisations { get; set; }
-        public DbSet<User> Users  { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<MapData> MapDatas { get; set; }
 

@@ -20,12 +20,14 @@ namespace NRL_PROJECT.Controllers
     public class RegistrarController : Controller
     {
         private readonly NRL_Db_Context _context;
+        private readonly UserManager<User> _userManager;
 
         public RegistrarController(NRL_Db_Context context, UserManager<User> userManager)
         {
             _context = context;
             _userManager = userManager;
         }
+
         private static UiStatus MapToUi(BackendStatus backendStatus)
         {
             return backendStatus switch
@@ -39,18 +41,18 @@ namespace NRL_PROJECT.Controllers
                 _ => UiStatus.Ny
             };
         }
+
         private static readonly List<string> PredefinedObstacleTypes = new()
-            {
-                "Radio/Mobilmast",
-                "Mast/Tårn",
-                "Vindmølle",
-                "Lyktestolpe",
-                "Høyspentledning",
-                "Bygning/Konstruksjon",
-                "Kran",
-                "Annet"
-            };
-        private readonly UserManager<User> _userManager;  
+        {
+            "Radio/Mobilmast",
+            "Mast/Tårn",
+            "Vindmølle",
+            "Lyktestolpe",
+            "Høyspentledning",
+            "Bygning/Konstruksjon",
+            "Kran",
+            "Annet"
+        };
 
         private async Task<List<(string Id, string Name)>> GetRegistrarsAsync()
         {
@@ -60,7 +62,9 @@ namespace NRL_PROJECT.Controllers
                        .ToList();
         }
 
-        //POST: /Registrar/UpdateStatus
+        // ---------------------------------------------
+        // POST: /Registrar/UpdateStatus
+        // ---------------------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateStatus(int id, string status, string? comment)
@@ -70,13 +74,12 @@ namespace NRL_PROJECT.Controllers
 
             if (report == null) return NotFound();
 
-
             var newBackendStatus = status switch
             {
                 "UnderBehandling" => BackendStatus.InProgress,
                 "Godkjent" => BackendStatus.Resolved,
                 "Avvist" => BackendStatus.Deleted,
-                _ => BackendStatus.Open      
+                _ => BackendStatus.Open
             };
 
             report.ObstacleReportStatus = newBackendStatus;
@@ -87,10 +90,15 @@ namespace NRL_PROJECT.Controllers
             return RedirectToAction(nameof(ReportDetails), new { id });
         }
 
+        // ---------------------------------------------
+        // GET: /Registrar/ReportDetails
+        // ---------------------------------------------
         [HttpGet]
         public async Task<IActionResult> ReportDetails(int id)
         {
             var report = await _context.ObstacleReports
+                .Include(r => r.SubmittedByUser)
+                    .ThenInclude(u => u.Organisation)
                 .Include(r => r.Obstacle)
                 .Include(r => r.User)
                     .ThenInclude(u => u.Organisation)
@@ -100,7 +108,6 @@ namespace NRL_PROJECT.Controllers
 
             if (report == null)
                 return NotFound();
-            var OrgName = "Ukjent";
 
             // ---- Coordinates ----
             var orderedCoords = report.MapData?.Coordinates?
@@ -115,67 +122,47 @@ namespace NRL_PROJECT.Controllers
                 ? orderedCoords.Select(c => new[] { c.Latitude, c.Longitude }).ToList()
                 : new List<double[]>();
 
-            // JSON -> Model.GeoJsonCoordinates
             var json = JsonSerializer.Serialize(latLngPairs,
                 new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.Never });
 
             var reportedLocation = first != null ? $"{lat},{lng}" : string.Empty;
-            var registrars = await GetRegistrarsAsync();
 
+            var registrars = await GetRegistrarsAsync();
             ViewBag.Registrars = registrars
                 .Select(x => new SelectListItem
                 {
                     Value = x.Id,
                     Text = x.Name,
-                    Selected = (x.Id == report.ReviewedByUserID) 
+                    Selected = (x.Id == report.ReviewedByUserID)
                 })
                 .ToList();
 
-            var typeList = await _context.Obstacles
-                .Select(o => o.ObstacleType)
-                .Where(t => t != null && t != "")
-                .Distinct()
-                .OrderBy(t => t)
-                .ToListAsync();
-
-           
             var vm = new ObstacleReportViewModel
             {
-                // Sender of the report
                 ObstacleReportID = report.ObstacleReportID,
-                TimeOfSubmittedReport = report.ObstacleReportDate,
-
-                // Obstacle Data
+                ObstacleReportDate = report.ObstacleReportDate,
                 ObstacleID = report.Obstacle?.ObstacleID ?? 0,
                 ObstacleType = report.Obstacle?.ObstacleType ?? "",
                 ObstacleComment = report.Obstacle?.ObstacleComment ?? "",
                 ObstacleHeight = report.Obstacle?.ObstacleHeight ?? 0,
                 ObstacleWidth = report.Obstacle?.ObstacleWidth ?? 0,
 
-                // Lokasjon
                 MapData = report.MapData,
                 Latitude = lat,
                 Longitude = lng,
                 Reported_Location = reportedLocation,
                 GeoJsonCoordinates = json,
 
-                // Status
                 ReportStatus = MapToUi(report.ObstacleReportStatus),
-                
-                // Kommentar inn i ReportDetails
-                StatusComment = report.ObstacleReportComment ?? "",
 
-                // User
-                UserName = report.UserName != null
-    ? (
-        !string.IsNullOrWhiteSpace(report.User.FirstName) || !string.IsNullOrWhiteSpace(report.User.LastName)
-            ? $"{(report.User.FirstName ?? "").Trim()} {(report.User.LastName ?? "").Trim()}".Trim()
-            : report.User.UserName
-      )
-    : "Ukjent",
-                OrgName = report.User?.Organisation != null
-                    ? (report.User.Organisation.OrgName ?? "Ukjent")
+                ObstacleReportComment = report.ObstacleReportComment ?? "",
+
+                UserName = report.SubmittedByUser != null
+                    ? report.SubmittedByUser.UserName
                     : "Ukjent",
+
+                OrgName = report.SubmittedByUser?.Organisation?.OrgName ?? "Ukjent",
+
                 AssignedRegistrarUserID = report.ReviewedByUserID
             };
 
@@ -185,12 +172,16 @@ namespace NRL_PROJECT.Controllers
 
             return View(vm);
         }
+
+        // ---------------------------------------------
+        // POST: Edit obstacle data
+        // ---------------------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateObstacleData(int id, string? obstacleType, double? obstacleHeight)
         {
             var report = await _context.ObstacleReports
-                .Include(r => r.Obstacle)  
+                .Include(r => r.Obstacle)
                 .FirstOrDefaultAsync(r => r.ObstacleReportID == id);
 
             if (report == null)
@@ -199,18 +190,15 @@ namespace NRL_PROJECT.Controllers
                 return RedirectToAction(nameof(RegistrarView));
             }
 
-            
             if (obstacleHeight is < 0 or > 10000)
             {
                 TempData["Error"] = "Ugyldig høyde (0–10 000).";
                 return RedirectToAction(nameof(ReportDetails), new { id });
             }
 
-            // Choose Obstacle if not exists
             if (report.Obstacle == null)
                 report.Obstacle = new ObstacleData();
 
-            // If user choose other, free text
             if (!string.IsNullOrWhiteSpace(obstacleType))
                 report.Obstacle.ObstacleType = obstacleType.Trim();
 
@@ -223,8 +211,9 @@ namespace NRL_PROJECT.Controllers
             return RedirectToAction(nameof(ReportDetails), new { id });
         }
 
-
-        //Transfer report to another registrar
+        // ---------------------------------------------
+        // Transfer report to another registrar
+        // ---------------------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> TransferReport(int id, string transferToUserId)
@@ -244,7 +233,6 @@ namespace NRL_PROJECT.Controllers
                 return RedirectToAction(nameof(RegistrarView));
             }
 
-            // Safetycheck: Ensure target user is a Registrar
             var targetUser = await _userManager.FindByIdAsync(transferToUserId);
             if (targetUser == null || !(await _userManager.IsInRoleAsync(targetUser, "Registrar")))
             {
@@ -252,7 +240,6 @@ namespace NRL_PROJECT.Controllers
                 return RedirectToAction(nameof(ReportDetails), new { id });
             }
 
-            // All OK — transfer report
             report.ReviewedByUserID = transferToUserId;
             await _context.SaveChangesAsync();
 
@@ -260,29 +247,25 @@ namespace NRL_PROJECT.Controllers
             return RedirectToAction(nameof(ReportDetails), new { id });
         }
 
-
-        // Gets all reports
+        // ---------------------------------------------
+        // GET: Registrar Overview
+        // ---------------------------------------------
         [HttpGet]
         public async Task<IActionResult> RegistrarView(string? status = "Alle", string? q = null)
         {
             var query = _context.ObstacleReports
                 .Include(r => r.Obstacle)
+                .Include(r => r.SubmittedByUser)
+                    .ThenInclude(u => u.Organisation)
                 .Include(r => r.User)
                     .ThenInclude(u => u.Organisation)
                 .Include(r => r.Reviewer)
                 .Include(r => r.MapData)
-                   .ThenInclude(m => m.Coordinates)
+                    .ThenInclude(m => m.Coordinates)
                 .AsQueryable();
 
-            // Status filter
             if (!string.IsNullOrWhiteSpace(status) &&
-                status.StartsWith("Alle", StringComparison.OrdinalIgnoreCase))
-            {
-                status = "Alle";
-            }
-
-            if (!string.IsNullOrWhiteSpace(status) &&
-                !string.Equals(status, "Alle", StringComparison.OrdinalIgnoreCase))
+                !status.Equals("Alle", StringComparison.OrdinalIgnoreCase))
             {
                 EnumTypes? filterStatus = status switch
                 {
@@ -295,9 +278,7 @@ namespace NRL_PROJECT.Controllers
                 };
 
                 if (filterStatus.HasValue)
-                {
                     query = query.Where(r => r.ObstacleReportStatus == filterStatus.Value);
-                }
             }
 
             if (!string.IsNullOrWhiteSpace(q))
@@ -306,79 +287,54 @@ namespace NRL_PROJECT.Controllers
 
                 query = query.Where(r =>
                     r.ObstacleReportID.ToString().Contains(q) ||
-
-                    // ObstacleType
                     (r.Obstacle != null ? r.Obstacle.ObstacleType : "").Contains(q) ||
-
                     (
-                        (r.UserName != null ? r.User.FirstName : "") + " " +
-                        (r.UserName != null ? r.User.LastName : "")
+                        (r.User != null ? r.User.FirstName : "") + " " +
+                        (r.User != null ? r.User.LastName : "")
                     ).Contains(q)
                 );
             }
 
             var model = await query
-      .OrderByDescending(r => r.ObstacleReportDate)
-      .Select(r => new ObstacleReportViewModel
-      {
-          ObstacleReportID = r.ObstacleReportID,
+                .OrderByDescending(r => r.ObstacleReportDate)
+                .Select(r => new ObstacleReportViewModel
+                {
+                    ObstacleReportID = r.ObstacleReportID,
+                    ObstacleReportDate = r.ObstacleReportDate,
+                    ObstacleID = r.Obstacle != null ? r.Obstacle.ObstacleID : 0,
+                    ObstacleType = r.Obstacle != null ? (r.Obstacle.ObstacleType ?? "") : "",
+                    ObstacleComment = r.Obstacle != null ? (r.Obstacle.ObstacleComment ?? "") : "",
+                    ObstacleHeight = r.Obstacle != null ? r.Obstacle.ObstacleHeight : 0,
 
-          // DateTime? -> DateTime
-          TimeOfSubmittedReport = r.ObstacleReportDate,
-                    
-          ObstacleID = r.Obstacle != null ? r.Obstacle.ObstacleID : 0,
-          ObstacleType = r.Obstacle != null ? (r.Obstacle.ObstacleType ?? "") : "",
-          ObstacleComment = r.Obstacle != null ? (r.Obstacle.ObstacleComment ?? "") : "",
-          ObstacleHeight = r.Obstacle != null ? r.Obstacle.ObstacleHeight : 0,
+                    Latitude = (r.MapData != null && r.MapData.Coordinates.Any())
+                        ? r.MapData.Coordinates.OrderBy(c => c.CoordinateId).Select(c => (double?)c.Latitude).FirstOrDefault() ?? 0
+                        : 0,
 
-          // Coordinates
-          Latitude =
-              (r.MapData != null && r.MapData.Coordinates.Any())
-                  ? r.MapData.Coordinates
-                      .OrderBy(c => c.CoordinateId)
-                      .Select(c => (double?)c.Latitude)
-                      .FirstOrDefault() ?? 0
-                  : 0,
+                    Longitude = (r.MapData != null && r.MapData.Coordinates.Any())
+                        ? r.MapData.Coordinates.OrderBy(c => c.CoordinateId).Select(c => (double?)c.Longitude).FirstOrDefault() ?? 0
+                        : 0,
 
-          Longitude =
-              (r.MapData != null && r.MapData.Coordinates.Any())
-                  ? r.MapData.Coordinates
-                      .OrderBy(c => c.CoordinateId)
-                      .Select(c => (double?)c.Longitude)
-                      .FirstOrDefault() ?? 0
-                  : 0,
+                    ReportStatus = MapToUi(r.ObstacleReportStatus),
+                    ObstacleReportComment = r.ObstacleReportComment ?? "",
 
-          // Status/Comment
-          ReportStatus = MapToUi(r.ObstacleReportStatus),
-          StatusComment = r.ObstacleReportComment ?? "",
+                    UserName = r.SubmittedByUser != null
+                        ? r.SubmittedByUser.UserName
+                        : "Ukjent",
 
-          // User
-          UserName = r.User != null
-            ? (
-        
-        !string.IsNullOrWhiteSpace(r.User.FirstName) || !string.IsNullOrWhiteSpace(r.User.LastName)
-            ? $"{(r.User.FirstName ?? "").Trim()} {(r.User.LastName ?? "").Trim()}".Trim()
-             : r.User.UserName
-            )
-            : "",
+                    OrgName =
+                        r.SubmittedByUser != null &&
+                        r.SubmittedByUser.Organisation != null
+                        ? r.SubmittedByUser.Organisation.OrgName
+        :               "Ukjent",
 
-          OrgName = r.User != null && r.User.Organisation != null
-            ? (r.User.Organisation.OrgName ?? "Ukjent")
-            : "Ukjent",
-
-          AssignedRegistrarUserID = r.Reviewer != null
-            ? r.Reviewer.UserName
-            : null,
-
-      })
-      .ToListAsync();
-
+                    AssignedRegistrarUserID = r.Reviewer != null
+                        ? r.Reviewer.UserName
+                        : null
+                })
+                .ToListAsync();
 
             ViewBag.SelectedStatus = status ?? "Alle";
             return View(model);
         }
-
-
     }
-
 }

@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Brukerhåndtering";
     var adminCount = ViewBag.AdminCount;
+    var organisations = ViewBag.Organisations as List<NRL_PROJECT.Models.Organisation>;
 }
 
 <div class="container mt-4">
@@ -47,46 +48,43 @@
                     <td>@user.UserName</td>
                     <td>@user.Email</td>
                     <td>@user.FirstName @user.LastName</td>
-                    <td>@user.OrgName</td>
+                    <td>
+                        @{
+                            var org = organisations?.FirstOrDefault(o => o.OrgID == user.OrgID);
+                        }
+                        @(org?.OrgName ?? "(ingen)")
+                    </td>
 
-                    <!-- Vis rollen som tekst -->
                     <td>@user.CurrentRole</td>
 
                     <td class="text-end">
 
                         @if (!isLastAdmin)
                         {
+                            <!-- ROLLE-ENDRING FORM -->
                             <form asp-action="AssignRole" method="post" class="d-inline">
                                 @Html.AntiForgeryToken()
-                                <input type="hidden" name="UserId" value="@user.UserID" />
+                                <input type="hidden" name="UserID" value="@user.UserID" />
 
-                                <!-- ALLTID dropdown for roller -->
-                                <select name="role" class="form-select form-select-sm d-inline w-auto">
-                                    <option value="No Role" selected="@(user.CurrentRole == "No Role")">
-                                        Ingen
-                                    </option>
-
+                                <select name="role" class="form-select form-select-sm d-inline w-auto me-1">
+                                    <option value="No Role" selected="@(user.CurrentRole == "No Role")">Ingen</option>
                                     @foreach (var role in user.AvailableRoles)
                                     {
-                                        <option value="@role" selected="@(role == user.CurrentRole)">
-                                            @role
-                                        </option>
+                                        <option value="@role" selected="@(role == user.CurrentRole)">@role</option>
                                     }
                                 </select>
 
-                                <!-- Organisasjon vises kun, ikke endres -->
-                                <input type="hidden" name="OrgName" value="@user.OrgName" />
-
-                                <button type="submit" class="btn btn-sm btn-outline-primary mt-1">
-                                    Lagre
+                                <button type="submit" class="btn btn-sm btn-outline-primary">
+                                    Lagre rolle
                                 </button>
                             </form>
 
+                            <!-- SLETT-BRUKER FORM -->
                             <form asp-action="DeleteUser" method="post" class="d-inline"
                                   onsubmit="return confirm('Slette @user.UserName?');">
                                 @Html.AntiForgeryToken()
-                                <input type="hidden" name="UserId" value="@user.UserID" />
-                                <button type="submit" class="btn btn-sm btn-outline-danger mt-1">
+                                <input type="hidden" name="UserID" value="@user.UserID" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger ms-1">
                                     Slett
                                 </button>
                             </form>
@@ -122,10 +120,12 @@
                 @Html.AntiForgeryToken()
 
                 <div class="row g-3">
+
                     <div class="col-md-6">
                         <label class="form-label">Brukernavn</label>
-                        <input type="text" class="form-control" name="UserName" required />
+                        <input type="text" class="form-control" name="UserName" />
                     </div>
+
                     <div class="col-md-6">
                         <label class="form-label">E-post</label>
                         <input type="email" class="form-control" name="Email" required />
@@ -135,14 +135,22 @@
                         <label class="form-label">Fornavn</label>
                         <input type="text" class="form-control" name="FirstName" required />
                     </div>
+
                     <div class="col-md-6">
                         <label class="form-label">Etternavn</label>
                         <input type="text" class="form-control" name="LastName" required />
                     </div>
 
+                    <!-- ORGANISASJON DROPDOWN -->
                     <div class="col-md-6">
                         <label class="form-label">Organisasjon</label>
-                        <input type="text" class="form-control" name="OrgName" required />
+                        <select class="form-select" name="OrgID" required>
+                            <option value="">Velg organisasjon</option>
+                            @foreach (var org in organisations)
+                            {
+                                <option value="@org.OrgID">@org.OrgName</option>
+                            }
+                        </select>
                     </div>
 
                     <div class="col-md-6">
@@ -160,6 +168,7 @@
                         <label class="form-label">Passord</label>
                         <input type="password" class="form-control" name="Password" required />
                     </div>
+
                     <div class="col-md-6">
                         <label class="form-label">Bekreft passord</label>
                         <input type="password" class="form-control" name="ConfirmPassword" required />
@@ -170,6 +179,7 @@
                     <button type="submit" class="btn btn-outline-success">Opprett</button>
                     <button type="button" class="btn btn-outline-secondary" onclick="toggleCreateUserForm()">Avbryt</button>
                 </div>
+
             </form>
 
         </div>

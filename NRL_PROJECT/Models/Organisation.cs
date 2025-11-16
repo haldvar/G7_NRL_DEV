@@ -9,7 +9,7 @@ namespace NRL_PROJECT.Models
         public int OrgID { get; set; }
 
         [StringLength(100)]
-        public string OrgName { get; set; }
+        public string? OrgName { get; set; }
 
         [StringLength(100)]
         public string OrgContactEmail { get; set; }
