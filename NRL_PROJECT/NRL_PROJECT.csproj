@@ -17,11 +17,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Controllers\ReportController.cs" />
-      <Compile Remove="Models\ObstacleMarkers.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
       <Content Remove="Views\Home\MapOverview.cshtml" />
       <Content Remove="Views\Home\ObstacleDataForm.cshtml" />
       <Content Remove="Views\Home\ObstacleOverview.cshtml" />
@@ -56,7 +51,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Migrations\" />
       <Folder Include="wwwroot\lib\leaflet\" />
       <Folder Include="wwwroot\uploads\" />
     </ItemGroup>

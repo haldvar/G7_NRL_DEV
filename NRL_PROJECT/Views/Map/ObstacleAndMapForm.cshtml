@@ -108,6 +108,16 @@
 					Rapport nullstilt
 				</div>
 
+				<!-- Toast for manglende kart-geometri (server-side validering) -->
+				<div id="geoErrorToast"
+					 class="hidden absolute top-36 left-1/2 -translate-x-1/2
+						bg-orange-500/95 text-white text-xl px-6 py-3
+						rounded-xl shadow-2xl font-bold tracking-wide
+						backdrop-blur-sm z-[99999]
+						transition-opacity duration-500">
+					Du må minst angi ett punkt på kartet.
+				</div>
+
 				<!-- Leaflet map -->
 				<div id="mapDraw" class="absolute inset-0 z-0"></div>
 
@@ -172,16 +182,27 @@
 	</div>
 </form>
 
-@if (!ViewData.ModelState.IsValid)
+@{
+	var hasGeoError = ViewData.ModelState.ContainsKey("MapData.GeoJsonCoordinates")
+		|| ViewData.ModelState.ContainsKey("GeoJsonCoordinates");
+}
+
+@if (hasGeoError)
 {
-	<div class="bg-red-600 text-white p-4 rounded-lg mt-6">
-		<ul class="list-disc list-inside">
-			@foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-			{
-				<li>@error.ErrorMessage</li>
-			}
-		</ul>
-	</div>
+	<script>
+		window.addEventListener("load", () => {
+			const toast = document.getElementById("geoErrorToast");
+			if (!toast) return;
+
+			toast.classList.remove("hidden");
+			toast.style.opacity = "1";
+
+			setTimeout(() => {
+				toast.style.opacity = "0";
+				setTimeout(() => toast.classList.add("hidden"), 500);
+			}, 3000);
+		});
+	</script>
 }
 
 @section Scripts {

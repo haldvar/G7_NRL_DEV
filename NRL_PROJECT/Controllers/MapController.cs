@@ -158,8 +158,15 @@ namespace NRL_PROJECT.Controllers
             var report = new ObstacleReportData
             {
                 ObstacleID = model.ObstacleID,
+
+                // Generisk kobling (hvis du trenger den)
                 UserId = string.IsNullOrWhiteSpace(currentUserId) ? null : currentUserId,
                 UserName = currentUser?.UserName ?? currentUser?.Email ?? "Anonymous",
+
+                // 🔑 Viktig: kobling til innsender
+                SubmittedByUserId = currentUserId,
+                SubmittedByUser = currentUser,
+
                 ObstacleReportComment = "Her skal Registerfører kunne skrive inn kommentar.",
                 ObstacleReportDate = DateTime.UtcNow,
                 ObstacleReportStatus = ObstacleReportData.EnumTypes.New,

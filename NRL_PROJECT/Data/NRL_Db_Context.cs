@@ -11,15 +11,11 @@ namespace NRL_PROJECT.Data
         public NRL_Db_Context(DbContextOptions<NRL_Db_Context> options) : base(options) { }
         public DbSet<ObstacleData> Obstacles { get; set; }
         public DbSet<MapCoordinate> MapCoordinates { get; set; }
-        public DbSet<ObstacleReportData> ObstacleReports { get; set; }
-        public DbSet<AccessLevel> AccessLevels { get; set; }
-        public DbSet<Organisation> Organisations { get; set; }
-        public DbSet<User> Users  { get; set; }
-        public DbSet<UserRole> UserRoles { get; set; }
+        public DbSet<ObstacleReportData> ObstacleReports { get; set; }       
+        public DbSet<Organisation> Organisations { get; set; }        
         public DbSet<MapData> MapDatas { get; set; }
 
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+       protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
             
@@ -45,11 +41,6 @@ namespace NRL_PROJECT.Data
                 .HasOne(r => r.MapData)
                 .WithMany(m => m.ObstacleReports)
                 .HasForeignKey(r => r.MapDataID);
-
-            // UserRole enum til string
-            modelBuilder.Entity<UserRole>()
-                .Property(r => r.RoleName)
-                .HasConversion<string>();
 
             // MapData ↔ MapCoordinate
             modelBuilder.Entity<MapCoordinate>()

@@ -65,7 +65,7 @@
 
                     <textarea name="comment" rows="3"
                               class="w-full rounded-xl border px-3 py-2 text-sm"
-                              placeholder="Kommentar (valgfritt)">@Model.StatusComment</textarea>
+                              placeholder="Kommentar (valgfritt)">@Model.ObstacleReportComment</textarea>
 
                     <div class="flex flex-wrap gap-3 pt-1">
                         <button name="status" value="UnderBehandling" type="submit"
@@ -220,18 +220,22 @@
 
             <div>
                 <dt class="font-semibold text-slate-700">Tidspunkt registrert</dt>
-                <dd>@Model.TimeOfSubmittedReport.ToString("dd.MM.yyyy HH:mm")</dd>
+                <dd>@Model.ObstacleReportDate.ToString("dd.MM.yyyy HH:mm")</dd>
             </div>
 
             <div class="sm:col-span-2">
                 <dt class="font-semibold text-slate-700">Innsender</dt>
-                <dd>@Model.UserName</dd>
+                <dd>
+                    @Model.UserName
+                    @if (!string.IsNullOrWhiteSpace(Model.OrgName))
+                    {
+                        <span class="text-slate-500"> (</span>
+                        @Model.OrgName
+                        <span class="text-slate-500">)</span>
+                    }
+                </dd>
             </div>
 
-            <div class="sm:col-span-2">
-                <dt class="font-semibold text-slate-700">Organisasjon</dt>
-                <dd>@Model.OrgName</dd>
-            </div>
         </dl>
 
         <div class="mt-4">

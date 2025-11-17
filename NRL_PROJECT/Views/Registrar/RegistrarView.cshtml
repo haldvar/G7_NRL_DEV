@@ -116,30 +116,19 @@
                             @r.Latitude, @r.Longitude
                             <span class="mx-2">•</span>
                             <span class="text-slate-500">Innmeldt:</span>
-                            @r.TimeOfSubmittedReport.ToString("dd.MM.yyyy HH:mm")
+                            @r.ObstacleReportDate.ToString("dd.MM.yyyy HH:mm")
                         </div>
                         <div class="mt-1 text-sm text-slate-600">
-                            <span class="text-slate-500">Innsender:</span> @r.UserName
-                            @if (!string.IsNullOrWhiteSpace(r.UserName))
+                            <span class="text-slate-500">Innsender:</span>
+                            @r.UserName
+                            @if (!string.IsNullOrWhiteSpace(r.OrgName))
                             {
-                                <span class="text-slate-400"></span>
-                                @r.UserName
+                                <span class="text-slate-500"> (</span>
+                                @r.OrgName
+                                <span class="text-slate-500">)</span>
                             }
-                        </div>
-                        @if (!string.IsNullOrWhiteSpace(@r.OrgName))
-                        {
-                            <div class="mt-1 text-sm text-slate-600">
-                                <span class="text-slate-500">Innsender:</span>
-                                @r.UserName
-                                @if (!string.IsNullOrWhiteSpace(r.OrgName))
-                                {
-                                    <span class="text-slate-500"> (</span>
-                                    @r.OrgName
+                    </div>
                         
-                                    <span class="text-slate-500">)</span>
-                                }
-                            </div>
-                        }
 
                 </div>
                 <div class="flex shrink-0 flex-col items-end gap-1 text-sm text-slate-600">

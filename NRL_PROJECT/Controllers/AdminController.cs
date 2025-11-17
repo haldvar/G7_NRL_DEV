@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
 using NRL_PROJECT.Models.ViewModels;
 
@@ -12,18 +13,25 @@ namespace NRL_PROJECT.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly NRL_Db_Context _context;
 
-        public AdminController(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
+        public AdminController(
+            UserManager<User> userManager,
+            RoleManager<IdentityRole> roleManager,
+            NRL_Db_Context context)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _context = context;
         }
 
-        // GET: /Admin/Dashboard - Main landing page for admins
+
+        // ------------------------------------------------------------
+        //  DASHBOARD
+        // ------------------------------------------------------------
         [HttpGet]
         public async Task<IActionResult> Dashboard()
         {
-            // Get statistics
             var totalUsers = await _userManager.Users.CountAsync();
             var admins = 0;
             var pilots = 0;
@@ -45,35 +53,38 @@ namespace NRL_PROJECT.Controllers
             ViewBag.Admins = admins;
             ViewBag.Pilots = pilots;
             ViewBag.Registrars = registrars;
-            ViewBag.Registrars = externalorgs;
+            ViewBag.ExternalOrgs = externalorgs;
             ViewBag.NoRole = noRole;
 
             return View();
         }
 
-        // GET: /Admin/ManageUsers
+
+
+        // ------------------------------------------------------------
+        //  MANAGE USERS (GET)
+        // ------------------------------------------------------------
         [HttpGet]
         public async Task<IActionResult> ManageUsers()
         {
-            var users = await _userManager.Users.ToListAsync();
-            
+            var users = await _userManager.Users
+                
+                .ToListAsync();
+
             var userViewModels = new List<UserManagementViewModel>();
-            
-            var adminCount = 0;
-            
+
+            int adminCount = 0;
             foreach (var user in users)
             {
                 var roles = await _userManager.GetRolesAsync(user);
                 if (roles.Contains("Admin")) adminCount++;
             }
-
             ViewBag.AdminCount = adminCount;
 
-            
             foreach (var user in users)
             {
                 var roles = await _userManager.GetRolesAsync(user);
-                
+
                 userViewModels.Add(new UserManagementViewModel
                 {
                     UserID = user.Id,
@@ -81,45 +92,63 @@ namespace NRL_PROJECT.Controllers
                     Email = user.Email,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
-                    OrgName = user.OrgName,
+
+                    OrgID = user.OrgID,
+                    OrgName = user.Organisation?.OrgName,
+
                     CurrentRole = roles.FirstOrDefault() ?? "No Role",
-                    AvailableRoles = new List<string> { "Admin", "Pilot", "Registrar", "ExternalOrg" }
+                    AvailableRoles = new List<string>
+                    {
+                        "Admin", "Pilot", "Registrar", "ExternalOrg"
+                    }
                 });
             }
+
+            // Send organisasjoner til dropdown
+            ViewBag.Organisations = new List<Organisation>
+        {
+            new Organisation { OrgID = 1, OrgName = "NRL" },
+            new Organisation { OrgID = 2, OrgName = "Politiet" },
+            new Organisation { OrgID = 3, OrgName = "Forsvaret" },
+            new Organisation { OrgID = 4, OrgName = "Norsk Luftambulanse" }
             
-            ViewBag.AdminCount = adminCount;
+        };
+
             return View(userViewModels);
         }
 
-        // POST: /Admin/AssignRole
+
+
+        // ------------------------------------------------------------
+        //  ASSIGN ROLE
+        // ------------------------------------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AssignRole(string UserID, string role)
         {
             var user = await _userManager.FindByIdAsync(UserID);
-            
             if (user == null)
             {
-                return NotFound();
+                TempData["Error"] = "Bruker finnes ikke.";
+                return RedirectToAction("ManageUsers");
             }
 
-            // Remove all existing roles
             var currentRoles = await _userManager.GetRolesAsync(user);
             if (currentRoles.Any())
-            {
                 await _userManager.RemoveFromRolesAsync(user, currentRoles);
-            }
 
-            // Add new role (if not "No Role")
             if (!string.IsNullOrEmpty(role) && role != "No Role")
-            {
                 await _userManager.AddToRoleAsync(user, role);
-            }
 
-            TempData["Success"] = $"Rolle oppdatert for {user.UserName}";
+            TempData["Success"] = $"Rolle oppdatert for {user.UserName}.";
             return RedirectToAction("ManageUsers");
         }
 
+
+
+        // ------------------------------------------------------------
+        //  DELETE USER
+        // ------------------------------------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUser(string UserID)
@@ -132,65 +161,77 @@ namespace NRL_PROJECT.Controllers
             }
 
             var roles = await _userManager.GetRolesAsync(user);
+
+            // Hindre sletting av siste Admin
             if (roles.Contains("Admin"))
             {
-                var allUsers = await _userManager.Users.ToListAsync();
                 int adminCount = 0;
-
-                foreach (var u in allUsers)
+                foreach (var u in await _userManager.Users.ToListAsync())
                 {
                     var r = await _userManager.GetRolesAsync(u);
-                    if (r.Contains("Admin"))
-                        adminCount++;
+                    if (r.Contains("Admin")) adminCount++;
                 }
 
                 if (adminCount <= 1)
                 {
-                    TempData["Error"] = "Du kan ikke slette den siste admin-brukeren.";
+                    TempData["Error"] = "Kan ikke slette siste administrator.";
                     return RedirectToAction("ManageUsers");
                 }
             }
 
             var result = await _userManager.DeleteAsync(user);
-            TempData["Success"] = result.Succeeded ? $"Bruker {user.UserName} slettet." : "Kunne ikke slette bruker.";
+            TempData["Success"] = result.Succeeded ?
+                $"Bruker {user.UserName} ble slettet." :
+                "Kunne ikke slette bruker.";
+
             return RedirectToAction("ManageUsers");
         }
+
+
+
+        // ------------------------------------------------------------
+        //  CREATE USER
+        // ------------------------------------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateUser(RegisterViewModel model)
         {
             if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Ugyldige data.";
                 return RedirectToAction("ManageUsers");
+            }
 
             var user = new User
             {
-                UserName = string.IsNullOrWhiteSpace(model.UserName) ? model.Email : model.UserName,
+                UserName = string.IsNullOrWhiteSpace(model.UserName)
+                    ? model.Email
+                    : model.UserName,
+
                 Email = model.Email,
                 EmailConfirmed = true,
                 FirstName = model.FirstName,
                 LastName = model.LastName,
-                OrgName = model.OrgName
+
+                OrgID = model.OrgID  // ← 🚀 Viktig!
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
-            if (result.Succeeded)
-            {
-                if (!string.IsNullOrEmpty(model.RoleName) && model.RoleName != "No Role")
-                {
-                    await _userManager.AddToRoleAsync(user, model.RoleName);
-                }
 
-                TempData["Success"] = "User created successfully.";
-            }
-            else
+            if (!result.Succeeded)
             {
                 TempData["Error"] = string.Join(", ", result.Errors.Select(e => e.Description));
+                return RedirectToAction("ManageUsers");
             }
 
+            if (!string.IsNullOrEmpty(model.RoleName) && model.RoleName != "No Role")
+            {
+                await _userManager.AddToRoleAsync(user, model.RoleName);
+            }
+
+            TempData["Success"] = "Bruker opprettet!";
             return RedirectToAction("ManageUsers");
         }
 
-
-
-        }
     }
+}
