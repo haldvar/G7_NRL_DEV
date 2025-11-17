@@ -187,6 +187,7 @@
 @section Scripts {
 	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 	<script src="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
+	<script src="https://rawcdn.githack.com/bbecquet/Leaflet.RotatedMarker/master/leaflet.rotatedMarker.js"></script>
 
 	<script>
 		// ------------------------------------------------------------
@@ -263,7 +264,7 @@
 				return;
 			}
 
-			// Helikopter-markør
+					// Helikopter-markør
 			window.currentPosMarker = L.marker(e.latlng, { icon: helicopterIcon })
 				.addTo(map)
 				.bindPopup(`
@@ -272,9 +273,18 @@
 				`)
 				.openPopup();
 
+			// Lukk popup etter 3 sekunder
 			setTimeout(() => {
-				window.currentPosMarker.closePopup();
+				if (window.currentPosMarker) {
+					window.currentPosMarker.closePopup();
+				}
 			}, 3000);
+
+			// Rotér helikopter basert på heading hvis tilgjengelig
+			if (typeof e.heading === "number" && !isNaN(e.heading)) {
+				window.currentPosMarker.setRotationAngle(e.heading);
+			}
+
 
 			// Nøyaktighetssirkel
 			window.currentPosCircle = L.circle(e.latlng, {
