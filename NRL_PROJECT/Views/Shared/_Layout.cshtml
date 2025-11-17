@@ -38,20 +38,31 @@
 
                 <!-- Desktop menu -->
                 <div class="hidden space-x-6 font-medium md:flex">
+<<<<<<< HEAD
                     <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Hjem</a>
                    
+=======
+                    <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Meny</a>
+                    <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ObstacleAndMapForm">Meld hinder</a>
+                    <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="MapView">Situasjonskart</a>
+>>>>>>> JK_mapfixes_div
                     <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="About">Om oss</a>
                     
                     @if (User.IsInRole("Admin"))
                     {
+<<<<<<< HEAD
                         <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ObstacleAndMapForm">Meld hinder</a>
                         <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Admin" asp-action="ManageUsers">Brukerhåndtering</a>
                         <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ReportListOverview">Hinderlogg</a>
                         <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="MapView">Situasjonskart</a>
+=======
+                        <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Admin" asp-action="ManageUsers">Brukerhåndtering</a>
+>>>>>>> JK_mapfixes_div
                     }
 
                     @if (User.IsInRole("Registrar"))
                     {
+<<<<<<< HEAD
                         <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ObstacleAndMapForm">Meld hinder</a>
                         <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Registrar" asp-action="RegistrarView">Rapporthåndtering</a>
                         <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ReportListOverview">Hinderlogg</a>
@@ -63,6 +74,9 @@
                         <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ObstacleAndMapForm">Meld hinder</a>
                         <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ReportListOverview">Hinderlogg</a>
                         <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="MapView">Situasjonskart</a>
+=======
+                        <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Registrar" asp-action="RegistrarView">Rapporthåndtering</a>
+>>>>>>> JK_mapfixes_div
                     }
                 </div>
             </div>
@@ -72,7 +86,11 @@
                 <span class="text-gray-600">👤 Logget inn som <strong>@User.Identity.Name</strong></span>
                 <span class="text-gray-600">
                     Antall rapporter:
+<<<<<<< HEAD
                     <span class="ml-2 text-2xl font-extrabold text-gray-600">@ViewBag.ReportCount</span>
+=======
+                    <span class="ml-2 text-sm font-medium md:flex">@ViewBag.ReportCount</span>
+>>>>>>> JK_mapfixes_div
                 </span>
                 <form asp-controller="Account" asp-action="Logout" method="post" class="inline">
                     @Html.AntiForgeryToken()
@@ -92,11 +110,20 @@
         <!-- Mobile dropdown -->
         <div id="mobile-menu" class="hidden border-t bg-white shadow-sm md:hidden">
             <div class="space-y-2 px-6 py-4">
+<<<<<<< HEAD
                 <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Hjem</a>
                 <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ObstacleAndMapForm">Meld hinder</a>
                 <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="About">Om oss</a>
 
 
+=======
+                <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Meny</a>
+                <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ObstacleAndMapForm">Meld hinder</a>
+                <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="MapView">Situasjonskart</a>
+                <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="About">Om oss</a>
+                
+                
+>>>>>>> JK_mapfixes_div
                 @if (User.IsInRole("Admin"))
                 {
                     <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Admin" asp-action="ManageUsers">Brukerhåndtering</a>

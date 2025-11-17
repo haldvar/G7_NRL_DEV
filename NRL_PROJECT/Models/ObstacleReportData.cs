@@ -23,11 +23,14 @@ namespace NRL_PROJECT.Models
 
         public string UserName { get; set; }
 
+<<<<<<< HEAD
       
         public string? SubmittedByUserName { get; set; }
         public User? SubmittedByUser { get; set; }
 
 
+=======
+>>>>>>> JK_mapfixes_div
         [Required]
         public string ObstacleReportComment { get; set; } = string.Empty;
 

@@ -1,13 +1,22 @@
 @model List<NRL_PROJECT.Models.ObstacleReportData>
 
+<<<<<<< HEAD
 <h1 class="text-3xl font-bold text-blue-700 mb-6 text-center">📋 Hinderlogg</h1>
+=======
+<h1 class="text-3xl font-bold text-blue-700 mb-6 text-center">📋 Rapportoversikt (fil: ReportListOverview)</h1>
+>>>>>>> JK_mapfixes_div
 
 <table class="table-auto w-full border border-gray-300 rounded-lg shadow-md">
     <thead class="bg-gray-100 text-left">
         <tr>
             <th class="px-4 py-2">ObstacleReportID</th>
+<<<<<<< HEAD
             <th class="px-4 py-2">Innmelder</th>
             <th class="px-4 py-2">Saksbehandler</th>
+=======
+            <th class="px-4 py-2">UserName</th>
+            <th class="px-4 py-2">ReviewedByUserID</th>
+>>>>>>> JK_mapfixes_div
             <th class="px-4 py-2">ObstacleID</th>
             <th class="px-4 py-2">ObstacleType</th>
             <th class="px-4 py-2">Kommentar fra innmelder</th>
@@ -32,9 +41,49 @@
                 <td class="px-4 py-2">@report.ObstacleReportComment</td>
                 <td class="px-4 py-2">@report.ObstacleReportDate.ToString("yyyy-MM-dd HH:mm")</td>
                 <td class="px-4 py-2">@report.ObstacleReportStatus</td>
+<<<<<<< HEAD
                 <td class="px-4 py-2">@report.MapData.CoordinateSummary</td>
                 <td class="px-4 py-2">@report.Obstacle?.ObstacleImageURL</td>   <!-- bør endres til å vise et ikon i de tilfellene det er ei tilknytta fil -->
                 
+=======
+                <td class="px-4 py-2">@report.MapDataID</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+
+<h1 class="text-3xl font-bold text-blue-700 mb-6 text-center">📋 Innrapporterte hindre (fil: ReportListOverview)</h1>
+
+<table class="table-auto w-full border border-gray-300 rounded-lg shadow-md">
+    <thead class="bg-gray-100 text-left">
+        <tr>
+            <th class="px-4 py-2">ObstacleID</th>
+            <th class="px-4 py-2">UserName</th>
+            <th class="px-4 py-2">ObstacleType</th>
+            
+           
+            <th class="px-4 py-2">ObstacleComment</th>
+            <th class="px-4 py-2">ObstacleReportDate</th>
+            <th class="px-4 py-2">Coordinates</th>
+            <th class="px-4 py-2">ObstacleImageURL</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var report in Model)
+        {
+            <tr class="border-t">
+                <td class="px-4 py-2">@report.ObstacleID</td>
+                <td class="px-4 py-2">@report.UserName</td>
+                <td class="px-4 py-2">@report.Obstacle?.ObstacleType</td>
+                
+                
+                <td class="px-4 py-2">@report.Obstacle?.ObstacleComment</td>
+                <td class="px-4 py-2">@report.ObstacleReportDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td class="px-4 py-2">@report.MapData.CoordinateSummary</td>
+                <td class="px-4 py-2">@report.Obstacle?.ObstacleImageURL</td>
+>>>>>>> JK_mapfixes_div
             </tr>
         }
     </tbody>

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NRL_PROJECT.Data;
 
@@ -11,9 +12,11 @@ using NRL_PROJECT.Data;
 namespace NRL_PROJECT.Migrations
 {
     [DbContext(typeof(NRL_Db_Context))]
-    partial class NRL_Db_ContextModelSnapshot : ModelSnapshot
+    [Migration("20251112154429_InitialCreate8")]
+    partial class InitialCreate8
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -245,6 +248,10 @@ namespace NRL_PROJECT.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ObstacleComment")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ObstacleDescription")
                         .HasColumnType("longtext");
 
                     b.Property<double>("ObstacleHeight")
@@ -276,10 +283,6 @@ namespace NRL_PROJECT.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ObstacleReportID"));
 
-                    b.Property<string>("CoordinateSummary")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<int?>("MapDataID")
                         .HasColumnType("int");
 
@@ -299,21 +302,9 @@ namespace NRL_PROJECT.Migrations
                     b.Property<string>("ReviewedByUserID")
                         .HasColumnType("varchar(255)");
 
-<<<<<<< HEAD
-                    b.Property<string>("SubmittedByUserId")
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("SubmittedByUserName")
-                        .HasColumnType("longtext");
-
                     b.Property<string>("UserId")
                         .HasColumnType("varchar(255)");
 
-=======
-                    b.Property<string>("UserId")
-                        .HasColumnType("varchar(255)");
-
->>>>>>> JK_mapfixes_div
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -326,11 +317,6 @@ namespace NRL_PROJECT.Migrations
 
                     b.HasIndex("ReviewedByUserID");
 
-<<<<<<< HEAD
-                    b.HasIndex("SubmittedByUserId");
-
-=======
->>>>>>> JK_mapfixes_div
                     b.HasIndex("UserId");
 
                     b.ToTable("ObstacleReports");
@@ -404,9 +390,6 @@ namespace NRL_PROJECT.Migrations
 
                     b.Property<int?>("OrgID")
                         .HasColumnType("int");
-
-                    b.Property<string>("OrgName")
-                        .HasColumnType("longtext");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("longtext");
@@ -560,10 +543,6 @@ namespace NRL_PROJECT.Migrations
                         .HasForeignKey("ReviewedByUserID")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("NRL_PROJECT.Models.User", "SubmittedByUser")
-                        .WithMany()
-                        .HasForeignKey("SubmittedByUserId");
-
                     b.HasOne("NRL_PROJECT.Models.User", "User")
                         .WithMany("ObstacleReportsSubmitted")
                         .HasForeignKey("UserId")
@@ -574,8 +553,6 @@ namespace NRL_PROJECT.Migrations
                     b.Navigation("Obstacle");
 
                     b.Navigation("Reviewer");
-
-                    b.Navigation("SubmittedByUser");
 
                     b.Navigation("User");
                 });

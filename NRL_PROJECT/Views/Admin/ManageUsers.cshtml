@@ -59,6 +59,7 @@
                             <form asp-action="AssignRole" method="post" class="d-inline">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="UserId" value="@user.UserID" />
+<<<<<<< HEAD
 
                                 <!-- ALLTID dropdown for roller -->
                                 <select name="role" class="form-select form-select-sm d-inline w-auto">
@@ -66,6 +67,10 @@
                                         Ingen
                                     </option>
 
+=======
+                                <select name="role" class="form-select form-select-sm d-inline" style="width: auto;">
+                                    <option value="No Role" selected="@(user.CurrentRole == "No Role")">No Role</option>
+>>>>>>> JK_mapfixes_div
                                     @foreach (var role in user.AvailableRoles)
                                     {
                                         <option value="@role" selected="@(role == user.CurrentRole)">
@@ -86,9 +91,13 @@
                                   onsubmit="return confirm('Slette @user.UserName?');">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="UserId" value="@user.UserID" />
+<<<<<<< HEAD
                                 <button type="submit" class="btn btn-sm btn-outline-danger mt-1">
                                     Slett
                                 </button>
+=======
+                                <button type="submit" class="btn btn-sm btn-danger">Slett bruker</button>
+>>>>>>> JK_mapfixes_div
                             </form>
                         }
                         else
@@ -120,11 +129,18 @@
 
             <form asp-action="CreateUser" method="post">
                 @Html.AntiForgeryToken()
+<<<<<<< HEAD
 
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">Brukernavn</label>
                         <input type="text" class="form-control" name="UserName" required />
+=======
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="UserName" class="form-label">Brukernavn</label>
+                        <input type="text" class="form-control" id="UserName" name="UserName" required />
+>>>>>>> JK_mapfixes_div
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">E-post</label>

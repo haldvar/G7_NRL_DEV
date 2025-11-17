@@ -172,11 +172,25 @@
                                    class="form-control mt-1" placeholder="Annen type..."
                                    style="display:none" />
 
+<<<<<<< HEAD
                             <label class="mt-2 text-sm text-slate-600">Høyde (m)</label>
                             <input name="obstacleHeight"
                                    type="number" step="0.01" min="0" max="10000"
                                    class="w-32 rounded border border-slate-300 px-2 py-1 text-sm"
                                    value="@(Model.ObstacleHeight?.ToString(inv) ?? "")" />
+=======
+                    <div class="sm:col-span-2">
+                        <dt class="font-semibold text-slate-700">Innsender (UserName)</dt>
+                        <dd>
+                            @Model.UserName
+                            @if (!string.IsNullOrWhiteSpace(Model.UserName))
+                            {
+                                <span class="text-slate-500"> — @Model.UserName</span>
+                            }
+                        </dd>
+                    </div>
+                </dl>
+>>>>>>> JK_mapfixes_div
 
                             <div class="mt-2 flex gap-2">
                                 <button type="submit" class="rounded bg-blue-600 px-3 py-1 text-xs text-white hover:bg-blue-700">Lagre</button>

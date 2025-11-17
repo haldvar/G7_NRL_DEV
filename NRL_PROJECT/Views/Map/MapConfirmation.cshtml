@@ -46,18 +46,31 @@
             ⬅️ Hjem
         </a>
         <a asp-action="ObstacleAndMapForm" asp-controller="Map"
+<<<<<<< HEAD
            class="bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold shadow-md hover:bg-blue-700 transition">
             🗺️ Meld nytt hider
         </a>
         <a asp-action="ReportListOverview" asp-controller="Map"
            class="bg-gray-600 text-white px-8 py-3 rounded-xl font-medium shadow-md hover:bg-gray-700 transition">
             Hinderlogg
+=======
+           class="bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold shadow-md hover:bg-blue-700 hover:shadow-lg transition">
+            🗺️ Tegn på nytt
+>>>>>>> JK_mapfixes_div
+        </a>
+        <a asp-action="ReportListOverview" asp-controller="Map"
+           class="bg-gray-600 text-white px-8 py-3 rounded-xl font-medium shadow-md hover:bg-gray-700 hover:shadow-lg transition">
+            Rapportoversikt
         </a>
     </div>
 </div>
 
 @section Scripts {
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        localStorage.removeItem("ObstacleReportForm");
+    </script>
 
     <script>
         const map = L.map('mapConfirm').setView([@fallbackLat, @fallbackLng], @zoomLevel);

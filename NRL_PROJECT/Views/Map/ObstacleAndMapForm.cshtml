@@ -1,8 +1,71 @@
 @model NRL_PROJECT.Models.ObstacleData
 
 @section Styles {
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+	<link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
+
+	<style>
+		/* STORE KNAPPER */
+		.map-btn-norge {
+			width: 120px;
+			height: 120px;
+			background-color: rgba(255, 255, 255, 0.85);
+			border: none;
+			border-radius: 50%;
+			backdrop-filter: blur(6px);
+			box-shadow: 0 4px 12px rgba(0,0,0,0.30);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: transform 0.15s ease, box-shadow 0.2s ease;
+		}
+
+			.map-btn-norge img {
+				width: 90px;
+				height: 90px;
+				pointer-events: none;
+				opacity: 0.95;
+			}
+
+			.map-btn-norge:active {
+				transform: scale(0.92);
+				background-color: rgba(0, 200, 100, 0.9);
+				box-shadow: 0 0 20px rgba(0, 200, 100, 0.6);
+				box-shadow: 0 2px 6px rgba(0,0,0,0.40);
+			}
+
+		.active-map-btn {
+			background-color: rgba(0, 200, 100, 0.9) !important;
+			box-shadow: 0 0 25px rgba(0, 200, 100, 0.6) !important;
+			transform: scale(1.05);
+			transition: all 0.2s ease;
+		}
+
+		/* Leaflet popup styling */
+		.leaflet-popup-content-wrapper {
+			padding: 20px 26px;
+			font-size: 1.2rem;
+			line-height: 1.4;
+		}
+
+		.leaflet-popup-content-wrapper,
+		.leaflet-popup-tip {
+			background: white;
+			border-radius: 14px;
+			box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+		}
+
+		.popup-heading {
+			font-size: 1.4rem;
+			font-weight: 700;
+			margin-bottom: 8px;
+		}
+
+		.popup-accuracy {
+			font-size: 1.2rem;
+			opacity: 0.8;
+		}
+	</style>
 }
 
 <div class="text-center mb-10">
@@ -25,6 +88,7 @@
 <form asp-action="SubmitObstacleWithLocation" asp-controller="Map" method="post" enctype="multipart/form-data" class="space-y-10">
 	@Html.AntiForgeryToken()
 
+<<<<<<< HEAD
     <script>
         // Nullstill utkast hvis brukeren kommer fra en annen side
         if (performance.navigation.type !== performance.navigation.TYPE_RELOAD) {
@@ -41,14 +105,75 @@
         <div class="bg-slate-700/60 rounded-2xl p-8 shadow-lg border border-slate-600">
             <h2 class="text-2xl md:text-3xl font-bold text-amber-400 mb-4 text-center">🗺️ Marker hinder i kartet</h2>
             <p class="text-center text-slate-300 mb-8 text-lg">Bruk kartverktøyene for å markere hinderet.</p>
+=======
+	<!-- OBSTACLE / MAP-CONTAINER -->
+	<div class="bg-slate-700/60 rounded-2xl p-8 shadow-lg border border-slate-600">
+		<h2 class="text-2xl font-bold text-sky-300 mb-6"> Informasjon om hinderet</h2>
+>>>>>>> JK_mapfixes_div
 
-            <div id="mapDraw" class="z-10" style="height: 400px;"></div>
-        </div>
+		<!-- MAP SECTION -->
+		<div class="bg-slate-700/60 rounded-2xl p-8 shadow-lg border border-slate-600">
+			<h2 class="text-2xl md:text-3xl font-bold text-amber-400 mb-4 text-center">🗺️ Marker hinderposisjon</h2>
+			<p class="text-center text-slate-300 mb-6 text-lg">Bruk helikopterknappen for å finne din posisjon.</p>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+			<div id="mapWrapper" class="relative rounded-xl overflow-hidden" style="height: 400px;">
+
+				<!-- Toast for gjenopprettet utkast -->
+				<div id="restoreToast"
+					 class="absolute top-4 left-1/2 -translate-x-1/2
+                            bg-sky-500/95 text-white text-xl px-6 py-3
+                            rounded-xl shadow-2xl font-bold tracking-wide
+                            backdrop-blur-sm z-[99999]
+                            transition-opacity duration-500"
+					 style="opacity:0; pointer-events:none;">
+					Utkast gjenopprettet
+				</div>
+
+				<div id="cancelToast"
+					class="absolute top-20 left-1/2 -translate-x-1/2
+						bg-sky-600/95 text-white text-xl px-6 py-3
+						rounded-xl shadow-2xl font-bold tracking-wide
+						backdrop-blur-sm z-[99999]
+						transition-opacity duration-500"
+					style="opacity:0; pointer-events:none;">
+					Rapport nullstilt
+				</div>
+
+
+				<!-- Leaflet map -->
+				<div id="mapDraw" class="absolute inset-0 z-0"></div>
+
+				<!-- Høyre knappestack (punkt / linje) -->
+				<div id="mapButtons" class="absolute bottom-6 right-4 flex flex-col gap-3 z-[9999]">
+					<button id="btnDrawPoint" type="button" class="map-btn-norge" aria-label="Marker punkt">
+						<img src="/icons/map-pin.svg" alt="Marker hinder" />
+					</button>
+
+					<button id="btnDrawLine" type="button" class="map-btn-norge" aria-label="Tegn linje">
+						<img src="/icons/line.svg" alt="Tegn linje" />
+					</button>
+				</div>
+
+				<!-- Venstre knapp (min posisjon) -->
+				<div id="mapButtonsLeft" class="absolute bottom-6 left-4 z-[9999]">
+					<button id="btnLocate" type="button" class="map-btn-norge" aria-label="Finn min posisjon">
+						<img src="/icons/helicopter.svg" alt="Finn posisjon" />
+					</button>
+				</div>
+
+			</div>
+		</div>
+
+		<!-- Kommentar + bilde -->
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
 			<div>
 				<label asp-for="ObstacleComment" class="block text-sm font-medium text-sky-200">Kommentar</label>
+<<<<<<< HEAD
 				<textarea asp-for="ObstacleComment" rows="3" class="mt-1 block w-full bg-slate-900 border-slate-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-400 focus:outline-none"></textarea>
+=======
+				<textarea asp-for="ObstacleComment" rows="3"
+						  class="mt-1 block w-full bg-slate-900 border-slate-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-400 focus:outline-none"></textarea>
+>>>>>>> JK_mapfixes_div
 				<span asp-validation-for="ObstacleComment" class="text-red-500 text-sm"></span>
 			</div>
 
@@ -61,31 +186,30 @@
 					   class="mt-1 block w-full bg-slate-900 border-slate-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-400 focus:outline-none" />
 				<span asp-validation-for="ImageFile" class="text-red-500 text-sm"></span>
 			</div>
-
 		</div>
 
-		<!-- Hidden map fields -->
-        <input type="hidden" asp-for="MapData.GeoJsonCoordinates" id="GeoJsonCoordinates" />
-
+		<!-- Hidden map field -->
+		<input type="hidden" asp-for="MapData.GeoJsonCoordinates" id="GeoJsonCoordinates" />
 	</div>
-    
-	<!--  SUBMIT / CANCEL BUTTONS -->
+
+	<!-- SUBMIT / CANCEL -->
 	<div class="flex flex-col md:flex-row justify-center gap-6 mt-10">
 		<button type="submit"
 				class="bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-4 rounded-2xl font-bold text-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all">
-			 Submit Report
+			Submit Report
 		</button>
-		<a asp-action="Index" asp-controller="Home"
-		   class="bg-red-600 hover:bg-red-700 text-white px-10 py-4 rounded-2xl font-bold text-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all text-center">
-			 Cancel
-		</a>
+
+		<button type="button"
+				id="cancelBtn"
+				class="bg-red-600 hover:bg-red-700 text-white px-10 py-4 rounded-2xl font-bold text-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all">
+			Cancel
+		</button>
 	</div>
 </form>
 
-
 @if (!ViewData.ModelState.IsValid)
 {
-	<div class="bg-red-600 text-white p-4 rounded-lg mb-6">
+	<div class="bg-red-600 text-white p-4 rounded-lg mt-6">
 		<ul class="list-disc list-inside">
 			@foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
 			{
@@ -96,104 +220,107 @@
 }
 
 @section Scripts {
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
-    <script>
-        // Init kartet med fallback til et standardpunkt
-        const map = L.map('mapDraw', {zoomControl: false }).setView([58.333, 8.233], 13);
+	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+	<script src="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
+	<script src="https://rawcdn.githack.com/bbecquet/Leaflet.RotatedMarker/master/leaflet.rotatedMarker.js"></script>
 
-        L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {
-            layers: 'topo',
-            format: 'image/png',
-            transparent: false,
-            attribution: '© Kartverket'
-        }).addTo(map);
+	<script>
+		// ------------------------------------------------------------
+		// IKON / KARTINIT
+		// ------------------------------------------------------------
+		const helicopterIcon = L.icon({
+			iconUrl: '/icons/helicopter.svg',
+			iconSize: [45, 45],
+			iconAnchor: [19, 19],
+			popupAnchor: [0, -12]
+		});
 
-        // Zoom control (already created at bottom-right)
-        const zoomCtl = L.control.zoom({ position: 'bottomright' }).addTo(map);
+		const map = L.map('mapDraw', {
+			zoomControl: false,
+			touchZoom: true,
+			scrollWheelZoom: true,
+			doubleClickZoom: true,
+			boxZoom: false
+		});
 
-        map.pm.addControls({
-            position: 'bottomright',
-            drawText: false,
-            drawMarker: true,
-            drawPolyline: true,
-            drawPolygon: false,
-            drawCircle: false,
-            drawCircleMarker: false,
-            drawRectangle: false,
-            editMode: false,
-            removalMode: false,
-            cutPolygon: false,
-            dragMode: false,
-            rotateMode: false,
-        });
+		map.locate({
+			setView: true,
+			maxZoom: 18,
+			enableHighAccuracy: true,
+			timeout: 10000,
+			maximumAge: 0
+		});
 
-        // A feature group to track user-drawn layers (so we can enforce "one at a time")
-        const drawn = L.featureGroup().addTo(map);
+		L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {
+			layers: 'topo',
+			format: 'image/png',
+			transparent: false,
+			attribution: '© Kartverket'
+		}).addTo(map);
 
-        // 1) Limit Polyline to TWO points (finish draw on second click)
-        map.on('pm:drawstart', ({ shape, workingLayer }) => {
-            if (shape === 'Line') {
-                workingLayer.on('pm:vertexadded', () => {
-                    const pts = workingLayer.getLatLngs();
-                    if (pts.length >= 2) {
-                        // finish current line immediately after the 2nd point
-                        if (map.pm?.Draw?.Line?._finishShape) {
-                            map.pm.Draw.Line._finishShape(); // adds the finished layer to the map
-                        } else {
-                            // Fallback: stop draw mode; the second click will have created the layer already
-                            map.pm.disableDraw();
-                        }
-                    }
-                });
-            }
-});
+		map.pm.addControls({ drawMarker: false, drawPolyline: false, editMode: false, removalMode: false });
+		if (map.pm?.Toolbar) map.pm.Toolbar.removeControls();
 
-        // 2) Allow only ONE Marker total (replace previous or disable the button)
-        let currentMarker = null;
+		setTimeout(() => {
+			map.invalidateSize();
+		}, 300);
 
-        map.on('pm:create', (e) => {
-            const { layer, shape } = e;
+		// ------------------------------------------------------------
+		// POSISJON
+		// ------------------------------------------------------------
+		function locateUser() {
+			map.locate({
+				setView: true,
+				maxZoom: 18,
+				enableHighAccuracy: true,
+				timeout: 10000,
+				maximumAge: 0
+			});
+		}
 
-            // Put new layers into our tracking group
-            drawn.addLayer(layer);
+		map.on("locationfound", (e) => {
+			if (window.currentPosMarker) map.removeLayer(window.currentPosMarker);
+			if (window.currentPosCircle) map.removeLayer(window.currentPosCircle);
 
-            if (shape === 'Marker') {
-                // If there's already a marker, remove it (keeping only the newest)
-                if (currentMarker && map.hasLayer(currentMarker)) {
-                    map.removeLayer(currentMarker);
-                }
-                currentMarker = layer;
+			// Nøyaktighetssjekk
+			if (e.accuracy > 200) {
+				const popup = L.popup({
+					closeButton: false,
+					autoPan: true
+				})
+					.setLatLng(e.latlng)
+					.setContent(`
+						<div class="popup-heading">⚠️ Posisjon for upresis</div>
+						<div class="popup-accuracy">Nøyaktighet: ±${Math.round(e.accuracy)} m</div>
+					`)
+					.openOn(map);
 
-                // Optionally disable the "drawMarker" button after one is placed
-                if (map.pm?.Toolbar?.setButtonDisabled) {
-                    map.pm.Toolbar.setButtonDisabled('drawMarker', true);
-                }
-            }
+				setTimeout(() => map.closePopup(popup), 3000);
+				return;
+			}
 
-            if (shape === 'Line') {
-                // Ensure any existing polylines are removed so only one line is kept
-                drawn.eachLayer((l) => {
-                    if (l !== layer && l instanceof L.Polyline && !(l instanceof L.Polygon)) {
-                        map.removeLayer(l);
-                    }
-                });
-            }
+					// Helikopter-markør
+			window.currentPosMarker = L.marker(e.latlng, { icon: helicopterIcon })
+				.addTo(map)
+				.bindPopup(`
+					<div class="popup-heading">🚁 Helikopterposisjon</div>
+					<div class="popup-accuracy">Nøyaktighet: ±${Math.round(e.accuracy)} m</div>
+				`)
+				.openPopup();
 
-            // Update your hidden input (keep your existing logic)
-            const geojson = layer.toGeoJSON();
-            document.getElementById('GeoJsonCoordinates').value = JSON.stringify(geojson.geometry);
-        });
+			// Lukk popup etter 3 sekunder
+			setTimeout(() => {
+				if (window.currentPosMarker) {
+					window.currentPosMarker.closePopup();
+				}
+			}, 3000);
 
-        // Re-enable marker drawing if the marker gets removed
-        map.on('pm:remove', (e) => {
-            if (e.layer === currentMarker) {
-                currentMarker = null;
-                if (map.pm?.Toolbar?.setButtonDisabled) {
-                    map.pm.Toolbar.setButtonDisabled('drawMarker', false);
-                }
-            }
+			// Rotér helikopter basert på heading hvis tilgjengelig
+			if (typeof e.heading === "number" && !isNaN(e.heading)) {
+				window.currentPosMarker.setRotationAngle(e.heading);
+			}
 
+<<<<<<< HEAD
             // Clear hidden field if everything was removed (keep your existing logic)
             document.getElementById('GeoJsonCoordinates').value = '';
         });
@@ -278,4 +405,247 @@
           }
         });
     </script>
+=======
+
+			// Nøyaktighetssirkel
+			window.currentPosCircle = L.circle(e.latlng, {
+				radius: Math.min(e.accuracy / 2, 100),
+				color: "blue",
+				weight: 2,
+				opacity: 0.6,
+				fillOpacity: 0.15
+			}).addTo(map);
+		});
+
+		map.on("locationerror", () => {
+			console.warn("Posisjon ikke tilgjengelig – marker manuelt.");
+		});
+
+		// ------------------------------------------------------------
+		// TEGNING
+		// ------------------------------------------------------------
+		const drawn = L.featureGroup().addTo(map);
+
+		function startDrawPoint() {
+			map.pm.disableDraw();
+			map.pm.enableDraw('Marker', { snappable: false });
+		}
+
+		function startDrawLine() {
+			map.pm.disableDraw();
+			map.pm.enableDraw('Line', { snappable: false });
+		}
+
+		function clearDraw() {
+			drawn.clearLayers();
+			document.getElementById('GeoJsonCoordinates').value = '';
+			map.pm.disableDraw();
+			saveDraft(); // oppdatér utkast hvis kartet tømmes
+		}
+
+		// Begrens linje til 2 punkter
+		map.on('pm:drawstart', ({ shape, workingLayer }) => {
+			if (shape === 'Line') {
+				workingLayer.on('pm:vertexadded', () => {
+					const pts = workingLayer.getLatLngs();
+					if (pts.length >= 2) {
+						if (map.pm?.Draw?.Line?._finishShape) {
+							map.pm.Draw.Line._finishShape();
+						} else {
+							map.pm.disableDraw();
+						}
+					}
+				});
+			}
+		});
+
+		map.on('pm:create', (e) => {
+			drawn.clearLayers();
+			drawn.addLayer(e.layer);
+			map.pm.disableDraw();
+
+			document.getElementById('GeoJsonCoordinates').value =
+				JSON.stringify(e.layer.toGeoJSON().geometry);
+
+			resetActiveButtons();
+			saveDraft();
+		});
+
+		// ------------------------------------------------------------
+		// KNAPPER (punkt / linje / posisjon)
+		// ------------------------------------------------------------
+		const btnLocate = document.getElementById("btnLocate");
+		const btnPoint = document.getElementById("btnDrawPoint");
+		const btnLine = document.getElementById("btnDrawLine");
+		const btnClear = document.getElementById("btnClearDraw"); // finnes ikke nå, men lar stå for evt. fremtid
+
+		function resetActiveButtons() {
+			btnPoint?.classList.remove("active-map-btn");
+			btnLine?.classList.remove("active-map-btn");
+		}
+
+		function setActiveButton(btn) {
+			resetActiveButtons();
+			btn?.classList.add("active-map-btn");
+		}
+
+		btnLocate?.addEventListener("click", () => {
+			resetActiveButtons();
+			locateUser();
+		});
+
+		btnPoint?.addEventListener("click", () => {
+			setActiveButton(btnPoint);
+			startDrawPoint();
+		});
+
+		btnLine?.addEventListener("click", () => {
+			setActiveButton(btnLine);
+			startDrawLine();
+		});
+
+		if (btnClear) {
+			btnClear.addEventListener("click", () => {
+				resetActiveButtons();
+				clearDraw();
+			});
+		}
+
+		// ------------------------------------------------------------
+		// SMART AUTOSAVE
+		// ------------------------------------------------------------
+		const formKey = "ObstacleReportForm";
+
+		function saveDraft() {
+			const commentInput = document.querySelector('[name="ObstacleComment"]');
+			const comment = commentInput ? (commentInput.value || "") : "";
+			const geo = document.getElementById('GeoJsonCoordinates').value || "";
+
+			// Lagre kun hvis vi har geometri
+			if (geo.trim().length > 0) {
+				localStorage.setItem(formKey, JSON.stringify({ comment, geoJson: geo }));
+			} else {
+				localStorage.removeItem(formKey);
+			}
+		}
+
+		const commentField = document.querySelector('[name="ObstacleComment"]');
+		if (commentField) {
+			commentField.addEventListener("input", saveDraft);
+		}
+
+		// ------------------------------------------------------------
+		// GJENOPPRETT UTKAST
+		// ------------------------------------------------------------
+		window.addEventListener("load", () => {
+			const saved = localStorage.getItem(formKey);
+			if (!saved) return;
+
+			let data = null;
+			try {
+				data = JSON.parse(saved);
+			} catch {
+				localStorage.removeItem(formKey);
+				return;
+			}
+
+			const hasComment = data.comment && data.comment.trim().length > 0;
+			const hasGeo = data.geoJson && data.geoJson.trim().length > 0;
+
+			if (!hasGeo) {
+				localStorage.removeItem(formKey);
+				return;
+			}
+
+			if (hasComment && commentField) {
+				commentField.value = data.comment;
+			}
+
+			document.getElementById('GeoJsonCoordinates').value = data.geoJson;
+
+			try {
+				const geom = JSON.parse(data.geoJson);
+				drawn.clearLayers();
+
+				if (geom.type === "Point" && Array.isArray(geom.coordinates)) {
+					const [lng, lat] = geom.coordinates;
+					const m = L.marker([lat, lng]).addTo(map);
+					drawn.addLayer(m);
+					map.setView([lat, lng], 15);
+				} else if (geom.type === "LineString" && Array.isArray(geom.coordinates)) {
+					const latlngs = geom.coordinates.map(([lng, lat]) => [lat, lng]);
+					const l = L.polyline(latlngs, { color: "orange", weight: 4 }).addTo(map);
+					drawn.addLayer(l);
+					map.fitBounds(l.getBounds());
+				}
+			} catch (err) {
+				console.warn("Kunne ikke gjenopprette geometri:", err);
+			}
+
+			// Vis toast i 5 sek
+			const toast = document.getElementById("restoreToast");
+			if (toast) {
+				toast.style.opacity = "1";
+				setTimeout(() => {
+					toast.style.opacity = "0";
+				}, 5000);
+			}
+		});
+
+		// ------------------------------------------------------------
+		// SLETT UTKAST VED SUBMIT
+		// ------------------------------------------------------------
+		const form = document.querySelector("form");
+		if (form) {
+			form.addEventListener("submit", () => {
+				localStorage.removeItem(formKey);
+			});
+		}
+
+		// ------------------------------------------------------------
+		// CANCEL – redirect kommentert ut
+		// ------------------------------------------------------------
+		const cancelBtn = document.getElementById("cancelBtn");
+
+		if (cancelBtn) {
+			cancelBtn.addEventListener("click", () => {
+
+				// Slett utkast
+				localStorage.removeItem(formKey);
+
+				// Tøm kommentarfelt
+				const commentField = document.querySelector('[name="ObstacleComment"]');
+				if (commentField) commentField.value = "";
+
+				// Tøm kart
+				drawn.clearLayers();
+
+				// Nullstill koordinater
+				document.getElementById('GeoJsonCoordinates').value = "";
+
+				// Slå av tegning
+				map.pm.disableDraw();
+
+				// Fjern grønne aktive knapper
+				resetActiveButtons();
+
+				// Vis toast
+				showCancelToast();
+			});
+		}
+			
+		function showCancelToast() {
+			const toast = document.getElementById("cancelToast");
+			if (!toast) return;
+
+			toast.style.opacity = "1";
+
+			setTimeout(() => {
+				toast.style.opacity = "0";
+			}, 5000);
+		}
+
+
+	</script>
+>>>>>>> JK_mapfixes_div
 }
