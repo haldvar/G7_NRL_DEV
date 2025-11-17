@@ -55,12 +55,14 @@ namespace NRL_PROJECT.Controllers
         [HttpGet]
         public async Task<IActionResult> ManageUsers()
         {
-            var users = await _userManager.Users.ToListAsync();
-            
+            var users = await _userManager.Users
+                .Include(u => u.Organisation)         // ← NYTT
+                .ToListAsync();
+
             var userViewModels = new List<UserManagementViewModel>();
-            
+
             var adminCount = 0;
-            
+
             foreach (var user in users)
             {
                 var roles = await _userManager.GetRolesAsync(user);
@@ -69,11 +71,10 @@ namespace NRL_PROJECT.Controllers
 
             ViewBag.AdminCount = adminCount;
 
-            
             foreach (var user in users)
             {
                 var roles = await _userManager.GetRolesAsync(user);
-                
+
                 userViewModels.Add(new UserManagementViewModel
                 {
                     UserID = user.Id,
@@ -81,15 +82,16 @@ namespace NRL_PROJECT.Controllers
                     Email = user.Email,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
-                    OrgName = user.OrgName,
+                    OrgName = user.Organisation?.OrgName, // ← FIKSET
                     CurrentRole = roles.FirstOrDefault() ?? "No Role",
                     AvailableRoles = new List<string> { "Admin", "Pilot", "Registrar", "ExternalOrg" }
                 });
             }
-            
+
             ViewBag.AdminCount = adminCount;
             return View(userViewModels);
         }
+
 
         // POST: /Admin/AssignRole
         [HttpPost]

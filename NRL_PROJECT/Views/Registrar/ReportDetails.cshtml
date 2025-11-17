@@ -96,7 +96,7 @@
                 <input type="hidden" name="id" value="@Model.ObstacleReportID" />
 
                 <div class="col-md-7">
-                    <select asp-for="TransferToUserID" asp-items="registrarList" class="form-select">
+                    <select name="transferToUserId" asp-items="registrarList" class="form-select">
                         <option value="">— Velg registerfører —</option>
                     </select>
                 </div>
@@ -107,8 +107,10 @@
             </form>
 
             <div class="text-muted mt-2">
-                Nå tildelt:
-                <b>@(registrarList.FirstOrDefault(x => x.Value == Model.AssignedRegistrarUserID)?.Text ?? "Ingen")</b>
+                Nå tildelt: <b>@(registrarList.FirstOrDefault(x => x.Value == Model.AssignedRegistrarUserID)?.Text ?? "Ingen")</b>
+            </div>
+            <div class="text-muted mt-1">
+                (Navn: @Model.ReviewerName)
             </div>
         </div>
     </div>

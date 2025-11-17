@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
+using NRL_PROJECT.Models.ViewModels;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text.Json;
@@ -33,33 +34,47 @@ namespace NRL_PROJECT.Controllers
         // === ORG VIEW ===
         public async Task<IActionResult> OrgView()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await _userManager.Users
+                .Include(u => u.Organisation)
+                .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
 
-            if (string.IsNullOrWhiteSpace(user?.OrgName))
+            if (user == null)
                 return Unauthorized();
+
+            // Hvis bruker har rolle som gir tilgang, men MANGLER organisasjon
+            if (user.Organisation == null)
+            {
+                // Vis view — men uten link til rapporter
+                return View(user);
+            }
 
             return View(user);
         }
 
         // === ORG REPORT VIEW ===
         public async Task<IActionResult> OrgReportView(
-    string search,
-    string status,
-    string type,
-    string sortField = "date",
-    string sortDir = "desc")
+            string search,
+            string status,
+            string type,
+            string sortField = "date",
+            string sortDir = "desc")
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await _userManager.Users
+                .Include(u => u.Organisation)
+                .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
 
-            if (string.IsNullOrWhiteSpace(user?.OrgName))
+            if (user == null || user.Organisation == null)
                 return Unauthorized();
 
             var query = _context.ObstacleReports
                 .Include(r => r.SubmittedByUser)
+                    .ThenInclude(u => u.Organisation)
                 .Include(r => r.MapData)
+                    .ThenInclude(m => m.Coordinates)
                 .Include(r => r.Obstacle)
-                .Where(r => r.SubmittedByUser.OrgName == user.OrgName)
+                .Where(r => r.SubmittedByUser.Organisation.OrgID == user.OrgID)
                 .AsQueryable();
+
 
             // -----------------------------
             // 🔍 SØK
@@ -128,18 +143,26 @@ namespace NRL_PROJECT.Controllers
             ViewBag.SortField = sortField;
             ViewBag.SortDir = sortDir;
 
-            var reports = query
-                .Select(r => new ObstacleReportViewModel
-                {
-                    ObstacleReportID = r.ObstacleReportID,
-                    ObstacleReportDate = r.ObstacleReportDate,
-                    ObstacleType = r.Obstacle.ObstacleType,
-                    ObstacleReportStatus = r.ObstacleReportStatus,
-                    SubmittedByUser = r.SubmittedByUser,
-                    OrgName = r.SubmittedByUser.OrgName,
-                    MapData = r.MapData
-                })
-                .ToList();
+            var reports = await query
+    .Select(r => new OrgExternalViewModel
+    {
+        ObstacleReportID = r.ObstacleReportID,
+        ObstacleReportDate = r.ObstacleReportDate,
+        ObstacleReportStatus = r.ObstacleReportStatus,
+
+        // Innmelder
+        UserName = r.SubmittedByUser.UserName,
+        Email = r.SubmittedByUser.Email,
+        OrgName = r.SubmittedByUser.Organisation.OrgName,
+
+        // Hindring
+        ObstacleID = r.Obstacle.ObstacleID,
+        ObstacleType = r.Obstacle.ObstacleType,
+
+        // Kart
+        CoordinateSummary = r.MapData.CoordinateSummary
+    })
+    .ToListAsync();
 
             return View(reports);
         }

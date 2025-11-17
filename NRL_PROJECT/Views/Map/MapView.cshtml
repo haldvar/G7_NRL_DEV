@@ -20,7 +20,9 @@
             geometry = r.MapData.GeoJsonCoordinates,   // GeoJSON-streng
             geometryType = r.MapData.GeometryType,
             comment = r.ObstacleReportComment,
-            user = string.IsNullOrEmpty(r.UserName) ? r.UserId : r.UserName,
+            user = r.SubmittedByUser != null
+            ? r.SubmittedByUser.UserName
+            : "(ukjent)",
             date = r.ObstacleReportDate
         })
         .ToList();

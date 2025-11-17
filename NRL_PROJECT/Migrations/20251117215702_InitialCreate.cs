@@ -349,21 +349,15 @@ namespace NRL_PROJECT.Migrations
                     ObstacleReportID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     ObstacleID = table.Column<int>(type: "int", nullable: true),
-                    UserId = table.Column<string>(type: "varchar(255)", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    UserName = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    SubmittedByUserName = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
                     SubmittedByUserId = table.Column<string>(type: "varchar(255)", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    ReviewedByUserID = table.Column<string>(type: "varchar(255)", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    MapDataID = table.Column<int>(type: "int", nullable: true),
                     ObstacleReportComment = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ObstacleReportDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     ObstacleReportStatus = table.Column<int>(type: "int", nullable: false),
-                    ReviewedByUserID = table.Column<string>(type: "varchar(255)", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    MapDataID = table.Column<int>(type: "int", nullable: true),
                     CoordinateSummary = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
@@ -379,11 +373,6 @@ namespace NRL_PROJECT.Migrations
                     table.ForeignKey(
                         name: "FK_ObstacleReports_AspNetUsers_SubmittedByUserId",
                         column: x => x.SubmittedByUserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_ObstacleReports_AspNetUsers_UserId",
-                        column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -471,11 +460,6 @@ namespace NRL_PROJECT.Migrations
                 name: "IX_ObstacleReports_SubmittedByUserId",
                 table: "ObstacleReports",
                 column: "SubmittedByUserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ObstacleReports_UserId",
-                table: "ObstacleReports",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Obstacles_MapDataID",

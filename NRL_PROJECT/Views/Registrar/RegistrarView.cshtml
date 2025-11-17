@@ -168,11 +168,9 @@
                     <!-- Registerfører -->
                     <div>
                         <span class="font-semibold">Reg.fører:</span>
-                        @(
-                                                string.IsNullOrWhiteSpace(r.AssignedRegistrarUserID)
+                        @(string.IsNullOrWhiteSpace(r.ReviewerName)
                                                 ? "Ikke tildelt"
-                                                : r.AssignedRegistrarUserID
-                                                )
+                                                : r.ReviewerName)
                     </div>
 
                     </div>

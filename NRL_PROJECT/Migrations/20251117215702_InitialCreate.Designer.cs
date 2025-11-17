@@ -12,7 +12,7 @@ using NRL_PROJECT.Data;
 namespace NRL_PROJECT.Migrations
 {
     [DbContext(typeof(NRL_Db_Context))]
-    [Migration("20251115175805_InitialCreate")]
+    [Migration("20251117215702_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -305,16 +305,6 @@ namespace NRL_PROJECT.Migrations
                     b.Property<string>("SubmittedByUserId")
                         .HasColumnType("varchar(255)");
 
-                    b.Property<string>("SubmittedByUserName")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.HasKey("ObstacleReportID");
 
                     b.HasIndex("MapDataID");
@@ -324,8 +314,6 @@ namespace NRL_PROJECT.Migrations
                     b.HasIndex("ReviewedByUserID");
 
                     b.HasIndex("SubmittedByUserId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("ObstacleReports");
                 });
@@ -555,12 +543,8 @@ namespace NRL_PROJECT.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("NRL_PROJECT.Models.User", "SubmittedByUser")
-                        .WithMany()
-                        .HasForeignKey("SubmittedByUserId");
-
-                    b.HasOne("NRL_PROJECT.Models.User", "User")
                         .WithMany("ObstacleReportsSubmitted")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("SubmittedByUserId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("MapData");
@@ -570,8 +554,6 @@ namespace NRL_PROJECT.Migrations
                     b.Navigation("Reviewer");
 
                     b.Navigation("SubmittedByUser");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("NRL_PROJECT.Models.User", b =>

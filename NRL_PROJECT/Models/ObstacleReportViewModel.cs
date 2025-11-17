@@ -26,6 +26,7 @@ namespace NRL_PROJECT.Models
         public DateTime ObstacleReportDate { get; set; }
         public EnumTypes ObstacleReportStatus { get; set; }
         public User SubmittedByUser { get; set; }
+        public string ObstacleReportComment { get; set; } = string.Empty;
 
         public string? StatusComment { get; set; }      // kommentaren du skriver i ReportDetails
 
@@ -48,6 +49,7 @@ namespace NRL_PROJECT.Models
         // Registrar 
         public string? AssignedRegistrarUserID { get; set; }
         public string? TransferToUserID { get; set; }
+        public string? ReviewerName { get; set; }
     }
 }
 

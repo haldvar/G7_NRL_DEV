@@ -30,9 +30,9 @@ namespace NRL_PROJECT.Data
                 .HasForeignKey(r => r.ObstacleID);
 
             modelBuilder.Entity<ObstacleReportData>()
-                .HasOne(r => r.User)
+                .HasOne(r => r.SubmittedByUser)
                 .WithMany(u => u.ObstacleReportsSubmitted)
-                .HasForeignKey(r => r.UserId)
+                .HasForeignKey(r => r.SubmittedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ObstacleReportData>()

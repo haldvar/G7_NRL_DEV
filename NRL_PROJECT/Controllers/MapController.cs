@@ -158,14 +158,14 @@ namespace NRL_PROJECT.Controllers
             var report = new ObstacleReportData
             {
                 ObstacleID = model.ObstacleID,
-                UserId = string.IsNullOrWhiteSpace(currentUserId) ? null : currentUserId,
-                UserName = currentUser?.UserName ?? currentUser?.Email ?? "Anonymous",
+                SubmittedByUserId = currentUserId, // 🔁 Bruker SubmittedByUserId i stedet for UserId
                 ObstacleReportComment = "Her skal Registerfører kunne skrive inn kommentar.",
                 ObstacleReportDate = DateTime.UtcNow,
                 ObstacleReportStatus = ObstacleReportData.EnumTypes.New,
                 MapDataID = model.MapData?.MapDataID,
                 CoordinateSummary = model.MapData?.CoordinateSummary ?? string.Empty
             };
+
 
             _context.ObstacleReports.Add(report);
             await _context.SaveChangesAsync();
@@ -184,12 +184,13 @@ namespace NRL_PROJECT.Controllers
         public async Task<IActionResult> ReportListOverview()
         {
             var reports = await _context.ObstacleReports
-                .Include(r => r.Obstacle)
-                .Include(r => r.User)
-                .Include(r => r.Reviewer)
-                .Include(r => r.MapData)
-                    .ThenInclude(m => m.Coordinates)
-                .ToListAsync();
+            .Include(r => r.Obstacle)
+            .Include(r => r.SubmittedByUser)      // 🔁 bruker innsenderen
+            .Include(r => r.Reviewer)
+            .Include(r => r.MapData)
+                .ThenInclude(m => m.Coordinates)
+            .ToListAsync();
+
 
             return View(reports);
         }
@@ -220,7 +221,8 @@ namespace NRL_PROJECT.Controllers
                 ObstacleReportDate = DateTime.UtcNow,
                 ObstacleReportStatus = ObstacleReportData.EnumTypes.New,
                 MapDataID = mapData.MapDataID,
-                UserId = null,
+                
+                SubmittedByUserId = null,   // ingen innlogget bruker
                 ReviewedByUserID = null,
             };
 

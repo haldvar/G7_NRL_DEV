@@ -106,107 +106,15 @@ app.Use(async (context, next) =>
     await next();
 });
 
-// DB-migrasjoner flyttet hit!
 // ------------------------------------------------------------
-// AUTOMATISK DATABASEMIGRERING VED OPPSTART
-// - DENNE KOMMENTERES OGSÅ UT VED TESTING
+// SEEDING
 // ------------------------------------------------------------
-// Apply migrations at startup (Migrations + Seed Data)
+
 
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    
-    try
-    {
-        // 1. Apply migrations
-        var dbContext = services.GetRequiredService<NRL_Db_Context>();
-        var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
-        
-        if (pendingMigrations.Any())
-        {
-            await dbContext.Database.MigrateAsync();
-            Console.WriteLine("✓ Database migrations applied successfully.");
-        }
-        else
-        {
-            Console.WriteLine("✓ Database is up to date.");
-        }
-
-        // 2. Create roles
-        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-        var roles = new[] { "Admin", "Pilot", "Registrar", "ExternalOrg" };
-
-        foreach (var roleName in roles)
-        {
-            if (!await roleManager.RoleExistsAsync(roleName))
-            {
-                var roleResult = await roleManager.CreateAsync(new IdentityRole(roleName));
-                if (roleResult.Succeeded)
-                {
-                    Console.WriteLine($"✓ Role '{roleName}' created successfully.");
-                }
-                else
-                {
-                    throw new Exception($"Failed to create role '{roleName}': " +
-                        $"{string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
-                }
-            }
-        }
-
-        // 3. Create default admin user - HARDCODED FOR EXAM
-        var userManager = services.GetRequiredService<UserManager<User>>();
-        
-        string adminEmail = builder.Configuration["AdminUser:Email"];
-        string adminPassword = builder.Configuration["AdminUser:Password"];
-        
-        if (await userManager.FindByEmailAsync(adminEmail) == null)
-        {
-            var adminUser = new User 
-            { 
-                UserName = adminEmail, 
-                Email = adminEmail,
-                EmailConfirmed = true,
-                FirstName = "Admin",
-                LastName = "User",
-                OrgName = "NRL_Test"
-            };
-
-
-            var createResult = await userManager.CreateAsync(adminUser, adminPassword);
-
-            if (createResult.Succeeded)
-            {
-                var roleResult = await userManager.AddToRoleAsync(adminUser, "Admin");
-                
-                if (roleResult.Succeeded)
-                {
-                    Console.WriteLine($"Admin user created: {adminEmail}");
-                }
-                else
-                {
-                    throw new Exception($"Failed to assign Admin role: " +
-                        $"{string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
-                }
-            }
-            else
-            {
-                throw new Exception($"Failed to create admin user: " +
-                    $"{string.Join(", ", createResult.Errors.Select(e => e.Description))}");
-            }
-        }
-        else
-        {
-            Console.WriteLine($"Admin user already exists: {adminEmail}");
-        }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Database initialization failed: {ex.Message}");
-        throw;
-    }
+    await DataSeeder.SeedAsync(scope.ServiceProvider, builder.Configuration);
 }
-
 // ------------------------------------------------------------
 // KONFIGURER MIDDLEWARE (HTTP request pipeline)
 // ------------------------------------------------------------
