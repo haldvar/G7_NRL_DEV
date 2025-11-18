@@ -200,7 +200,7 @@
 			popupAnchor: [0, -12]
 		});
 
-		// B-basert fallback + A sin locate
+		// fallback
 		const map = L.map('mapDraw', {
 			zoomControl: false,
 			touchZoom: true,
@@ -250,7 +250,7 @@
 			if (window.currentPosMarker) map.removeLayer(window.currentPosMarker);
 			if (window.currentPosCircle) map.removeLayer(window.currentPosCircle);
 
-			// Nøyaktighetssjekk (A)
+			// Nøyaktighetssjekk 
 			if (e.accuracy > 200) {
 				const popup = L.popup({ closeButton: false, autoPan: true })
 					.setLatLng(e.latlng)
@@ -306,7 +306,7 @@
 		});
 
 		// ------------------------------------------------------------
-		// TEGNING (én geometri totalt – B-logikk, A-UI)
+		// TEGNING (én geometri totalt)
 		// ------------------------------------------------------------
 		const btnPoint = document.getElementById("btnDrawPoint");
 		const btnLine = document.getElementById("btnDrawLine");
@@ -341,7 +341,7 @@
 			startDrawLine();
 		});
 
-		// Begrens linje til 2 punkter (B-idé)
+		// Begrens linje til 2 punkter 
 		map.on('pm:drawstart', ({ shape, workingLayer }) => {
 			if (shape === 'Line') {
 				workingLayer.on('pm:vertexadded', () => {
@@ -371,7 +371,7 @@
 		});
 
 		// ------------------------------------------------------------
-		// SMART AUTOSAVE (A-basert, uten interval fra B)
+		// SMART AUTOSAVE 
 		// ------------------------------------------------------------
 		const formKey = "ObstacleReportForm";
 		let draftDisabled = false;
@@ -397,7 +397,7 @@
 		}
 
 		// ------------------------------------------------------------
-		// GJENOPPRETT UTKAST (B sin trygghet + A sin toast)
+		// GJENOPPRETT UTKAST 
 		// ------------------------------------------------------------
 		window.addEventListener("load", () => {
 			const saved = localStorage.getItem(formKey);
@@ -455,7 +455,7 @@
 		});
 
 		// ------------------------------------------------------------
-		// SLETT UTKAST VED SUBMIT (A + sperre autosave etterpå)
+		// SLETT UTKAST VED SUBMIT 
 		// ------------------------------------------------------------
 		const submitBtn = document.getElementById("submitBtn");
 		if (submitBtn) {
