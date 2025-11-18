@@ -1,19 +1,22 @@
 @model List<NRL_PROJECT.Models.ObstacleReportData>
 
-<h1 class="text-3xl font-bold text-blue-700 mb-6 text-center">📋 Obstacle Report Overview (fil: ReportListOverview)</h1>
+<h1 class="text-3xl font-bold text-blue-700 mb-6 text-center">📋 Hinderlogg</h1>
 
 <table class="table-auto w-full border border-gray-300 rounded-lg shadow-md">
     <thead class="bg-gray-100 text-left">
         <tr>
             <th class="px-4 py-2">ObstacleReportID</th>
-            <th class="px-4 py-2">UserID</th>
-            <th class="px-4 py-2">ReviewedByUserID</th>
+            <th class="px-4 py-2">Innmelder</th>
+            <th class="px-4 py-2">Saksbehandler</th>
             <th class="px-4 py-2">ObstacleID</th>
-            <th class="px-4 py-2">ObstacleReportComment</th>
-            <th class="px-4 py-2">ObstacleReportDate</th>
-            <th class="px-4 py-2">ObstacleReportStatus</th>
-            <th class="px-4 py-2">ObstacleImageURL</th>
-            <th class="px-4 py-2">MapDataID</th>
+            <th class="px-4 py-2">ObstacleType</th>
+            <th class="px-4 py-2">Kommentar fra innmelder</th>
+            <th class="px-4 py-2">Kommentar fra saksbehandler</th>
+            <th class="px-4 py-2">Rapportdato</th>
+            <th class="px-4 py-2">Rapportstatus</th>
+            <th class="px-4 py-2">Koordinater</th>
+            <th class="px-4 py-2">Bildefil</th>
+            
         </tr>
     </thead>
     <tbody>
@@ -21,52 +24,42 @@
         {
             <tr class="border-t">
                 <td class="px-4 py-2">@report.ObstacleReportID</td>
-                <td class="px-4 py-2">@report.UserID</td>
-                <td class="px-4 py-2">@report.ReviewedByUserID</td>
+                <td class="px-4 py-2">
+                    @(report.SubmittedByUser != null
+                                    ? report.SubmittedByUser.UserName
+                                    : "(ukjent)")
+                                             </td>
+
+                <td class="px-4 py-2">
+                    @(report.Reviewer != null
+                                    ? report.Reviewer.UserName
+                                    : "(ingen)")
+                                              </td>
                 <td class="px-4 py-2">@report.ObstacleID</td>
+                <td class="px-4 py-2">@report.Obstacle?.ObstacleType</td>
+                <td class="px-4 py-2">@report.Obstacle?.ObstacleComment</td>
                 <td class="px-4 py-2">@report.ObstacleReportComment</td>
                 <td class="px-4 py-2">@report.ObstacleReportDate.ToString("yyyy-MM-dd HH:mm")</td>
                 <td class="px-4 py-2">@report.ObstacleReportStatus</td>
-                <td class="px-4 py-2">@report.ObstacleImageURL</td>
-                <td class="px-4 py-2">@report.MapDataID</td>
-            </tr>
-        }
-    </tbody>
-</table>
+                <td class="px-4 py-2">@report.MapData.CoordinateSummary</td>
+                <td class="px-4 py-2">
+                    @if (!string.IsNullOrEmpty(report.Obstacle?.ObstacleImageURL))
+                    {
+                        <a href="@report.Obstacle.ObstacleImageURL"
+                           target="_blank"
+                           class="flex items-center">
 
-
-
-<h1 class="text-3xl font-bold text-blue-700 mb-6 text-center">📋 Obstacle Overview (fil: ReportListOverview)</h1>
-
-<table class="table-auto w-full border border-gray-300 rounded-lg shadow-md">
-    <thead class="bg-gray-100 text-left">
-        <tr>
-            <th class="px-4 py-2">ObstacleId</th>
-            <th class="px-4 py-2">UserID</th>
-            <th class="px-4 py-2">ObstacleType</th>
-            <th class="px-4 py-2">ObstacleHeight</th>
-            <th class="px-4 py-2">ObstacleWidth</th>
-            <th class="px-4 py-2">ObstacleComment</th>
-            <th class="px-4 py-2">ObstacleReportDate</th>
-            <th class="px-4 py-2">Longitude</th>
-            <th class="px-4 py-2">Latitude</th>            
-            <th class="px-4 py-2">ObstacleImageURL</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var report in Model)
-        {
-            <tr class="border-t">
-                <td class="px-4 py-2">@report.ObstacleID</td>
-                <td class="px-4 py-2">@report.UserID</td>
-                <td class="px-4 py-2">@report.Obstacle?.ObstacleType</td>
-                <td class="px-4 py-2">@report.Obstacle?.ObstacleHeight</td>
-                <td class="px-4 py-2">@report.Obstacle?.ObstacleWidth</td>
-                <td class="px-4 py-2">@report.Obstacle?.ObstacleComment</td>
-                <td class="px-4 py-2">@report.ObstacleReportDate.ToString("yyyy-MM-dd HH:mm")</td>
-                <td class="px-4 py-2">@report.MapData?.Longitude</td>
-                <td class="px-4 py-2">@report.MapData?.Latitude</td>                
-                <td class="px-4 py-2">@report.ObstacleImageURL</td>
+                            <img src="@report.Obstacle.ObstacleImageURL"
+                                 alt="Bilde"
+                                 class="h-16 w-16 object-cover rounded shadow-md border border-gray-300" />
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="text-gray-400 italic">Ingen</span>
+                    }
+                </td>  
+                
             </tr>
         }
     </tbody>

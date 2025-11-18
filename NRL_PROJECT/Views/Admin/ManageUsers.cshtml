@@ -1,0 +1,187 @@
+@model List<NRL_PROJECT.Models.ViewModels.UserManagementViewModel>
+@{
+    ViewData["Title"] = "Brukerhåndtering";
+    var adminCount = ViewBag.AdminCount;
+}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">Brukerhåndtering</h2>
+
+    <!-- Meldinger -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    @if (adminCount <= 1)
+    {
+        <div class="alert alert-warning">
+            <strong>Obs!</strong> Det må alltid finnes minst én administrator.
+        </div>
+    }
+
+    <!-- Brukertabell -->
+    <table class="table table-bordered align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Brukernavn</th>
+                <th>Email</th>
+                <th>Navn</th>
+                <th>Organisasjon</th>
+                <th>Rolle</th>
+                <th class="text-end">Handling</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var user in Model)
+            {
+                var isLastAdmin = (user.CurrentRole == "Admin" && adminCount <= 1);
+
+                <tr>
+                    <td>@user.UserName</td>
+                    <td>@user.Email</td>
+                    <td>@user.FirstName @user.LastName</td>
+                    <td>@user.OrgName</td>
+
+                    <!-- Vis rollen som tekst -->
+                    <td>@user.CurrentRole</td>
+
+                    <td class="text-end">
+
+                        @if (!isLastAdmin)
+                        {
+                            <form asp-action="AssignRole" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="UserId" value="@user.UserID" />
+
+                                <!-- ALLTID dropdown for roller -->
+                                <select name="role" class="form-select form-select-sm d-inline w-auto">
+                                    <option value="No Role" selected="@(user.CurrentRole == "No Role")">
+                                        Ingen
+                                    </option>
+
+                                    @foreach (var role in user.AvailableRoles)
+                                    {
+                                        <option value="@role" selected="@(role == user.CurrentRole)">
+                                            @role
+                                        </option>
+                                    }
+                                </select>
+
+                                <!-- Organisasjon vises kun, ikke endres -->
+                                <input type="hidden" name="OrgName" value="@user.OrgName" />
+
+                                <button type="submit" class="btn btn-sm btn-outline-primary mt-1">
+                                    Lagre
+                                </button>
+                            </form>
+
+                            <form asp-action="DeleteUser" method="post" class="d-inline"
+                                  onsubmit="return confirm('Slette @user.UserName?');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="UserId" value="@user.UserID" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger mt-1">
+                                    Slett
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="text-muted small">Adminrolle kan ikke endres</span>
+                        }
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
+
+    <!-- Opprett ny bruker knapp -->
+    <button type="button" class="btn btn-outline-primary mb-4" onclick="toggleCreateUserForm()">
+        Opprett ny bruker
+    </button>
+
+
+    <!-- Ny bruker form -->
+    <div id="createUserForm" class="card shadow-sm mb-4" style="display: none;">
+        <div class="card-header bg-light">
+            <strong>Opprett ny bruker</strong>
+        </div>
+
+        <div class="card-body">
+
+            <form asp-action="CreateUser" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Brukernavn</label>
+                        <input type="text" class="form-control" name="UserName" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">E-post</label>
+                        <input type="email" class="form-control" name="Email" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Fornavn</label>
+                        <input type="text" class="form-control" name="FirstName" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Etternavn</label>
+                        <input type="text" class="form-control" name="LastName" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Organisasjon</label>
+                        <input type="text" class="form-control" name="OrgName" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Rolle</label>
+                        <select class="form-select" name="RoleName" required>
+                            <option value="">Velg rolle</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Pilot">Pilot</option>
+                            <option value="Registrar">Registrar</option>
+                            <option value="ExternalOrg">ExternalOrg</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Passord</label>
+                        <input type="password" class="form-control" name="Password" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Bekreft passord</label>
+                        <input type="password" class="form-control" name="ConfirmPassword" required />
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-outline-success">Opprett</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="toggleCreateUserForm()">Avbryt</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        function toggleCreateUserForm() {
+            const form = document.getElementById('createUserForm');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
+}

@@ -3,68 +3,83 @@
     ViewData["Title"] = "Group7";
 }
 
-<div class="min-h-screen bg-gradient-to-b from-slate-900 via-sky-900 to-sky-700 flex flex-col items-center justify-center px-4 py-10 font-sans">
+<div class="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-slate-900 via-sky-900 to-sky-700 px-4 py-10 font-sans">
 
     <!-- Title Section -->
-    <div class="text-center mb-10">
-        <h1 class="text-5xl md:text-6xl font-extrabold text-sky-100 tracking-tight drop-shadow-lg">
-            ✈️ Rapportering av Luftfartshinder
+    <div class="mb-10 text-center">
+        <h1 class="text-5xl font-extrabold tracking-tight text-sky-100 drop-shadow-lg md:text-6xl">
+            ✈️ Luftfartshinder – Rapportering
         </h1>
-        <p class="text-sky-200 text-lg md:text-xl mt-4 italic">
+        <p class="mt-4 text-lg text-sky-200 italic md:text-xl">
             @Model
         </p>
     </div>
 
-   
-
-    <!-- MAIN ACTION - Register with Map -->
-    <div class="w-full max-w-3xl mb-8">
+    <!-- MAIN ACTION - Register Obstacle -->
+    <div class="mb-8 w-full max-w-3xl">
         <a asp-action="ObstacleAndMapForm" asp-controller="Map"
-           class="flex flex-col items-center justify-center bg-amber-500 hover:bg-amber-600 text-white px-10 py-12 rounded-3xl font-bold text-3xl md:text-4xl shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 hover:scale-[1.03] transition-all duration-300">
-            <span class="text-6xl mb-4">🛰️</span>
-            Registreringsskjema med kart
+           class="flex flex-col items-center justify-center rounded-3xl bg-amber-500 px-10 py-12 text-3xl font-bold text-white shadow-2xl transition hover:scale-[1.03] hover:bg-amber-600 md:text-4xl">
+            <!-- Heroicon: Exclamation Triangle -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 9v2m0 4h.01M10.29 3.86l-7.1 12.26A1 1 0 004.1 18h15.8a1 1 0 00.91-1.88l-7.1-12.26a1 1 0 00-1.72 0z" />
+            </svg>
+            Meld inn luftfartshinder
         </a>
     </div>
 
     <!-- SECONDARY ACTIONS -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-4xl mb-12">
+    <div class="mb-12 grid w-full max-w-4xl grid-cols-1 gap-6 sm:grid-cols-2">
 
-        <!-- View Obstacle Reports -->
-        <a asp-action="ReportListOverview"  asp-controller="Map"
-           class="flex flex-col items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-10 rounded-2xl font-semibold text-2xl md:text-3xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
-            <span class="text-5xl mb-3">📋</span>
-            Rapportoversikt
+        <!-- View Reports -->
+        <a asp-action="ReportListOverview" asp-controller="Map"
+           class="flex flex-col items-center justify-center rounded-2xl bg-indigo-600 px-8 py-10 text-2xl font-semibold text-white shadow-lg transition hover:scale-[1.03] hover:bg-indigo-700 md:text-3xl">
+            <!-- Heroicon: Clipboard List -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-14 w-14 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 5h6M9 9h6M9 13h6M5 7h.01M5 11h.01M5 15h.01" />
+            </svg>
+            Hinderlogg
+            <span class="mt-2 text-xl">
+                Antall rapporter:
+                <span class="ml-2 text-2xl font-extrabold text-white shadow-lg">@ViewBag.ReportCount</span>
+            </span>
         </a>
 
-        <!-- Go to Map -->
+        <!-- Map View -->
         <a asp-controller="Map" asp-action="MapView"
-           class="flex flex-col items-center justify-center bg-sky-600 hover:bg-sky-700 text-white px-8 py-10 rounded-2xl font-semibold text-2xl md:text-3xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
-            <span class="text-5xl mb-3">🗺️</span>
-            Kartregistrering
+           class="flex flex-col items-center justify-center rounded-2xl bg-sky-600 px-8 py-10 text-2xl font-semibold text-white shadow-lg transition hover:scale-[1.03] hover:bg-sky-700 md:text-3xl">
+            <!-- Heroicon: Map -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-14 w-14 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 01.553-.894L9 2m6 0l5.447 2.724A1 1 0 0121 5.618v10.764a1 1 0 01-.553.894L15 22m-6-2l6-18" />
+            </svg>
+            Situasjonskart
         </a>
     </div>
 
-    <!-- Info Card -->
-    <div class="bg-gradient-to-r from-sky-100 to-blue-50 border-l-8 border-sky-500 text-sky-800 p-5 rounded-xl shadow mb-10 w-full max-w-xl text-center">
-        <p class="font-semibold text-xl">
-            <span class="text-2xl mr-2">📊</span>
-            Totalt antall rapporter:
-            <span class="ml-2 text-2xl font-extrabold text-sky-900">@ViewBag.ReportCount</span>
-        </p>
-    </div>
+   
 
-
-
-    <!-- FOOTER LINKS -->
-    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-auto text-slate-300 text-sm opacity-80">
+    <!-- Footer -->
+    <div class="mt-auto flex flex-col items-center justify-center gap-4 text-sm text-slate-300 opacity-80 sm:flex-row">
         <a asp-action="Privacy"
-           class="flex items-center gap-2 hover:text-white transition text-sm sm:text-base">
-            🔒 <span>Privatliv</span>
+           class="flex items-center gap-2 text-sm transition hover:text-white sm:text-base">
+            <!-- Heroicon: Lock Closed -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 11c.828 0 1.5.672 1.5 1.5v4.5h-3v-4.5c0-.828.672-1.5 1.5-1.5zM6 11V7a6 6 0 1112 0v4" />
+            </svg>
+            <span>Personvern</span>
         </a>
-        <span class="hidden sm:inline text-slate-500">|</span>
+        <span class="hidden text-slate-500 sm:inline">|</span>
         <a asp-action="About"
-           class="flex items-center gap-2 hover:text-white transition text-sm sm:text-base">
-            👨‍✈️ <span>Om oss</span>
+           class="flex items-center gap-2 text-sm transition hover:text-white sm:text-base">
+            <!-- Heroicon: User -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M5.121 17.804A9 9 0 1118.879 17.804M12 7a4 4 0 100 8 4 4 0 000-8z" />
+            </svg>
+            <span>Om prosjektet</span>
         </a>
     </div>
 </div>

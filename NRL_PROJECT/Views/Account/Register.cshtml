@@ -1,0 +1,60 @@
+@model NRL_PROJECT.Models.ViewModels.RegisterViewModel
+
+<h1>Ny bruker</h1>
+<br/>
+<form asp-action="Register" method="post">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    
+    <div class="form-group">
+        <label asp-for="UserName"></label><br />
+        <input asp-for="UserName" class="form-control" />
+        <span asp-validation-for="UserName" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Email"></label><br />
+        <input asp-for="Email" class="form-control"/>
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Password"></label><br />
+        <input asp-for="Password" type="password" class="form-control"/>
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="ConfirmPassword"></label><br />
+        <input asp-for="ConfirmPassword" type="password" class="form-control"/>
+        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="FirstName"></label><br />
+        <input asp-for="FirstName" class="form-control"/>
+        <span asp-validation-for="FirstName" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="LastName"></label><br />
+        <input asp-for="LastName" class="form-control"/>
+        <span asp-validation-for="LastName" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="OrgName"></label><br />
+        <input asp-for="OrgName" class="form-control" />
+        <span asp-validation-for="OrgName" class="text-danger"></span>
+    </div>
+    <br/>
+    <button type="submit" class="btn btn-primary">Opprett ny bruker</button>
+</form>
+
+<!-- Login Redirect -->
+<div class="mt-4 text-center">
+    <span class="text-muted">Har du allerede en konto?</span>
+    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-secondary ml-2">
+        Logg inn her
+    </a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

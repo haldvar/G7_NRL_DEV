@@ -1,0 +1,32 @@
+@using NRL_PROJECT.Models
+@model object
+
+@{
+    var text = Model?.ToString() ?? "–";
+
+    // Støtt begge enum-settene ved navn
+    string badge = text switch
+    {
+        // EnumStatus (norsk)
+        "Ny"               => "bg-gray-100 text-gray-800",
+        "UnderBehandling"  => "bg-yellow-100 text-yellow-800",
+        "Godkjent"         => "bg-green-100 text-green-800",
+        "Avvist"           => "bg-red-100 text-red-800",
+        "Venter"           => "bg-blue-100 text-blue-800",
+
+        // ObstacleReportData.EnumTypes (engelsk)
+        "New"        => "bg-gray-100 text-gray-800",
+        "Open"       => "bg-blue-100 text-blue-800",
+        "InProgress" => "bg-yellow-100 text-yellow-800",
+        "Resolved"   => "bg-green-100 text-green-800",
+        "Closed"     => "bg-gray-200 text-gray-700",
+        "Deleted"    => "bg-red-100 text-red-800",
+
+        _ => "bg-gray-100 text-gray-800"
+    };
+}
+
+<span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium @badge">
+  @text
+</span>
+

@@ -1,15 +1,21 @@
 @model NRL_PROJECT.Models.MapData
+@using System.Text.Json
 
 @{
     ViewData["Title"] = "Map Confirmation";
     Layout = "_Layout";
+    int zoomLevel = Model.MapZoomLevel != 0 ? Model.MapZoomLevel : 12;
 
-    string displayLat = Model.Latitude.ToString();
-    string displayLng = Model.Longitude.ToString();
-    int zoomLevel = Model.MapZoomLevel;
+    // Fallback til første koordinat hvis GeoJSON mangler
+    var firstCoord = Model.Coordinates?.OrderBy(c => c.OrderIndex).FirstOrDefault();
+    double fallbackLat = firstCoord?.Latitude ?? 60.0;
+    double fallbackLng = firstCoord?.Longitude ?? 10.0;
+
+    // Ren GeoJSON-streng eller tom streng
+    var geoJsonString = Model.GeoJsonCoordinates ?? "";
 }
+
 <div class="max-w-4xl mx-auto px-4 py-10">
-    <!-- Title -->
     <h1 class="text-4xl font-extrabold text-purple-700 text-center mb-4 tracking-wide">
         ✅ Kartbekreftelse
     </h1>
@@ -17,7 +23,6 @@
         Kartdataene du sendte inn er visualisert nedenfor.
     </p>
 
-    <!-- Map Card -->
     <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
         <div id="mapConfirm" class="rounded-xl border border-gray-200 shadow-inner" style="height: 450px;"></div>
         <p class="text-sm text-gray-500 mt-3">
@@ -25,27 +30,28 @@
         </p>
     </div>
 
-    <!-- Raw Coordinates Card -->
     <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
         <h2 class="text-xl font-semibold text-purple-700 mb-3 flex items-center">
             📍 Rå kartdata
         </h2>
-        <div class="bg-gray-50 p-4 rounded-lg text-sm text-gray-800 space-y-1 border border-gray-200">
-            <div><strong>Breddegrad (Latitude):</strong> @displayLat</div>
-            <div><strong>Lengdegrad (Longitude):</strong> @displayLng</div>
-            <div><strong>Zoomnivå:</strong> @zoomLevel</div>
+        <div id="rawDataContainer"
+             class="bg-gray-50 p-4 rounded-lg text-sm text-gray-800 space-y-1 border border-gray-200">
+            <div><em>Laster inn kartdata...</em></div>
         </div>
     </div>
 
-    <!-- Action Buttons -->
     <div class="flex justify-center space-x-4">
         <a asp-action="Index" asp-controller="Home"
-           class="bg-gray-600 text-white px-8 py-3 rounded-xl font-medium shadow-md hover:bg-gray-700 hover:shadow-lg transition">
-            ⬅️ Tilbake til Hjem
+           class="bg-gray-600 text-white px-8 py-3 rounded-xl font-medium shadow-md hover:bg-gray-700 transition">
+            ⬅️ Hjem
         </a>
-        <a asp-action="MapView" asp-controller="Map"
-           class="bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold shadow-md hover:bg-blue-700 hover:shadow-lg transition">
-            🗺️ Tegn på nytt
+        <a asp-action="ObstacleAndMapForm" asp-controller="Map"
+           class="bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold shadow-md hover:bg-blue-700 transition">
+            🗺️ Meld nytt hider
+        </a>
+        <a asp-action="ReportListOverview" asp-controller="Map"
+           class="bg-gray-600 text-white px-8 py-3 rounded-xl font-medium shadow-md hover:bg-gray-700 transition">
+            Hinderlogg
         </a>
     </div>
 </div>
@@ -54,29 +60,79 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        const startLat = @Model.Latitude;
-        const startLng = @Model.Longitude;
-        const zoomLevel = @Model.MapZoomLevel;
+        const map = L.map('mapConfirm').setView([@fallbackLat, @fallbackLng], @zoomLevel);
 
-        const map = L.map('mapConfirm').setView([startLat, startLng], zoomLevel);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
+        L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {
+            layers: 'topo',
+            format: 'image/png',
+            transparent: false,
+            attribution: '© Kartverket'
         }).addTo(map);
 
-        // Marker for senterpunkt
-        L.marker([startLat, startLng])
-            .addTo(map)
-            .bindPopup("Senterpunkt")
-            .openPopup();
+        // geoJsonRaw er nå en JS-strengliteral generert trygt av Json.Serialize
+        const geoJsonRaw = @Json.Serialize(geoJsonString);
+
+        if (geoJsonRaw && geoJsonRaw.length > 0) {
+            try {
+                const geometry = JSON.parse(geoJsonRaw);
+
+                if (geometry && geometry.type === "Point") {
+                    const [lng, lat] = geometry.coordinates;
+                    L.marker([lat, lng]).addTo(map).bindPopup("Hinderpunkt").openPopup();
+                    updateRawData([{ lat, lng }]);
+
+                } else if (geometry && geometry.type === "LineString") {
+                    const coords = geometry.coordinates;
+                    const markerList = [];
+
+                    coords.forEach((coord, i) => {
+                        const [lng, lat] = coord;
+                        markerList.push({ lat, lng });
+                        L.marker([lat, lng]).addTo(map).bindPopup(`Markør ${i + 1}`);
+                    });
+
+                    const latlngs = coords.map(c => [c[1], c[0]]);
+                    const line = L.polyline(latlngs, { color: 'orange', weight: 4 }).addTo(map);
+                    map.fitBounds(line.getBounds());
+
+                    updateRawData(markerList);
+                }
+            } catch (err) {
+                console.error("Failed to parse GeoJSON in MapConfirmation:", err);
+            }
+        } else {
+            // fallback: vis første koordinat
+            L.marker([@fallbackLat, @fallbackLng])
+                .addTo(map)
+                .bindPopup("Senterpunkt")
+                .openPopup();
+
+            updateRawData([{ lat: @fallbackLat, lng: @fallbackLng }]);
+        }
+
+        function updateRawData(markers) {
+            const container = document.querySelector("#rawDataContainer");
+            if (!container) return;
+
+            let html = "";
+
+            if (markers.length === 1) {
+                html += `
+                    <div><strong>Breddegrad (Latitude):</strong> ${markers[0].lat.toFixed(6)}</div>
+                    <div><strong>Lengdegrad (Longitude):</strong> ${markers[0].lng.toFixed(6)}</div>
+                    <div><strong>Type:</strong> Punkt</div>
+                `;
+            } else if (markers.length === 2) {
+                html += `
+                    <div><strong>Markør 1 Latitude:</strong> ${markers[0].lat.toFixed(6)}</div>
+                    <div><strong>Markør 1 Longitude:</strong> ${markers[0].lng.toFixed(6)}</div>
+                    <div><strong>Markør 2 Latitude:</strong> ${markers[1].lat.toFixed(6)}</div>
+                    <div><strong>Markør 2 Longitude:</strong> ${markers[1].lng.toFixed(6)}</div>
+                    <div><strong>Type:</strong> Linje (mellom 2 markører)</div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
     </script>
 }
-
-@if (!string.IsNullOrEmpty(Model.GeoJsonCoordinates))
-{
-    <div class="bg-gray-50 p-4 rounded-lg text-sm text-gray-800 border border-gray-200 mt-4">
-        <strong>GeoJSON-koordinater:</strong> @Model.GeoJsonCoordinates
-    </div>
-}
-

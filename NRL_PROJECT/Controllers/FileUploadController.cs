@@ -1,3 +1,4 @@
+/*
 using Microsoft.AspNetCore.Mvc;
 using NRL_PROJECT.Models;
 
@@ -53,3 +54,4 @@ namespace NRL_PROJECT.Controllers
         }
     }
 }
+*/

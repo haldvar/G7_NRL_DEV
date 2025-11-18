@@ -1,0 +1,300 @@
+@model NRL_PROJECT.Models.ObstacleReportViewModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using System.Globalization
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Rapportdetaljer";
+
+    // Fallback-lat/lon hvis kun gamle koordinater finnes
+    var inv = CultureInfo.InvariantCulture;
+    string? latJs = null, lonJs = null;
+
+    if (Model.Latitude != 0 && Model.Longitude != 0)
+    {
+        latJs = Model.Latitude.ToString("F6", inv);
+        lonJs = Model.Longitude.ToString("F6", inv);
+    }
+    else if (!string.IsNullOrWhiteSpace(Model.Reported_Location))
+    {
+        var nb = CultureInfo.GetCultureInfo("nb-NO");
+        var raw = Model.Reported_Location.Replace(" ", "").Replace(";", ",");
+        var parts = raw.Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+        if (parts.Length >= 2 &&
+            double.TryParse(parts[0], NumberStyles.Float, nb, out var lat) &&
+            double.TryParse(parts[1], NumberStyles.Float, nb, out var lon))
+        {
+            latJs = lat.ToString("F6", inv);
+            lonJs = lon.ToString("F6", inv);
+        }
+    }
+
+    var hasCoords = !string.IsNullOrWhiteSpace(Model.GeoJsonCoordinates)
+                    || (!string.IsNullOrWhiteSpace(latJs) && !string.IsNullOrWhiteSpace(lonJs));
+}
+
+@{
+    // Trygg GeoJSON: deserialize → serialize
+    JsonElement? geometry = null;
+
+    if (!string.IsNullOrWhiteSpace(Model.GeoJsonCoordinates))
+    {
+        try
+        {
+            geometry = JsonSerializer.Deserialize<JsonElement>(Model.GeoJsonCoordinates);
+        }
+        catch
+        {
+            geometry = null;
+        }
+    }
+
+    var safeGeometryJson = JsonSerializer.Serialize(geometry);
+}
+
+<div class="container mx-auto max-w-6xl px-4 py-6">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+
+        <!-- VENSTRE: Status/handling -->
+        <div class="space-y-6 lg:col-span-2">
+            <div class="rounded-2xl border bg-white p-4 shadow-sm">
+                <form asp-controller="Registrar" asp-action="UpdateStatus" method="post" class="space-y-3">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.ObstacleReportID" />
+
+                    <textarea name="comment" rows="3"
+                              class="w-full rounded-xl border px-3 py-2 text-sm"
+                              placeholder="Kommentar (valgfritt)">@Model.StatusComment</textarea>
+
+                    <div class="flex flex-wrap gap-3 pt-1">
+                        <button name="status" value="UnderBehandling" type="submit"
+                                class="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2 text-white hover:bg-amber-600">
+                            Under behandling
+                        </button>
+
+                        <button name="status" value="Godkjent" type="submit"
+                                class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700">
+                            Godkjenn
+                        </button>
+
+                        <button name="status" value="Avvist" type="submit"
+                                class="inline-flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-white hover:bg-rose-700">
+                            Avvis
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Overføring -->
+            @{
+                var registrarList = ViewBag.Registrars as List<SelectListItem> ?? new();
+            }
+
+            <form asp-controller="Registrar" asp-action="TransferReport" method="post" class="row g-2">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.ObstacleReportID" />
+
+                <div class="col-md-7">
+                    <select name="transferToUserId" asp-items="registrarList" class="form-select">
+                        <option value="">— Velg registerfører —</option>
+                    </select>
+                </div>
+
+                <div class="col-md-5">
+                    <button type="submit" class="btn btn-outline-primary">Overfør</button>
+                </div>
+            </form>
+
+            <div class="text-muted mt-2">
+                Nå tildelt: <b>@(registrarList.FirstOrDefault(x => x.Value == Model.AssignedRegistrarUserID)?.Text ?? "Ingen")</b>
+            </div>
+            <div class="text-muted mt-1">
+                (Navn: @Model.ReviewerName)
+            </div>
+        </div>
+    </div>
+
+    <!-- DETALJER -->
+    <div class="rounded-2xl border bg-white p-5 shadow-sm">
+        <h2 class="mb-4 text-lg font-semibold text-slate-900">Rapportdetaljer</h2>
+
+        <dl class="grid grid-cols-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
+
+            <!-- Rapport-info -->
+            <div class="sm:col-span-1">
+                <dt class="font-semibold text-slate-700">Rapport ID</dt>
+                <dd>@Model.ObstacleReportID</dd>
+
+                <dt class="mt-3 font-semibold text-slate-700">Status</dt>
+                <dd>@await Html.PartialAsync("_EnumTypes", Model.ReportStatus)</dd>
+
+                <dt class="mt-3 font-semibold text-slate-700">Hindertype</dt>
+                <dd>
+                    @{
+                        var typeTxt = string.IsNullOrWhiteSpace(Model.ObstacleType) ? "Ukjent" : Model.ObstacleType;
+                        var harHoyde = Model.ObstacleHeight.HasValue && Model.ObstacleHeight > 0;
+                        var typeItems = ViewBag.ObstacleTypes as List<SelectListItem> ?? new();
+                    }
+
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <div>@typeTxt</div>
+                            @if (harHoyde)
+                            {
+                                <div class="text-sm text-slate-500">
+                                    Høyde: @Model.ObstacleHeight?.ToString("0.##", inv) m
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-sm text-slate-400 italic">Høyde ikke satt</div>
+                            }
+                        </div>
+
+                        <button type="button"
+                                class="rounded border border-slate-300 px-2 py-1 text-xs hover:bg-slate-50"
+                                onclick="document.getElementById('edit-hindring').classList.toggle('hidden')">
+                            Rediger
+                        </button>
+                    </div>
+
+                    <!-- Rediger -->
+                    <div id="edit-hindring" class="mt-3 hidden">
+                        <form asp-controller="Registrar" asp-action="UpdateObstacleData" method="post" class="flex flex-col gap-2">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.ObstacleReportID" />
+
+                            <label class="text-sm text-slate-600">Type</label>
+                            <select id="type-select" name="obstacleType" asp-items="typeItems" class="form-select">
+                                <option value="">— Velg type —</option>
+                            </select>
+
+                            <input id="customType" name="obstacleType" type="text"
+                                   class="form-control mt-1" placeholder="Annen type..."
+                                   style="display:none" />
+
+                            <label class="mt-2 text-sm text-slate-600">Høyde (m)</label>
+                            <input name="obstacleHeight"
+                                   type="number" step="0.01" min="0" max="10000"
+                                   class="w-32 rounded border border-slate-300 px-2 py-1 text-sm"
+                                   value="@(Model.ObstacleHeight?.ToString(inv) ?? "")" />
+
+                            <div class="mt-2 flex gap-2">
+                                <button type="submit" class="rounded bg-blue-600 px-3 py-1 text-xs text-white hover:bg-blue-700">Lagre</button>
+                                <button type="button"
+                                        class="rounded border border-slate-300 px-3 py-1 text-xs hover:bg-slate-50"
+                                        onclick="document.getElementById('edit-hindring').classList.add('hidden')">
+                                    Avbryt
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </dd>
+            </div>
+
+            <!-- LOKASJON -->
+            <div class="sm:col-span-2">
+                <dt class="font-semibold text-slate-700">Lokasjon</dt>
+                <dd>
+                    @if (Model.MapData?.Coordinates?.Any() == true)
+                    {
+                        foreach (var c in Model.MapData.Coordinates.OrderBy(c => c.OrderIndex))
+                        {
+                            <div>@c.Latitude.ToString("F6"), @c.Longitude.ToString("F6")</div>
+                        }
+                    }
+                    else if (Model.Latitude != 0 && Model.Longitude != 0)
+                    {
+                        <div>@Model.Latitude.ToString("F6"), @Model.Longitude.ToString("F6")</div>
+                    }
+                    else
+                    {
+                        <span class="text-slate-400">Ingen koordinater</span>
+                    }
+                </dd>
+            </div>
+
+            <div class="sm:col-span-2">
+                <dt class="font-semibold text-slate-700">Beskrivelse</dt>
+                <dd>@(Model.ObstacleComment ?? "-")</dd>
+            </div>
+
+            <div>
+                <dt class="font-semibold text-slate-700">Tidspunkt registrert</dt>
+                <dd>@Model.TimeOfSubmittedReport.ToString("dd.MM.yyyy HH:mm")</dd>
+            </div>
+
+            <div class="sm:col-span-2">
+                <dt class="font-semibold text-slate-700">Innsender</dt>
+                <dd>@Model.UserName</dd>
+            </div>
+
+            <div class="sm:col-span-2">
+                <dt class="font-semibold text-slate-700">Organisasjon</dt>
+                <dd>@Model.OrgName</dd>
+            </div>
+        </dl>
+
+        <div class="mt-4">
+            <a asp-action="RegistrarView"
+               class="inline-flex items-center rounded-xl border px-4 py-2 text-sm hover:bg-slate-50">
+                Tilbake
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Kart -->
+<div class="lg:col-span-1 mt-6">
+    <div class="rounded-2xl border bg-white p-4 shadow-sm">
+        <h3 class="mb-3 text-base font-semibold text-slate-900">Kart</h3>
+
+        @if (hasCoords)
+        {
+            <div id="map" class="w-full rounded-xl border" style="height: 380px;"></div>
+        }
+        else
+        {
+            <div class="text-sm text-slate-500">Ingen koordinater i rapporten.</div>
+        }
+    </div>
+</div>
+
+@if (hasCoords)
+{
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <!-- ⭐ NYTT KARTSCRIPT – MINSTE MULIGE ENDRING -->
+    <script>
+        (function () {
+
+            // Hent koordinater fra mapdata
+            const latlngs = [
+                @foreach (var c in Model.MapData.Coordinates.OrderBy(c => c.OrderIndex))
+                {
+                        <text>[ @c.Latitude, @c.Longitude ],</text>
+                }
+            ];
+
+            const map = L.map('map', { zoomControl: true });
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(map);
+
+            if (latlngs.length === 1) {
+                L.marker(latlngs[0]).addTo(map);
+                map.setView(latlngs[0], 15);
+            }
+            else if (latlngs.length > 1) {
+                latlngs.forEach(ll => L.marker(ll).addTo(map));
+                L.polyline(latlngs, { weight: 3 }).addTo(map);
+                map.fitBounds(L.latLngBounds(latlngs).pad(0.2));
+            }
+
+        })();
+    </script>
+}
+
