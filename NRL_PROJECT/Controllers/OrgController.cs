@@ -159,6 +159,9 @@ namespace NRL_PROJECT.Controllers
         ObstacleID = r.Obstacle.ObstacleID,
         ObstacleType = r.Obstacle.ObstacleType,
 
+        //  BILDESTØTTE
+        ObstacleImageURL = r.Obstacle.ObstacleImageURL,
+
         // Kart
         CoordinateSummary = r.MapData.CoordinateSummary
     })

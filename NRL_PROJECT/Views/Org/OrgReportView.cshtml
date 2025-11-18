@@ -1,97 +1,111 @@
 @model List<NRL_PROJECT.Models.ViewModels.OrgExternalViewModel>
 
 <h1 class="text-3xl font-bold text-blue-700 mb-6 text-center">
-    📋 Rapporter fra din organisasjon
+	📋 Rapporter fra din organisasjon
 </h1>
 
 <!-- FILTER SKJEMA -->
 <form method="get" class="mb-6 flex flex-wrap gap-4 items-end">
-    <!-- Søk -->
-    <div class="flex items-center gap-2">
-        <div>
-            <label class="block text-sm mb-1">Søk</label>
-            <input type="text"
-                   name="search"
-                   value="@Context.Request.Query["search"]"
-                   placeholder="Søk i type, innmelder, status, lokasjon..."
-                   class="border px-3 py-2 rounded w-72" />
-        </div>
+	<!-- Søk -->
+	<div class="flex items-center gap-2">
+		<div>
+			<label class="block text-sm mb-1">Søk</label>
+			<input type="text"
+				   name="search"
+				   value="@Context.Request.Query["search"]"
+				   placeholder="Søk i type, innmelder, status, lokasjon..."
+				   class="border px-3 py-2 rounded w-72" />
+		</div>
 
-        <button type="submit"
-                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">
-            Søk
-        </button>
-    </div>
+		<button type="submit"
+				class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">
+			Søk
+		</button>
+	</div>
 
-    <!-- Type -->
-    <div>
-        <label class="block text-sm mb-1">Obstacle Type</label>
-        <select name="type" class="border px-3 py-2 rounded w-48">
-            <option value="">Alle typer</option>
-            @foreach (var t in (List<string>)ViewBag.Types)
-            {
-                <option value="@t" selected="@(Context.Request.Query["type"] == t)">
-                    @t
-                </option>
-            }
-        </select>
-    </div>
+	<!-- Type -->
+	<div>
+		<label class="block text-sm mb-1">Obstacle Type</label>
+		<select name="type" class="border px-3 py-2 rounded w-48">
+			<option value="">Alle typer</option>
+			@foreach (var t in (List<string>)ViewBag.Types)
+			{
+				<option value="@t" selected="@(Context.Request.Query["type"] == t)">
+					@t
+				</option>
+			}
+		</select>
+	</div>
 
-    <!-- Status -->
-    <div>
-        <label class="block text-sm mb-1">Status</label>
-        <select name="status" class="border px-3 py-2 rounded w-40">
-            <option value="">Alle</option>
-            @foreach (var statusValue in Enum.GetNames(typeof(NRL_PROJECT.Models.ObstacleReportData.EnumTypes)))
-            {
-                var isSelected = Context.Request.Query["status"] == statusValue;
-                <option value="@statusValue" selected="@(isSelected ? "selected" : null)">
-                    @statusValue
-                </option>
-            }
-        </select>
-    </div>
+	<!-- Status -->
+	<div>
+		<label class="block text-sm mb-1">Status</label>
+		<select name="status" class="border px-3 py-2 rounded w-40">
+			<option value="">Alle</option>
+			@foreach (var statusValue in Enum.GetNames(typeof(NRL_PROJECT.Models.ObstacleReportData.EnumTypes)))
+			{
+				var isSelected = Context.Request.Query["status"] == statusValue;
+				<option value="@statusValue" selected="@isSelected">
+					@statusValue
+				</option>
+			}
+		</select>
+	</div>
 
-    <div>
-        <button type="submit"
-                class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded">
-            Filtrer
-        </button>
-    </div>
+	<div>
+		<button type="submit"
+				class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded">
+			Filtrer
+		</button>
+	</div>
 </form>
-
 
 <!-- RAPPORTTABELL -->
 <table class="table-auto w-full border border-gray-300 rounded-lg shadow-md">
-    <thead class="bg-gray-100 text-left">
-        <tr>
-            <th class="px-4 py-2">ObstacleReportID</th>
-            <th class="px-4 py-2">Innmelder</th>
-            <th class="px-4 py-2">ObstacleID</th>
-            <th class="px-4 py-2">ObstacleType</th>
-            <th class="px-4 py-2">Rapportdato</th>
-            <th class="px-4 py-2">Rapportstatus</th>
-            <th class="px-4 py-2">OrgName</th>
-            <th class="px-4 py-2">Koordinater</th>
-            <th class="px-4 py-2"></th>
-        </tr>
-    </thead>
+	<thead class="bg-gray-100 text-left">
+		<tr>
+			<th class="px-4 py-2">ObstacleReportID</th>
+			<th class="px-4 py-2">Innmelder</th>
+			<th class="px-4 py-2">ObstacleID</th>
+			<th class="px-4 py-2">ObstacleType</th>
+			<th class="px-4 py-2">Rapportdato</th>
+			<th class="px-4 py-2">Rapportstatus</th>
+			<th class="px-4 py-2">OrgName</th>
+			<th class="px-4 py-2">Koordinater</th>
+			<th class="px-4 py-2">Bilde</th>
+		</tr>
+	</thead>
 
-    <tbody>
-        @foreach (var report in Model)
-        {
-            <tr class="border-t hover:bg-gray-50">
+	<tbody>
+		@foreach (var report in Model)
+		{
+			<tr class="border-t hover:bg-gray-50">
 
-                <td class="px-4 py-2">@report.ObstacleReportID</td>
-                <td class="px-4 py-2">@report.UserName</td>
-                <td class="px-4 py-2">@report.ObstacleID</td>
-                <td class="px-4 py-2">@report.ObstacleType</td>
-                <td class="px-4 py-2">@report.ObstacleReportDate.ToString("yyyy-MM-dd HH:mm")</td>
-                <td class="px-4 py-2">@report.ObstacleReportStatus</td>
-                <td class="px-4 py-2">@report.OrgName</td>
-                <td class="px-4 py-2">@report.CoordinateSummary</td>
+				<td class="px-4 py-2">@report.ObstacleReportID</td>
+				<td class="px-4 py-2">@report.UserName</td>
+				<td class="px-4 py-2">@report.ObstacleID</td>
+				<td class="px-4 py-2">@report.ObstacleType</td>
+				<td class="px-4 py-2">@report.ObstacleReportDate.ToString("yyyy-MM-dd HH:mm")</td>
+				<td class="px-4 py-2">@report.ObstacleReportStatus</td>
+				<td class="px-4 py-2">@report.OrgName</td>
+				<td class="px-4 py-2">@report.CoordinateSummary</td>
 
-            </tr>
-        }
-    </tbody>
+				<!-- ⭐ BILDE (thumbnail) -->
+				<td class="px-4 py-2">
+					@if (!string.IsNullOrWhiteSpace(report.ObstacleImageURL))
+					{
+						<a href="@report.ObstacleImageURL" target="_blank">
+							<img src="@report.ObstacleImageURL"
+								 alt="Bilde"
+								 class="h-16 w-16 object-cover rounded border shadow" />
+						</a>
+					}
+					else
+					{
+						<span class="text-gray-400 italic">Ingen</span>
+					}
+				</td>
+			</tr>
+		}
+	</tbody>
 </table>
