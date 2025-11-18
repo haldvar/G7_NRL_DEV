@@ -6,12 +6,10 @@ using Microsoft.EntityFrameworkCore;
 using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using static NRL_PROJECT.Models.ObstacleReportData;
 using BackendStatus = NRL_PROJECT.Models.ObstacleReportData.EnumTypes;
-using EnumStatus = NRL_PROJECT.Models.ObstacleReportData.EnumTypes;
 using UiStatus = NRL_PROJECT.Models.EnumStatus;
 
 namespace NRL_PROJECT.Controllers
@@ -62,9 +60,9 @@ namespace NRL_PROJECT.Controllers
                        .ToList();
         }
 
-        // ---------------------------------------------
-        // POST: /Registrar/UpdateStatus
-        // ---------------------------------------------
+        // ---------------------------------------------------------------------
+        // POST: UpdateStatus
+        // ---------------------------------------------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateStatus(int id, string status, string? comment)
@@ -90,9 +88,9 @@ namespace NRL_PROJECT.Controllers
             return RedirectToAction(nameof(ReportDetails), new { id });
         }
 
-        // ---------------------------------------------
-        // GET: /Registrar/ReportDetails
-        // ---------------------------------------------
+        // ---------------------------------------------------------------------
+        // GET: ReportDetails
+        // ---------------------------------------------------------------------
         [HttpGet]
         public async Task<IActionResult> ReportDetails(int id)
         {
@@ -100,8 +98,9 @@ namespace NRL_PROJECT.Controllers
                 .Include(r => r.SubmittedByUser)
                     .ThenInclude(u => u.Organisation)
                 .Include(r => r.Obstacle)
-                .Include(r => r.User)
+                .Include(r => r.SubmittedByUser)
                     .ThenInclude(u => u.Organisation)
+                .Include(r => r.Reviewer)
                 .Include(r => r.MapData)
                     .ThenInclude(m => m.Coordinates)
                 .FirstOrDefaultAsync(r => r.ObstacleReportID == id);
@@ -109,7 +108,6 @@ namespace NRL_PROJECT.Controllers
             if (report == null)
                 return NotFound();
 
-            // ---- Coordinates ----
             var orderedCoords = report.MapData?.Coordinates?
                 .OrderBy(c => c.CoordinateId)
                 .ToList();
@@ -154,7 +152,6 @@ namespace NRL_PROJECT.Controllers
                 GeoJsonCoordinates = json,
 
                 ReportStatus = MapToUi(report.ObstacleReportStatus),
-
                 ObstacleReportComment = report.ObstacleReportComment ?? "",
 
                 UserName = report.SubmittedByUser != null
@@ -163,7 +160,8 @@ namespace NRL_PROJECT.Controllers
 
                 OrgName = report.SubmittedByUser?.Organisation?.OrgName ?? "Ukjent",
 
-                AssignedRegistrarUserID = report.ReviewedByUserID
+                AssignedRegistrarUserID = report.ReviewedByUserID,
+                ReviewerName = report.Reviewer?.UserName
             };
 
             ViewBag.ObstacleTypes = PredefinedObstacleTypes
@@ -173,9 +171,9 @@ namespace NRL_PROJECT.Controllers
             return View(vm);
         }
 
-        // ---------------------------------------------
-        // POST: Edit obstacle data
-        // ---------------------------------------------
+        // ---------------------------------------------------------------------
+        // POST: UpdateObstacleData
+        // ---------------------------------------------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateObstacleData(int id, string? obstacleType, double? obstacleHeight)
@@ -211,9 +209,9 @@ namespace NRL_PROJECT.Controllers
             return RedirectToAction(nameof(ReportDetails), new { id });
         }
 
-        // ---------------------------------------------
-        // Transfer report to another registrar
-        // ---------------------------------------------
+        // ---------------------------------------------------------------------
+        // POST: TransferReport
+        // ---------------------------------------------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> TransferReport(int id, string transferToUserId)
@@ -247,17 +245,15 @@ namespace NRL_PROJECT.Controllers
             return RedirectToAction(nameof(ReportDetails), new { id });
         }
 
-        // ---------------------------------------------
-        // GET: Registrar Overview
-        // ---------------------------------------------
+        // ---------------------------------------------------------------------
+        // GET: RegistrarView (overview)
+        // ---------------------------------------------------------------------
         [HttpGet]
         public async Task<IActionResult> RegistrarView(string? status = "Alle", string? q = null)
         {
             var query = _context.ObstacleReports
                 .Include(r => r.Obstacle)
                 .Include(r => r.SubmittedByUser)
-                    .ThenInclude(u => u.Organisation)
-                .Include(r => r.User)
                     .ThenInclude(u => u.Organisation)
                 .Include(r => r.Reviewer)
                 .Include(r => r.MapData)
@@ -289,8 +285,8 @@ namespace NRL_PROJECT.Controllers
                     r.ObstacleReportID.ToString().Contains(q) ||
                     (r.Obstacle != null ? r.Obstacle.ObstacleType : "").Contains(q) ||
                     (
-                        (r.User != null ? r.User.FirstName : "") + " " +
-                        (r.User != null ? r.User.LastName : "")
+                        (r.SubmittedByUser != null ? r.SubmittedByUser.FirstName : "") + " " +
+                        (r.SubmittedByUser != null ? r.SubmittedByUser.LastName : "")
                     ).Contains(q)
                 );
             }
@@ -321,15 +317,13 @@ namespace NRL_PROJECT.Controllers
                         ? r.SubmittedByUser.UserName
                         : "Ukjent",
 
-                    OrgName =
-                        r.SubmittedByUser != null &&
-                        r.SubmittedByUser.Organisation != null
-                        ? r.SubmittedByUser.Organisation.OrgName
-        :               "Ukjent",
+                    OrgName = r.SubmittedByUser != null &&
+                              r.SubmittedByUser.Organisation != null
+                              ? r.SubmittedByUser.Organisation.OrgName
+                              : "Ukjent",
 
-                    AssignedRegistrarUserID = r.Reviewer != null
-                        ? r.Reviewer.UserName
-                        : null
+                    AssignedRegistrarUserID = r.Reviewer != null ? r.Reviewer.Id : null,
+                    ReviewerName = r.Reviewer != null ? r.Reviewer.UserName : null
                 })
                 .ToListAsync();
 

@@ -10,9 +10,8 @@ namespace NRL_PROJECT.Models
         // public string? UserID { get; set; }
         public string? UserName { get; set; }
         public string? OrgName { get; set; } = string.Empty;
-        public int ObstacleReportID { get; set; }        
-        
-        // public DateTime TimeOfSubmittedReport { get; set; } // - overflødig?
+        public int ObstacleReportID { get; set; }                 
+        public DateTime TimeOfSubmittedReport { get; set; } 
 
         // Kobling til hindring
         public string? ObstacleName { get; set; }
@@ -27,9 +26,9 @@ namespace NRL_PROJECT.Models
         public DateTime ObstacleReportDate { get; set; }
         public EnumTypes ObstacleReportStatus { get; set; }
         public User SubmittedByUser { get; set; }
+        public string ObstacleReportComment { get; set; } = string.Empty;
 
-
-        public string? ObstacleReportComment { get; set; }      // kommentaren du skriver i ReportDetails - overflødig?
+        public string? StatusComment { get; set; }      // kommentaren du skriver i ReportDetails
 
 
         // Kart / koordinater
@@ -50,6 +49,7 @@ namespace NRL_PROJECT.Models
         // Registrar 
         public string? AssignedRegistrarUserID { get; set; }
         public string? TransferToUserID { get; set; }
+        public string? ReviewerName { get; set; }
     }
 }
 

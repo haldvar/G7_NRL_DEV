@@ -17,7 +17,6 @@
                    class="border px-3 py-2 rounded w-72" />
         </div>
 
-        <!-- 🔍 Knapp ved siden av søkefeltet -->
         <button type="submit"
                 class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">
             Søk
@@ -60,6 +59,8 @@
         </button>
     </div>
 </form>
+
+
 <!-- RAPPORTTABELL -->
 <table class="table-auto w-full border border-gray-300 rounded-lg shadow-md">
     <thead class="bg-gray-100 text-left">
@@ -72,24 +73,25 @@
             <th class="px-4 py-2">Rapportstatus</th>
             <th class="px-4 py-2">OrgName</th>
             <th class="px-4 py-2">Koordinater</th>
+            <th class="px-4 py-2"></th>
         </tr>
     </thead>
+
     <tbody>
         @foreach (var report in Model)
         {
             <tr class="border-t hover:bg-gray-50">
+
                 <td class="px-4 py-2">@report.ObstacleReportID</td>
                 <td class="px-4 py-2">@report.UserName</td>
                 <td class="px-4 py-2">@report.ObstacleID</td>
                 <td class="px-4 py-2">@report.ObstacleType</td>
-                <td class="px-4 py-2">@report.ObstacleReportDate?.ToString("yyyy-MM-dd HH:mm")</td>
+                <td class="px-4 py-2">@report.ObstacleReportDate.ToString("yyyy-MM-dd HH:mm")</td>
                 <td class="px-4 py-2">@report.ObstacleReportStatus</td>
                 <td class="px-4 py-2">@report.OrgName</td>
                 <td class="px-4 py-2">@report.CoordinateSummary</td>
+
             </tr>
         }
     </tbody>
-
-
-
 </table>

@@ -11,6 +11,14 @@ namespace NRL_PROJECT.Models
     }
 
 
+    public enum UserRoleType
+    {
+        Pilot = 0,
+        Registrar = 1,
+        Admin = 2,
+        ExternalOrg = 3
+    }
+
     public enum EnumStatus 
     { 
         Ny = 0, 
@@ -20,5 +28,15 @@ namespace NRL_PROJECT.Models
         Venter = 4 
     }
 
-    
+    /*
+    public enum OrgName
+    {
+        NLA,
+        Politiet,
+        Avinor,
+        Lufttransport,
+        Helitrans,
+        Forsvaret       
+    }
+    */
 }

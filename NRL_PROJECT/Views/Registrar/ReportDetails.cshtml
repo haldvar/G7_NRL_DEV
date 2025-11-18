@@ -65,7 +65,7 @@
 
                     <textarea name="comment" rows="3"
                               class="w-full rounded-xl border px-3 py-2 text-sm"
-                              placeholder="Kommentar (valgfritt)">@Model.ObstacleReportComment</textarea>
+                              placeholder="Kommentar (valgfritt)">@Model.StatusComment</textarea>
 
                     <div class="flex flex-wrap gap-3 pt-1">
                         <button name="status" value="UnderBehandling" type="submit"
@@ -96,7 +96,7 @@
                 <input type="hidden" name="id" value="@Model.ObstacleReportID" />
 
                 <div class="col-md-7">
-                    <select asp-for="TransferToUserID" asp-items="registrarList" class="form-select">
+                    <select name="transferToUserId" asp-items="registrarList" class="form-select">
                         <option value="">— Velg registerfører —</option>
                     </select>
                 </div>
@@ -107,8 +107,10 @@
             </form>
 
             <div class="text-muted mt-2">
-                Nå tildelt:
-                <b>@(registrarList.FirstOrDefault(x => x.Value == Model.AssignedRegistrarUserID)?.Text ?? "Ingen")</b>
+                Nå tildelt: <b>@(registrarList.FirstOrDefault(x => x.Value == Model.AssignedRegistrarUserID)?.Text ?? "Ingen")</b>
+            </div>
+            <div class="text-muted mt-1">
+                (Navn: @Model.ReviewerName)
             </div>
         </div>
     </div>
@@ -220,22 +222,18 @@
 
             <div>
                 <dt class="font-semibold text-slate-700">Tidspunkt registrert</dt>
-                <dd>@Model.ObstacleReportDate.ToString("dd.MM.yyyy HH:mm")</dd>
+                <dd>@Model.TimeOfSubmittedReport.ToString("dd.MM.yyyy HH:mm")</dd>
             </div>
 
             <div class="sm:col-span-2">
                 <dt class="font-semibold text-slate-700">Innsender</dt>
-                <dd>
-                    @Model.UserName
-                    @if (!string.IsNullOrWhiteSpace(Model.OrgName))
-                    {
-                        <span class="text-slate-500"> (</span>
-                        @Model.OrgName
-                        <span class="text-slate-500">)</span>
-                    }
-                </dd>
+                <dd>@Model.UserName</dd>
             </div>
 
+            <div class="sm:col-span-2">
+                <dt class="font-semibold text-slate-700">Organisasjon</dt>
+                <dd>@Model.OrgName</dd>
+            </div>
         </dl>
 
         <div class="mt-4">

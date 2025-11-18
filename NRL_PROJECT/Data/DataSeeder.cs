@@ -25,7 +25,9 @@ namespace NRL_PROJECT.Data
             await SeedDemoReports(context, userManager);
         }
 
-        // 1. Rollenavn
+        // --------------------------------------------------------------------
+        // 1. Roller
+        // --------------------------------------------------------------------
         private static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
         {
             string[] roles = { "Admin", "Pilot", "Registrar", "ExternalOrg" };
@@ -37,7 +39,9 @@ namespace NRL_PROJECT.Data
             }
         }
 
+        // --------------------------------------------------------------------
         // 2. Organisasjoner
+        // --------------------------------------------------------------------
         private static async Task SeedOrganisations(NRL_Db_Context context)
         {
             if (await context.Organisations.AnyAsync())
@@ -55,7 +59,9 @@ namespace NRL_PROJECT.Data
             await context.SaveChangesAsync();
         }
 
-        // 3. Adminbruker
+        // --------------------------------------------------------------------
+        // 3. Admin-bruker
+        // --------------------------------------------------------------------
         private static async Task SeedAdminUser(
             UserManager<User> userManager,
             IConfiguration config,
@@ -79,28 +85,24 @@ namespace NRL_PROJECT.Data
             };
 
             var createResult = await userManager.CreateAsync(adminUser, adminPassword);
+
             if (createResult.Succeeded)
                 await userManager.AddToRoleAsync(adminUser, "Admin");
         }
 
-        // 4. Demo Pilots
+        // --------------------------------------------------------------------
+        // 4. Piloter
+        // --------------------------------------------------------------------
         private static async Task SeedDemoPilots(UserManager<User> userManager, NRL_Db_Context context)
         {
             if (await userManager.Users.AnyAsync(u => u.UserName.StartsWith("pilot")))
                 return;
 
-            // Hent organisasjonene som finnes i databasen
             var organisations = await context.Organisations.OrderBy(o => o.OrgID).ToListAsync();
-
-            if (!organisations.Any())
-                return; // fail safe – skal aldri skje
-
             int orgCount = organisations.Count;
 
             for (int i = 1; i <= 10; i++)
             {
-                // Finn organisasjon basert på pilotnummer
-                // rullerer mellom 1,2,3,4,1,2,3,4 …
                 var assignedOrg = organisations[(i - 1) % orgCount];
 
                 var user = new User
@@ -114,16 +116,14 @@ namespace NRL_PROJECT.Data
                 };
 
                 var result = await userManager.CreateAsync(user, "Heisann1!");
-
                 if (result.Succeeded)
                     await userManager.AddToRoleAsync(user, "Pilot");
-                else
-                    Console.WriteLine($"Pilot{i} ble IKKE laget: {string.Join(", ", result.Errors.Select(e => e.Description))}");
             }
         }
 
-
-        // 5. Demo Registrars
+        // --------------------------------------------------------------------
+        // 5. Registrare
+        // --------------------------------------------------------------------
         private static async Task SeedDemoRegistrars(UserManager<User> userManager, NRL_Db_Context context)
         {
             if (await userManager.Users.AnyAsync(u => u.UserName.StartsWith("reg")))
@@ -147,7 +147,9 @@ namespace NRL_PROJECT.Data
             }
         }
 
-        // 6. Demo ExternalOrg Users
+        // --------------------------------------------------------------------
+        // 6. Eksterne organisasjonsbrukere
+        // --------------------------------------------------------------------
         private static async Task SeedDemoExternalOrgUsers(UserManager<User> userManager, NRL_Db_Context context)
         {
             if (await userManager.Users.AnyAsync(u => u.UserName.StartsWith("ext")))
@@ -157,10 +159,10 @@ namespace NRL_PROJECT.Data
 
             foreach (var org in orgs)
             {
+                var clean = org.OrgName.Replace(" ", "").Replace("ø", "o").Replace("å", "a").Replace("æ", "ae");
+
                 for (int i = 1; i <= 2; i++)
                 {
-                    var clean = org.OrgName.Replace(" ", "").Replace("ø", "o").Replace("å", "a").Replace("æ", "ae");
-
                     var user = new User
                     {
                         UserName = $"ext{i}_{clean}",
@@ -178,7 +180,9 @@ namespace NRL_PROJECT.Data
             }
         }
 
-        // 7. Demo Obstacle Reports
+        // --------------------------------------------------------------------
+        // 7. Realistiske demo-hinderrapporter
+        // --------------------------------------------------------------------
         private static async Task SeedDemoReports(NRL_Db_Context context, UserManager<User> userManager)
         {
             if (await context.ObstacleReports.AnyAsync())
@@ -186,57 +190,138 @@ namespace NRL_PROJECT.Data
 
             var random = new Random();
             var pilots = await userManager.GetUsersInRoleAsync("Pilot");
+            var registrars = await userManager.GetUsersInRoleAsync("Registrar");
 
-            for (int i = 1; i <= 20; i++)
+            // 6 forskjellige hindertyper
+            string[] obstacleTypes =
+            {
+        "Radio-/Mobilmast",
+        "Kran",
+        "Bygning/Konstruksjon",
+        "Vindmølle",
+        "Høyspentlinje",
+        "Tårn"
+    };
+
+            // Statusvariasjon
+            var statusValues = new[]
+            {
+        ObstacleReportData.EnumTypes.New,
+        ObstacleReportData.EnumTypes.Open,
+        ObstacleReportData.EnumTypes.InProgress,
+        ObstacleReportData.EnumTypes.Resolved,
+        ObstacleReportData.EnumTypes.Deleted
+    };
+
+            for (int i = 1; i <= 25; i++)
             {
                 var reporter = pilots[random.Next(pilots.Count)];
+                var registrar = registrars.Any() ? registrars[random.Next(registrars.Count)] : null;
 
-                // Coordinates
-                var coords = new List<MapCoordinate>
+                // ---------------------------------------------------------
+                // 1. Generer realistisk koordinatsett
+                // ---------------------------------------------------------
+                bool isLine = random.Next(0, 4) == 0;   // 25% sjanse for LineString
+                List<MapCoordinate> coords;
+
+                if (isLine)
                 {
-                    new MapCoordinate { Latitude = 59.90 + random.NextDouble()/100, Longitude = 10.75 + random.NextDouble()/100 },
-                    new MapCoordinate { Latitude = 59.90 + random.NextDouble()/100, Longitude = 10.75 + random.NextDouble()/100 },
-                    new MapCoordinate { Latitude = 59.90 + random.NextDouble()/100, Longitude = 10.75 + random.NextDouble()/100 }
+                    // Kraftlinje-stil koordinater
+                    coords = new List<MapCoordinate>();
+                    var baseLat = 59.90 + random.NextDouble() / 100;
+                    var baseLng = 10.75 + random.NextDouble() / 100;
+
+                    for (int p = 0; p < random.Next(3, 7); p++)
+                    {
+                        coords.Add(new MapCoordinate
+                        {
+                            Latitude = baseLat + (p * 0.001),
+                            Longitude = baseLng + (p * 0.0015),
+                            OrderIndex = p
+                        });
+                    }
+                }
+                else
+                {
+                    // Et enkelt punkt
+                    coords = new List<MapCoordinate>
+            {
+                new MapCoordinate
+                {
+                    Latitude = 59.90 + random.NextDouble()/100,
+                    Longitude = 10.75 + random.NextDouble()/100,
+                    OrderIndex = 0
+                }
+            };
+                }
+
+                var mapData = new MapData
+                {
+                    Coordinates = coords,
+                    GeometryType = isLine ? "LineString" : "Point",
+                    MapZoomLevel = 14
                 };
 
-                // MapData
-                var mapData = new MapData { Coordinates = coords };
                 context.MapDatas.Add(mapData);
                 await context.SaveChangesAsync();
 
-                // ObstacleData
+                // ---------------------------------------------------------
+                // 2. Lag hindring
+                // ---------------------------------------------------------
+
                 var obstacle = new ObstacleData
                 {
-                    ObstacleType = (new[] { "Mast", "Kran", "Bygning", "Tårn" })[random.Next(4)],
-                    ObstacleHeight = random.Next(15, 120),
-                    ObstacleWidth = random.Next(3, 15),
-                    ObstacleComment = "Demo hindring"
+                    ObstacleType = obstacleTypes[random.Next(obstacleTypes.Length)],
+                    ObstacleHeight = random.Next(20, 300),  // 20–300 meter
+                    ObstacleWidth = random.Next(2, 20),
+                    ObstacleComment = random.Next(0, 4) == 0
+                        ? "Automatisk generert hindring."
+                        : "Rapportert av pilot."
+
                 };
+
+                // 50% sannsynlighet for et illustrasjonsbilde
+                if (random.NextDouble() < 0.5)
+                {
+                    obstacle.ObstacleImageURL = "/example/demo" + random.Next(1, 4) + ".jpg";
+                }
+
                 context.Obstacles.Add(obstacle);
                 await context.SaveChangesAsync();
 
-                // Summary
+                // ---------------------------------------------------------
+                // 3. Lag koordinatsammendrag
+                // ---------------------------------------------------------
                 var first = coords.First();
-                string summary = $"{first.Latitude:F4}, {first.Longitude:F4} (+{coords.Count - 1} punkter)";
+                string summary = isLine
+                    ? $"{first.Latitude:F4}, {first.Longitude:F4} (linje med {coords.Count} punkter)"
+                    : $"{first.Latitude:F4}, {first.Longitude:F4}";
 
-                // Report
+                // ---------------------------------------------------------
+                // 4. Lag rapport
+                // ---------------------------------------------------------
                 var report = new ObstacleReportData
                 {
                     ObstacleID = obstacle.ObstacleID,
                     MapDataID = mapData.MapDataID,
-                    ObstacleReportDate = DateTime.Now.AddDays(-random.Next(30)),
-                    ObstacleReportStatus = ObstacleReportData.EnumTypes.Open,
 
                     SubmittedByUserId = reporter.Id,
-                    UserName = reporter.UserName,
 
-                    ObstacleReportComment = "Dette er en demo-rapport.",
-                    CoordinateSummary = summary
+                    ObstacleReportComment =
+                        isLine ? "Mulig høyspentlinje observert."
+                               : "Objekt observert og rapportert.",
+
+                    CoordinateSummary = summary,
+                    ObstacleReportStatus = statusValues[random.Next(statusValues.Length)],
+                    ObstacleReportDate = DateTime.Now.AddDays(-random.Next(60)),
+                    ReviewedByUserID = registrar?.Id
                 };
 
                 context.ObstacleReports.Add(report);
                 await context.SaveChangesAsync();
             }
         }
+
     }
 }
+
