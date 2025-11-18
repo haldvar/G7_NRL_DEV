@@ -139,11 +139,13 @@ namespace NRL_PROJECT.Controllers
             {
                 ObstacleReportID = report.ObstacleReportID,
                 ObstacleReportDate = report.ObstacleReportDate,
+
                 ObstacleID = report.Obstacle?.ObstacleID ?? 0,
                 ObstacleType = report.Obstacle?.ObstacleType ?? "",
                 ObstacleComment = report.Obstacle?.ObstacleComment ?? "",
                 ObstacleHeight = report.Obstacle?.ObstacleHeight ?? 0,
                 ObstacleWidth = report.Obstacle?.ObstacleWidth ?? 0,
+                ObstacleImageURL = report.Obstacle?.ObstacleImageURL,
 
                 MapData = report.MapData,
                 Latitude = lat,
@@ -297,17 +299,25 @@ namespace NRL_PROJECT.Controllers
                 {
                     ObstacleReportID = r.ObstacleReportID,
                     ObstacleReportDate = r.ObstacleReportDate,
+
                     ObstacleID = r.Obstacle != null ? r.Obstacle.ObstacleID : 0,
                     ObstacleType = r.Obstacle != null ? (r.Obstacle.ObstacleType ?? "") : "",
                     ObstacleComment = r.Obstacle != null ? (r.Obstacle.ObstacleComment ?? "") : "",
                     ObstacleHeight = r.Obstacle != null ? r.Obstacle.ObstacleHeight : 0,
+                    ObstacleImageURL = r.Obstacle != null ? r.Obstacle.ObstacleImageURL : null,
 
                     Latitude = (r.MapData != null && r.MapData.Coordinates.Any())
-                        ? r.MapData.Coordinates.OrderBy(c => c.CoordinateId).Select(c => (double?)c.Latitude).FirstOrDefault() ?? 0
+                        ? r.MapData.Coordinates
+                            .OrderBy(c => c.CoordinateId)
+                            .Select(c => (double?)c.Latitude)
+                            .FirstOrDefault() ?? 0
                         : 0,
 
                     Longitude = (r.MapData != null && r.MapData.Coordinates.Any())
-                        ? r.MapData.Coordinates.OrderBy(c => c.CoordinateId).Select(c => (double?)c.Longitude).FirstOrDefault() ?? 0
+                        ? r.MapData.Coordinates
+                            .OrderBy(c => c.CoordinateId)
+                            .Select(c => (double?)c.Longitude)
+                            .FirstOrDefault() ?? 0
                         : 0,
 
                     ReportStatus = MapToUi(r.ObstacleReportStatus),
