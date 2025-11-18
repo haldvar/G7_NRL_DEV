@@ -145,6 +145,9 @@ namespace NRL_PROJECT.Controllers
                 ObstacleHeight = report.Obstacle?.ObstacleHeight ?? 0,
                 ObstacleWidth = report.Obstacle?.ObstacleWidth ?? 0,
 
+                // ⭐ BILDESTØTTE
+                ObstacleImageURL = report.Obstacle?.ObstacleImageURL,
+
                 MapData = report.MapData,
                 Latitude = lat,
                 Longitude = lng,
@@ -246,7 +249,7 @@ namespace NRL_PROJECT.Controllers
         }
 
         // ---------------------------------------------------------------------
-        // GET: RegistrarView (overview)
+        // GET: RegistrarView
         // ---------------------------------------------------------------------
         [HttpGet]
         public async Task<IActionResult> RegistrarView(string? status = "Alle", string? q = null)
@@ -301,6 +304,9 @@ namespace NRL_PROJECT.Controllers
                     ObstacleType = r.Obstacle != null ? (r.Obstacle.ObstacleType ?? "") : "",
                     ObstacleComment = r.Obstacle != null ? (r.Obstacle.ObstacleComment ?? "") : "",
                     ObstacleHeight = r.Obstacle != null ? r.Obstacle.ObstacleHeight : 0,
+
+                    // ⭐ BILDESTØTTE
+                    ObstacleImageURL = r.Obstacle != null ? r.Obstacle.ObstacleImageURL : null,
 
                     Latitude = (r.MapData != null && r.MapData.Coordinates.Any())
                         ? r.MapData.Coordinates.OrderBy(c => c.CoordinateId).Select(c => (double?)c.Latitude).FirstOrDefault() ?? 0
