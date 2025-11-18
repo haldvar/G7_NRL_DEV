@@ -234,6 +234,28 @@
                 <dt class="font-semibold text-slate-700">Organisasjon</dt>
                 <dd>@Model.OrgName</dd>
             </div>
+
+			<div class="sm:col-span-2">
+				<dt class="font-semibold text-slate-700">Bilde</dt>
+				<dd>
+					@if (!string.IsNullOrWhiteSpace(Model.ObstacleImageURL))
+					{
+						<a href="@Model.ObstacleImageURL" target="_blank">
+							<img src="@Model.ObstacleImageURL"
+								 alt="Hinderbilde"
+								 class="h-32 w-32 object-cover rounded shadow border border-gray-300" />
+						</a>
+					}
+					else
+					{
+						<span class="text-slate-400 italic">Ingen bilde lastet opp</span>
+					}
+				</dd>
+			</div>
+
+
+			
+
         </dl>
 
         <div class="mt-4">

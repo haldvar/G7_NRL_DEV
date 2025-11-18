@@ -108,6 +108,16 @@
 					Rapport nullstilt
 				</div>
 
+				<!-- Toast for manglende kart-geometri (server-side validering) -->
+				<div id="geoErrorToast"
+					 class="hidden absolute top-36 left-1/2 -translate-x-1/2
+						bg-orange-500/95 text-white text-xl px-6 py-3
+						rounded-xl shadow-2xl font-bold tracking-wide
+						backdrop-blur-sm z-[99999]
+						transition-opacity duration-500">
+					Du må minst angi ett punkt på kartet.
+				</div>
+
 				<!-- Leaflet map -->
 				<div id="mapDraw" class="absolute inset-0 z-0"></div>
 
@@ -172,16 +182,27 @@
 	</div>
 </form>
 
-@if (!ViewData.ModelState.IsValid)
+@{
+	var hasGeoError = ViewData.ModelState.ContainsKey("MapData.GeoJsonCoordinates")
+		|| ViewData.ModelState.ContainsKey("GeoJsonCoordinates");
+}
+
+@if (hasGeoError)
 {
-	<div class="bg-red-600 text-white p-4 rounded-lg mt-6">
-		<ul class="list-disc list-inside">
-			@foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-			{
-				<li>@error.ErrorMessage</li>
-			}
-		</ul>
-	</div>
+	<script>
+		window.addEventListener("load", () => {
+			const toast = document.getElementById("geoErrorToast");
+			if (!toast) return;
+
+			toast.classList.remove("hidden");
+			toast.style.opacity = "1";
+
+			setTimeout(() => {
+				toast.style.opacity = "0";
+				setTimeout(() => toast.classList.add("hidden"), 500);
+			}, 3000);
+		});
+	</script>
 }
 
 @section Scripts {
@@ -190,6 +211,9 @@
 	<script src="https://rawcdn.githack.com/bbecquet/Leaflet.RotatedMarker/master/leaflet.rotatedMarker.js"></script>
 
 	<script>
+
+		let restoredFromDraft = false;
+
 		// ------------------------------------------------------------
 		// IKON / KARTINIT
 		// ------------------------------------------------------------
@@ -200,22 +224,25 @@
 			popupAnchor: [0, -12]
 		});
 
-		// B-basert fallback + A sin locate
+		// SetViews to location
 		const map = L.map('mapDraw', {
 			zoomControl: false,
 			touchZoom: true,
 			scrollWheelZoom: true,
 			doubleClickZoom: true,
 			boxZoom: false
-		}).setView([58.333, 8.233], 13); // fallback-område
+		}).setView([65, 13], 4); // fallback-område
 
-		map.locate({
-			setView: true,
-			maxZoom: 18,
-			enableHighAccuracy: true,
-			timeout: 10000,
-			maximumAge: 0
-		});
+		if (!restoredFromDraft) {
+			map.locate({
+				setView: true,
+				maxZoom: 18,
+				enableHighAccuracy: true,
+				timeout: 10000,
+				maximumAge: 0
+			});
+		}
+
 
 		L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {
 			layers: 'topo',
@@ -250,7 +277,7 @@
 			if (window.currentPosMarker) map.removeLayer(window.currentPosMarker);
 			if (window.currentPosCircle) map.removeLayer(window.currentPosCircle);
 
-			// Nøyaktighetssjekk (A)
+			// Nøyaktighetssjekk 
 			if (e.accuracy > 200) {
 				const popup = L.popup({ closeButton: false, autoPan: true })
 					.setLatLng(e.latlng)
@@ -280,7 +307,7 @@
 				}
 			}, 3000);
 
-			// Rotér helikopter basert på heading hvis tilgjengelig
+			// Roter helikopter basert på heading hvis tilgjengelig
 			if (typeof e.heading === "number" && !isNaN(e.heading)) {
 				window.currentPosMarker.setRotationAngle(e.heading);
 			}
@@ -306,7 +333,7 @@
 		});
 
 		// ------------------------------------------------------------
-		// TEGNING (én geometri totalt – B-logikk, A-UI)
+		// TEGNING I KART
 		// ------------------------------------------------------------
 		const btnPoint = document.getElementById("btnDrawPoint");
 		const btnLine = document.getElementById("btnDrawLine");
@@ -341,7 +368,7 @@
 			startDrawLine();
 		});
 
-		// Begrens linje til 2 punkter (B-idé)
+		// Begrens linje til 2 punkter 
 		map.on('pm:drawstart', ({ shape, workingLayer }) => {
 			if (shape === 'Line') {
 				workingLayer.on('pm:vertexadded', () => {
@@ -371,7 +398,7 @@
 		});
 
 		// ------------------------------------------------------------
-		// SMART AUTOSAVE (A-basert, uten interval fra B)
+		// SMART AUTOSAVE 
 		// ------------------------------------------------------------
 		const formKey = "ObstacleReportForm";
 		let draftDisabled = false;
@@ -397,7 +424,7 @@
 		}
 
 		// ------------------------------------------------------------
-		// GJENOPPRETT UTKAST (B sin trygghet + A sin toast)
+		// GJENOPPRETT UTKAST 
 		// ------------------------------------------------------------
 		window.addEventListener("load", () => {
 			const saved = localStorage.getItem(formKey);
@@ -433,16 +460,23 @@
 					const [lng, lat] = geom.coordinates;
 					const m = L.marker([lat, lng]).addTo(map);
 					drawn.addLayer(m);
-					map.setView([lat, lng], 15);
+					map.setView([lat, lng], 18);
 				} else if (geom.type === "LineString" && Array.isArray(geom.coordinates)) {
 					const latlngs = geom.coordinates.map(([lng, lat]) => [lat, lng]);
 					const l = L.polyline(latlngs, { color: "orange", weight: 4 }).addTo(map);
 					drawn.addLayer(l);
 					map.fitBounds(l.getBounds());
+
+					setTimeout(() => {
+						map.setZoom(18);
+					}, 150);
+
 				}
 			} catch (err) {
 				console.warn("Kunne ikke gjenopprette geometri:", err);
 			}
+
+			restoredFromDraft = true;
 
 			// Vis blå toast i 5 sek
 			const toast = document.getElementById("restoreToast");
@@ -455,7 +489,7 @@
 		});
 
 		// ------------------------------------------------------------
-		// SLETT UTKAST VED SUBMIT (A + sperre autosave etterpå)
+		// SLETT UTKAST VED SUBMIT 
 		// ------------------------------------------------------------
 		const submitBtn = document.getElementById("submitBtn");
 		if (submitBtn) {

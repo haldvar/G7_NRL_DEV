@@ -24,17 +24,8 @@
         {
             <tr class="border-t">
                 <td class="px-4 py-2">@report.ObstacleReportID</td>
-                <td class="px-4 py-2">
-                    @(report.SubmittedByUser != null
-                                    ? report.SubmittedByUser.UserName
-                                    : "(ukjent)")
-                                             </td>
-
-                <td class="px-4 py-2">
-                    @(report.Reviewer != null
-                                    ? report.Reviewer.UserName
-                                    : "(ingen)")
-                                              </td>
+                <td class="px-4 py-2">@report.UserName</td>
+                <td class="px-4 py-2">@report.ReviewedByUserID</td>
                 <td class="px-4 py-2">@report.ObstacleID</td>
                 <td class="px-4 py-2">@report.Obstacle?.ObstacleType</td>
                 <td class="px-4 py-2">@report.Obstacle?.ObstacleComment</td>
@@ -42,23 +33,24 @@
                 <td class="px-4 py-2">@report.ObstacleReportDate.ToString("yyyy-MM-dd HH:mm")</td>
                 <td class="px-4 py-2">@report.ObstacleReportStatus</td>
                 <td class="px-4 py-2">@report.MapData.CoordinateSummary</td>
-                <td class="px-4 py-2">
-                    @if (!string.IsNullOrEmpty(report.Obstacle?.ObstacleImageURL))
-                    {
-                        <a href="@report.Obstacle.ObstacleImageURL"
-                           target="_blank"
-                           class="flex items-center">
+				<td class="px-4 py-2">
+					@if (!string.IsNullOrEmpty(report.Obstacle?.ObstacleImageURL))
+					{
+						<a href="@report.Obstacle.ObstacleImageURL"
+						   target="_blank"
+						   class="flex items-center">
 
-                            <img src="@report.Obstacle.ObstacleImageURL"
-                                 alt="Bilde"
-                                 class="h-16 w-16 object-cover rounded shadow-md border border-gray-300" />
-                        </a>
-                    }
-                    else
-                    {
-                        <span class="text-gray-400 italic">Ingen</span>
-                    }
-                </td>  
+							<img src="@report.Obstacle.ObstacleImageURL"
+								 alt="Bilde"
+								 class="h-16 w-16 object-cover rounded shadow-md border border-gray-300" />
+						</a>
+					}
+					else
+					{
+						<span class="text-gray-400 italic">Ingen</span>
+					}
+				</td>
+
                 
             </tr>
         }

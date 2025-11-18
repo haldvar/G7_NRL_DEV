@@ -40,7 +40,7 @@ namespace NRL_PROJECT.Controllers
             };
         }
 
-        private static readonly List<string> PredefinedObstacleTypes = new()
+        private static readonly List<String> PredefinedObstacleTypes = new()
         {
             "Radio/Mobilmast",
             "Mast/Tårn",
@@ -84,7 +84,6 @@ namespace NRL_PROJECT.Controllers
             report.ObstacleReportComment = (comment ?? "").Trim();
 
             await _context.SaveChangesAsync();
-
             return RedirectToAction(nameof(ReportDetails), new { id });
         }
 
@@ -98,16 +97,14 @@ namespace NRL_PROJECT.Controllers
                 .Include(r => r.SubmittedByUser)
                     .ThenInclude(u => u.Organisation)
                 .Include(r => r.Obstacle)
-                .Include(r => r.SubmittedByUser)
-                    .ThenInclude(u => u.Organisation)
                 .Include(r => r.Reviewer)
                 .Include(r => r.MapData)
                     .ThenInclude(m => m.Coordinates)
                 .FirstOrDefaultAsync(r => r.ObstacleReportID == id);
 
-            if (report == null)
-                return NotFound();
+            if (report == null) return NotFound();
 
+            // Coordinates
             var orderedCoords = report.MapData?.Coordinates?
                 .OrderBy(c => c.CoordinateId)
                 .ToList();
@@ -125,6 +122,7 @@ namespace NRL_PROJECT.Controllers
 
             var reportedLocation = first != null ? $"{lat},{lng}" : string.Empty;
 
+            // Registrars list
             var registrars = await GetRegistrarsAsync();
             ViewBag.Registrars = registrars
                 .Select(x => new SelectListItem
@@ -135,6 +133,7 @@ namespace NRL_PROJECT.Controllers
                 })
                 .ToList();
 
+            // Build ViewModel
             var vm = new ObstacleReportViewModel
             {
                 ObstacleReportID = report.ObstacleReportID,
@@ -145,7 +144,7 @@ namespace NRL_PROJECT.Controllers
                 ObstacleComment = report.Obstacle?.ObstacleComment ?? "",
                 ObstacleHeight = report.Obstacle?.ObstacleHeight ?? 0,
                 ObstacleWidth = report.Obstacle?.ObstacleWidth ?? 0,
-                ObstacleImageURL = report.Obstacle?.ObstacleImageURL,
+                ObstacleImageURL = report.Obstacle?.ObstacleImageURL,   // ⭐ INFO FRA OBSTACLE
 
                 MapData = report.MapData,
                 Latitude = lat,
@@ -156,10 +155,7 @@ namespace NRL_PROJECT.Controllers
                 ReportStatus = MapToUi(report.ObstacleReportStatus),
                 ObstacleReportComment = report.ObstacleReportComment ?? "",
 
-                UserName = report.SubmittedByUser != null
-                    ? report.SubmittedByUser.UserName
-                    : "Ukjent",
-
+                UserName = report.SubmittedByUser?.UserName ?? "Ukjent",
                 OrgName = report.SubmittedByUser?.Organisation?.OrgName ?? "Ukjent",
 
                 AssignedRegistrarUserID = report.ReviewedByUserID,
@@ -262,6 +258,7 @@ namespace NRL_PROJECT.Controllers
                     .ThenInclude(m => m.Coordinates)
                 .AsQueryable();
 
+            // Statusfilter
             if (!string.IsNullOrWhiteSpace(status) &&
                 !status.Equals("Alle", StringComparison.OrdinalIgnoreCase))
             {
@@ -279,6 +276,7 @@ namespace NRL_PROJECT.Controllers
                     query = query.Where(r => r.ObstacleReportStatus == filterStatus.Value);
             }
 
+            // Søkeord
             if (!string.IsNullOrWhiteSpace(q))
             {
                 q = q.Trim();
@@ -293,6 +291,7 @@ namespace NRL_PROJECT.Controllers
                 );
             }
 
+            // SELECT → ViewModel
             var model = await query
                 .OrderByDescending(r => r.ObstacleReportDate)
                 .Select(r => new ObstacleReportViewModel
@@ -304,7 +303,7 @@ namespace NRL_PROJECT.Controllers
                     ObstacleType = r.Obstacle != null ? (r.Obstacle.ObstacleType ?? "") : "",
                     ObstacleComment = r.Obstacle != null ? (r.Obstacle.ObstacleComment ?? "") : "",
                     ObstacleHeight = r.Obstacle != null ? r.Obstacle.ObstacleHeight : 0,
-                    ObstacleImageURL = r.Obstacle != null ? r.Obstacle.ObstacleImageURL : null,
+                    ObstacleImageURL = r.Obstacle != null ? r.Obstacle.ObstacleImageURL : null,   // ⭐ FOR LISTEVISNING
 
                     Latitude = (r.MapData != null && r.MapData.Coordinates.Any())
                         ? r.MapData.Coordinates
