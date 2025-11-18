@@ -151,6 +151,9 @@ namespace NRL_PROJECT.Controllers
                 ObstacleComment = report.Obstacle?.ObstacleComment ?? "",
                 ObstacleHeight = report.Obstacle?.ObstacleHeight ?? 0,
                 ObstacleWidth = report.Obstacle?.ObstacleWidth ?? 0,
+                ObstacleImageURL = report.Obstacle?.ObstacleImageURL,
+
+
 
                 // Lokasjon
                 MapData = report.MapData,
@@ -330,6 +333,9 @@ namespace NRL_PROJECT.Controllers
           ObstacleType = r.Obstacle != null ? (r.Obstacle.ObstacleType ?? "") : "",
           ObstacleComment = r.Obstacle != null ? (r.Obstacle.ObstacleComment ?? "") : "",
           ObstacleHeight = r.Obstacle != null ? r.Obstacle.ObstacleHeight : 0,
+          ObstacleImageURL = r.Obstacle != null ? r.Obstacle.ObstacleImageURL : null,
+
+
 
           // Coordinates
           Latitude =
