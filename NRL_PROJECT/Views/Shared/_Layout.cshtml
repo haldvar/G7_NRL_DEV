@@ -7,6 +7,8 @@
     // Example in a controller: ViewBag.SiteBgUrl = Url.Content("~/Img/NRL_BG3.png");
     var siteBgUrl = ViewBag.SiteBgUrl as string;
     var hasBg = !string.IsNullOrWhiteSpace(siteBgUrl);
+    var hideChrome = (ViewBag.HideChrome as bool?) ?? false;
+
 }
 
 <!DOCTYPE html>
@@ -50,7 +52,9 @@
         @* <div class="absolute inset-0 bg-black/5"></div> *@
     </div>
 
-    <!-- HEADER -->
+    @if (!hideChrome)
+    {
+        <!-- HEADER -->
     <header class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200 shadow-sm">
         <nav class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
             <!-- Left side: Logo + navigation -->
@@ -149,19 +153,25 @@
             </div>
         </div>
     </header>
+    }
+    
+    
 
     <!-- MAIN CONTENT -->
     <main role="main" class="flex-1 w-full">
         @RenderBody()
     </main>
-
-    <!-- FOOTER -->
-    <footer class="mt-8 border-t bg-white/90 backdrop-blur">
-        <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 text-sm text-gray-600">
-            <span>&copy; 2025 - NRL_PROJECT</span>
-            <a class="transition hover:text-blue-700" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
+    
+    @if (!hideChrome)
+    {
+        <!-- FOOTER -->
+        <footer class="mt-8 border-t bg-white/90 backdrop-blur">
+            <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 text-sm text-gray-600">
+                <span>&copy; 2025 - NRL_PROJECT</span>
+                <a class="transition hover:text-blue-700" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            </div>
+        </footer>
+    }
 
     @await RenderSectionAsync("Scripts", required: false)
 

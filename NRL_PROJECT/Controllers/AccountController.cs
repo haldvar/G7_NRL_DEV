@@ -577,7 +577,7 @@ namespace NRL_PROJECT.Controllers
                     }
                     else if (roles.Contains("Pilot"))
                     {
-                        return RedirectToAction("Index", "Home");
+                        return RedirectToAction("ObstacleAndMapForm", "Map");
                     }
                     else if (roles.Contains("ExternalOrg"))
                     {
