@@ -114,13 +114,13 @@
                         <textarea asp-for="ObstacleComment" rows="4"
                                   class="mt-1 w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-900
                                      focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                                  placeholder="Beskriv hinderet, høyde, landemerker, osv."></textarea>
+                                  placeholder="Valgfritt"></textarea>
                         <span asp-validation-for="ObstacleComment" class="text-red-600 text-sm"></span>
                     </div>
 
                     <!-- Image upload with live preview -->
                     <div>
-                        <label asp-for="ImageFile" class="block text-sm font-semibold text-gray-700">Bilde</label>
+                        <label asp-for="ImageFile" class="block text-sm font-semibold text-gray-700">Last opp bilde</label>
                         <input asp-for="ImageFile" type="file" accept="image/*" capture="environment"
                                class="mt-1 w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-900
                                   focus:ring-2 focus:ring-blue-500 focus:outline-none" />
