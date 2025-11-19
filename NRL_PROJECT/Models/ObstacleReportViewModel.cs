@@ -20,6 +20,7 @@ namespace NRL_PROJECT.Models
         public double? ObstacleWidth { get; set; }
         public string ObstacleComment { get; set; } = "";
         public int ObstacleID { get; set; }
+        public string? ObstacleImageURL { get; set; }
 
         // Kobling til rapporten
         public string ReportedByUserName { get; set; } = string.Empty;

@@ -18,6 +18,9 @@ namespace NRL_PROJECT.Models.ViewModels
         public int? ObstacleID { get; set; }
         public string? ObstacleType { get; set; }
 
+        // ⭐ Bilde-URL
+        public string? ObstacleImageURL { get; set; }
+
         // Kart
         public MapData? MapData { get; set; }
         public string? CoordinateSummary { get; set; }
