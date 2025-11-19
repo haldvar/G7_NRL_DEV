@@ -31,54 +31,60 @@
                 </div>
             </div>
 
-            <!-- Floating map tools: right side -->
-            <div class="absolute bottom-6 right-4 z-20 flex flex-col gap-3">
-                <button id="btnDrawPoint" type="button"
-                        class="h-16 w-16 md:h-20 md:w-20 rounded-full bg-white/85 backdrop-blur border border-white/70 shadow-lg
-                           hover:shadow-xl active:scale-95 transition inline-flex items-center justify-center"
-                        title="Marker punkt">
-                    <img src="/icons/map-pin.svg" alt="" class="h-9 w-9 opacity-90 pointer-events-none" />
-                </button>
+            <!-- Floating map tools: right side (bigger + grouped with subtle divider) -->
+            <div class="absolute bottom-6 right-4 z-20">
+                <div class="flex flex-col items-center gap-4 rounded-[2rem] bg-white/40 backdrop-blur border border-white/60 p-3 shadow-lg">
+                    <!-- Draw Point -->
+                    <button id="btnDrawPoint" type="button"
+                            class="h-24 w-24 md:h-28 md:w-28 rounded-full bg-white/85 backdrop-blur border border-white/70 shadow-lg
+                   hover:shadow-xl active:scale-95 transition inline-flex items-center justify-center"
+                            title="Marker punkt">
+                        <img src="/icons/map-pin.svg" alt="" class="h-12 w-12 md:h-14 md:w-14 opacity-90 pointer-events-none" />
+                    </button>
 
-                <button id="btnDrawLine" type="button"
-                        class="h-16 w-16 md:h-20 md:w-20 rounded-full bg-white/85 backdrop-blur border border-white/70 shadow-lg
-                           hover:shadow-xl active:scale-95 transition inline-flex items-center justify-center"
-                        title="Tegn linje (2 punkter)">
-                    <img src="/icons/line.svg" alt="" class="h-9 w-9 opacity-90 pointer-events-none" />
-                </button>
+                    <!-- subtle divider to keep them visually together but spaced -->
+                    <div class="h-px w-16 md:w-20 bg-white/60"></div>
+
+                    <!-- Draw Line -->
+                    <button id="btnDrawLine" type="button"
+                            class="h-24 w-24 md:h-28 md:w-28 rounded-full bg-white/85 backdrop-blur border border-white/70 shadow-lg
+                   hover:shadow-xl active:scale-95 transition inline-flex items-center justify-center"
+                            title="Tegn linje (2 punkter)">
+                        <img src="/icons/line.svg" alt="" class="h-12 w-12 md:h-14 md:w-14 opacity-90 pointer-events-none" />
+                    </button>
+                </div>
             </div>
             
-            <!-- Floating nav: top-right -->
-            <div class="absolute top-6 right-4 z-20 flex flex-col gap-3">
-                <a asp-area=""
-                   asp-controller="Home"
-                   asp-action="Index"
-                   class="h-16 w-16 md:h-20 md:w-20 rounded-full bg-white/85 backdrop-blur border border-white/70 shadow-lg
-            hover:shadow-xl active:scale-95 transition inline-flex items-center justify-center"
-                   title="Til forsiden"
-                   aria-label="Til forsiden">
-                    <!-- use your existing icon or a home icon -->
-                    <img src="/icons/home.svg" alt="" class="h-9 w-9 opacity-90 pointer-events-none" />
+            <!-- Floating nav: top-right (bigger) -->
+            <div class="absolute top-6 right-4 z-20">
+                <a asp-area="" asp-controller="Home" asp-action="Index"
+                   class="h-24 w-24 md:h-28 md:w-28 rounded-full bg-white/85 backdrop-blur border border-white/70 shadow-lg
+                          hover:shadow-xl active:scale-95 transition inline-flex items-center justify-center"
+                   title="Til forsiden" aria-label="Til forsiden">
+                    <img src="/icons/home.svg" alt="" class="h-10 w-10 md:h-12 md:w-12 opacity-90 pointer-events-none" />
                 </a>
             </div>
 
-            <!-- Floating: locate (left) -->
+            <!-- Floating: locate (left) — also bigger -->
             <div class="absolute bottom-6 left-4 z-20">
                 <button id="btnLocate" type="button"
-                        class="h-16 w-16 md:h-20 md:w-20 rounded-full bg-white/85 backdrop-blur border border-white/70 shadow-lg
-                           hover:shadow-xl active:scale-95 transition inline-flex items-center justify-center"
+                        class="h-24 w-24 md:h-28 md:w-28 rounded-full bg-white/85 backdrop-blur border border-white/70 shadow-lg
+                 hover:shadow-xl active:scale-95 transition inline-flex items-center justify-center"
                         title="Finn min posisjon">
-                    <img src="/icons/helicopter.svg" alt="" class="h-9 w-9 opacity-90 pointer-events-none" />
+                    <img src="/icons/helicopter.svg" alt="" class="h-12 w-12 md:h-14 md:w-14 opacity-90 pointer-events-none" />
                 </button>
             </div>
 
             <!-- Open details panel button (bottom center) -->
             <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-20">
                 <button type="button" id="openPanelBtn"
-                        class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-green-600 to-blue-600
-                           px-6 py-3 text-white font-semibold shadow-lg hover:shadow-xl active:scale-95 transition">
-                    Detaljer & bilde
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        class="inline-flex items-center gap-3 rounded-full bg-blue-600 px-16 py-10 
+                               text-3xl font-semibold text-white shadow-lg hover:shadow-xl hover:bg-blue-700 
+                               active:scale-95 transition">
+                    <span class="leading-none">Detaljer & bilde</span>
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         class="h-5 w-5 md:h-6 md:w-6" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                 </button>
@@ -91,11 +97,11 @@
                       flex flex-col">
                 <!-- Panel header -->
                 <div class="flex items-center justify-between px-5 py-4 border-b">
-                    <h2 class="text-lg font-bold text-green-700">Rapportdetaljer</h2>
+                    <h2 class="text-3xl font-bold text-green-700">Rapportdetaljer</h2>
                     <button type="button" id="closePanelBtn"
-                            class="rounded-full p-2 hover:bg-gray-100 active:scale-95 transition"
+                            class="rounded-full p-4 hover:bg-gray-100 active:scale-95 transition"
                             title="Lukk">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                     </button>
@@ -141,11 +147,11 @@
                 <div class="border-t px-5 py-4">
                     <div class="flex flex-col gap-3 sm:flex-row sm:justify-between">
                         <button type="button" id="cancelBtn"
-                                class="rounded-full bg-red-600 px-6 py-3 font-semibold text-white shadow hover:bg-red-700 transition">
+                                class="rounded-full text-xl bg-red-600 px-8 py-6 font-semibold text-white shadow hover:bg-red-700 transition">
                             Nullstill
                         </button>
                         <button type="submit" id="submitBtn"
-                                class="rounded-full bg-blue-600 px-6 py-3 font-semibold text-white shadow hover:bg-blue-700 transition">
+                                class="rounded-full text-xl bg-green-600 px-8 py-6 font-semibold text-white shadow hover:bg-green-700 transition">
                             Send inn rapport
                         </button>
                     </div>
