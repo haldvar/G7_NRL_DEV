@@ -2,7 +2,7 @@
 services:
   nrl_project:
     build:
-      context: "/Users/emma/Desktop/UIA/nrl202/G7_NRL_DEV"
+      context: "/Users/halli/RiderProjects/G7_NRL_DEV"
       dockerfile: "NRL_PROJECT/Dockerfile"
       target: "base"
     command: []
@@ -15,7 +15,7 @@ services:
     image: "nrlproject:dev"
     ports: []
     volumes:
-    - "/Users/emma/Desktop/UIA/nrl202/G7_NRL_DEV/NRL_PROJECT:/app:rw"
-    - "/Users/emma/Desktop/UIA/nrl202/G7_NRL_DEV:/src:rw"
-    - "/Users/emma/.nuget/packages:/home/app/.nuget/packages"
+    - "/Users/halli/RiderProjects/G7_NRL_DEV/NRL_PROJECT:/app:rw"
+    - "/Users/halli/RiderProjects/G7_NRL_DEV:/src:rw"
+    - "/Users/halli/.nuget/packages:/home/app/.nuget/packages"
     working_dir: "/app"

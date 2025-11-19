@@ -90,21 +90,21 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
 // ------------------------------------------------------------
 var app = builder.Build();
 
-// Content security policy CSP
-app.Use(async (context, next) =>
-{
-    context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
-    context.Response.Headers.Add("X-Frame-Options", "DENY");
-    context.Response.Headers.Add("X-XSS-Protection", "1; mode=block");
-    context.Response.Headers.Add("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
-    context.Response.Headers.Add("Referrer-Policy", "no-referrer");
-    
-    // Klæsjer med _LoginLayout
-    //context.Response.Headers.Add("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';");
-    
-    // Add other headers as needed
-    await next();
-});
+// // Content security policy CSP
+// app.Use(async (context, next) =>
+// {
+//     context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
+//     context.Response.Headers.Add("X-Frame-Options", "DENY");
+//     context.Response.Headers.Add("X-XSS-Protection", "1; mode=block");
+//     context.Response.Headers.Add("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+//     context.Response.Headers.Add("Referrer-Policy", "no-referrer");
+//     
+//     // Klæsjer med _LoginLayout
+//     //context.Response.Headers.Add("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';");
+//     
+//     // Add other headers as needed
+//     await next();
+// });
 
 // ------------------------------------------------------------
 // SEEDING

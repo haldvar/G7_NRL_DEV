@@ -1,11 +1,58 @@
 @{
-    ViewData["Title"] = "Lukket ut";
-}
-@{
+    ViewData["Title"] = "Låst ut";
     Layout = "~/Views/Shared/_LoginLayout.cshtml";
 }
 
-<header>
-    <h1 class="text-danger">Lockout.</h1>
-    <p class="text-danger">Denne brukeren har blitt låst, prøv igjen senere.</p>
-</header>
+<div class="min-h-[100dvh] flex items-center justify-center px-4">
+    <div id="lockout-card" class="w-full max-w-md opacity-0 translate-y-2 transition-all duration-500 ease-out">
+        <div class="relative rounded-3xl bg-white/95 backdrop-blur shadow-2xl border border-gray-200 overflow-hidden">
+            <!-- Accent bar -->
+            <div class="h-2 bg-gradient-to-r from-green-600 via-blue-600 to-green-600"></div>
+
+            <div class="p-6 sm:p-7">
+                <div class="mb-5 text-center">
+                    <!-- Warning icon badge -->
+                    <div class="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl
+                                bg-rose-100 text-rose-700">
+                        !
+                    </div>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-green-700">@ViewData["Title"]</h1>
+                    <p class="text-gray-700 text-sm mt-2">
+                        Denne brukeren har blitt låst midlertidig. Prøv igjen senere.
+                    </p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                    <a asp-controller="Account" asp-action="Login"
+                       class="inline-flex justify-center items-center px-6 py-3 rounded-full font-semibold
+                              bg-blue-600 text-white shadow-md hover:bg-blue-700 transition">
+                        Gå til innlogging
+                    </a>
+                    <a asp-controller="Home" asp-action="Index"
+                       class="inline-flex justify-center items-center px-6 py-3 rounded-full font-semibold
+                              bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
+                        Hjem
+                    </a>
+                </div>
+
+                <!-- Optional hint -->
+                <p class="mt-4 text-xs text-gray-500 text-center">
+                    Hvis du mener dette er en feil, kontakt administrator.
+                </p>
+            </div>
+
+            <!-- Bottom accent -->
+            <div class="h-2 bg-gradient-to-r from-blue-600 to-green-600"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Fade-in the card on mount
+        document.addEventListener('DOMContentLoaded', () => {
+            const el = document.getElementById('lockout-card');
+            if (el) requestAnimationFrame(() => el.classList.remove('opacity-0', 'translate-y-2'));
+        });
+    </script>
+}
