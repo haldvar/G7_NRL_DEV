@@ -85,8 +85,7 @@ namespace NRL_PROJECT.Controllers
                     r.Obstacle.ObstacleType.Contains(search) ||
                     r.ObstacleReportStatus.ToString().Contains(search) ||
                     r.SubmittedByUser.Email.Contains(search) ||
-                    r.SubmittedByUser.OrgName.Contains(search) ||
-                    r.MapData.CoordinateSummary.Contains(search)
+                    r.SubmittedByUser.OrgName.Contains(search)
                 );
             }
 
@@ -163,7 +162,7 @@ namespace NRL_PROJECT.Controllers
         ObstacleImageURL = r.Obstacle.ObstacleImageURL,
 
         // Kart
-        CoordinateSummary = r.MapData.CoordinateSummary
+        CoordinateSummary = r.MapData != null ? r.MapData.CoordinateSummary : "",
     })
     .ToListAsync();
 
