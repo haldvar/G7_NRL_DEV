@@ -65,26 +65,29 @@ namespace NRL_PROJECT.Controllers
         // ---------------------------------------------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateStatus(int id, string status, string? comment)
+        public async Task<IActionResult> UpdateStatus(int id, string status, string? comment /* optional */)
         {
             var report = await _context.ObstacleReports
                 .FirstOrDefaultAsync(r => r.ObstacleReportID == id);
-
             if (report == null) return NotFound();
 
             var newBackendStatus = status switch
             {
                 "UnderBehandling" => BackendStatus.InProgress,
-                "Godkjent" => BackendStatus.Resolved,
-                "Avvist" => BackendStatus.Deleted,
-                _ => BackendStatus.Open
+                "Godkjent"        => BackendStatus.Resolved,
+                "Avvist"          => BackendStatus.Deleted,
+                _                 => BackendStatus.Open
             };
 
             report.ObstacleReportStatus = newBackendStatus;
-            report.ObstacleReportComment = (comment ?? "").Trim();
+
+            // Only update the comment if the form actually posted it
+            if (comment != null)
+                report.ObstacleReportComment = comment.Trim();
 
             await _context.SaveChangesAsync();
 
+            TempData["StatusChanged"] = "Status ble oppdatert.";
             return RedirectToAction(nameof(ReportDetails), new { id });
         }
 
@@ -244,7 +247,28 @@ namespace NRL_PROJECT.Controllers
             report.ReviewedByUserID = transferToUserId;
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = "Rapporten er overført.";
+            // TempData["Success"] = "Rapporten er overført.";
+            TempData["RegistrarAssigned"] = "Ny registerfører ble tildelt.";
+            return RedirectToAction(nameof(ReportDetails), new { id });
+        }
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveComment(int id, string? ObstacleReportComment)
+        {
+            var report = await _context.ObstacleReports.FindAsync(id);
+            if (report == null) return NotFound();
+
+            // Never store null if the column is NOT NULL
+            report.ObstacleReportComment = (ObstacleReportComment ?? string.Empty).Trim();
+
+            // Mark single prop modified (optional but clean)
+            _context.Attach(report);
+            _context.Entry(report).Property(r => r.ObstacleReportComment).IsModified = true;
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Kommentar lagret.";
             return RedirectToAction(nameof(ReportDetails), new { id });
         }
 
