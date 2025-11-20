@@ -61,16 +61,16 @@
             <div class="flex items-center space-x-8">
                 <a class="text-2xl font-bold tracking-wide text-blue-700 transition hover:text-blue-800"
                    asp-area="" asp-controller="Home" asp-action="Index">
-                    <img src="~/img/kartverket-logo.png" alt="Kartverket" class="h-14 w-auto opacity-90" />
+                    <img src="~/Img/Kartverket_logo.svg.png" alt="Kartverket" class="h-14 opacity-90" />
                 </a>
 
                 <!-- Desktop menu -->
                 <div class="hidden space-x-6 font-medium md:flex">
-                    <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="About">Om oss</a>
+                    @* <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="About">Om oss</a> *@
 
                     @if (User.IsInRole("Admin"))
                     {
-                        <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Hjem</a>
+                        @* <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Hjem</a> *@
                         <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ObstacleAndMapForm">Meld hinder</a>
                         <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Registrar" asp-action="RegistrarView">Rapporthåndtering</a>
                         <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Admin" asp-action="ManageUsers">Brukerhåndtering</a>
@@ -81,7 +81,7 @@
                     @if (User.IsInRole("Registrar"))
                     {
                         <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Hjem</a>
-                        <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ObstacleAndMapForm">Meld hinder</a>
+                        @* <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ObstacleAndMapForm">Meld hinder</a> *@
                         <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Registrar" asp-action="RegistrarView">Rapporthåndtering</a>
                         <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ReportListOverview">Hinderlogg</a>
                         <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="MapView">Situasjonskart</a>
