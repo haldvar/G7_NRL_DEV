@@ -68,88 +68,9 @@
                 Opprett ny bruker
             </button>
         </div>
-
-        <!-- Users table -->
-        <div class="overflow-hidden rounded-2xl border border-white/60 bg-white/90 backdrop-blur shadow-xl">
-            <div class="overflow-x-auto">
-                <table class="min-w-full text-left text-sm">
-                    <thead class="bg-gradient-to-r from-green-50 to-blue-50 text-slate-700">
-                        <tr class="border-b border-slate-200/70">
-                            <th class="px-4 py-3 font-semibold">Brukernavn</th>
-                            <th class="px-4 py-3 font-semibold">E-post</th>
-                            <th class="px-4 py-3 font-semibold">Navn</th>
-                            <th class="px-4 py-3 font-semibold">Organisasjon</th>
-                            <th class="px-4 py-3 font-semibold">Rolle</th>
-                            <th class="px-4 py-3 text-right font-semibold">Handling</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        @foreach (var user in Model)
-                        {
-                            var isLastAdmin = (user.CurrentRole == "Admin" && adminCount <= 1);
-
-                            <tr class="hover:bg-slate-50/60">
-                                <td class="px-4 py-3 font-medium text-slate-900">@user.UserName</td>
-                                <td class="px-4 py-3 text-slate-700">@user.Email</td>
-                                <td class="px-4 py-3 text-slate-700">@user.FirstName @user.LastName</td>
-                                <td class="px-4 py-3 text-slate-700">@user.OrgName</td>
-
-                                <td class="px-4 py-3">
-                                    <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
-                                        @user.CurrentRole
-                                    </span>
-                                </td>
-
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center justify-end gap-2">
-                                        @if (!isLastAdmin)
-                                        {
-                                            <form asp-action="AssignRole" method="post" class="inline-flex items-center gap-2"
-                                                  onsubmit="return confirmRoleChange(this)">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="UserId" value="@user.UserID" />
-                                                <input type="hidden" name="OrgName" value="@user.OrgName" />
-
-                                                <select name="role"
-                                                        class="rounded-md border border-slate-300 bg-white px-2 py-1 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                                                    <option value="No Role" selected="@(user.CurrentRole == "No Role")">Ingen</option>
-                                                    @foreach (var role in user.AvailableRoles)
-                                                    {
-                                                        <option value="@role" selected="@(role == user.CurrentRole)">@role</option>
-                                                    }
-                                                </select>
-
-                                                <button type="submit"
-                                                        class="rounded-full bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-blue-700">
-                                                    Lagre
-                                                </button>
-                                            </form>
-
-                                            <form asp-action="DeleteUser" method="post" class="inline"
-                                                  onsubmit="return confirmDelete('@user.UserName')">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="UserId" value="@user.UserID" />
-                                                <button type="submit"
-                                                        class="rounded-full bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-rose-700">
-                                                    Slett
-                                                </button>
-                                            </form>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-xs text-slate-500">Adminrolle kan ikke endres</span>
-                                        }
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
+        
         <!-- Create user panel -->
-        <div id="createUserForm" class="mt-6 hidden">
+        <div id="createUserForm" class="mb-6 hidden">
             <div class="rounded-2xl border border-white/60 bg-white/90 backdrop-blur shadow-xl">
                 <!-- Accent -->
                 @* <div class="h-1 w-full rounded-t-2xl bg-gradient-to-r from-green-600 via-blue-600 to-green-600"></div> *@
@@ -229,7 +150,86 @@
                 @* <div class="h-1 w-full bg-gradient-to-r from-blue-600 to-green-600 rounded-b-2xl"></div> *@
             </div>
         </div>
+        <!-- Users table -->
+        <div class="mx-auto max-w-7xl overflow-hidden rounded-2xl border border-white/60 bg-white/90 backdrop-blur shadow-xl">
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-left text-sm">
+                    <thead class="bg-gradient-to-r from-green-50 to-blue-50 text-slate-700">
+                        <tr class="border-b border-slate-200/70">
+                            <th class="px-4 py-3 font-semibold">Brukernavn</th>
+                            <th class="px-4 py-3 font-semibold">E-post</th>
+                            <th class="px-4 py-3 font-semibold">Navn</th>
+                            <th class="px-4 py-3 font-semibold">Organisasjon</th>
+                            <th class="px-4 py-3 font-semibold">Rolle</th>
+                            <th class="px-4 py-3 text-right font-semibold">Handling</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @foreach (var user in Model)
+                        {
+                            var isLastAdmin = (user.CurrentRole == "Admin" && adminCount <= 1);
+
+                            <tr class="hover:bg-slate-50/60">
+                                <td class="px-4 py-3 font-medium text-slate-900">@user.UserName</td>
+                                <td class="px-4 py-3 text-slate-700">@user.Email</td>
+                                <td class="px-4 py-3 text-slate-700">@user.FirstName @user.LastName</td>
+                                <td class="px-4 py-3 text-slate-700">@user.OrgName</td>
+
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
+                                        @user.CurrentRole
+                                    </span>
+                                </td>
+
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center justify-end gap-2">
+                                        @if (!isLastAdmin)
+                                        {
+                                            <form asp-action="AssignRole" method="post" class="inline-flex items-center gap-2"
+                                                  onsubmit="return confirmRoleChange(this)">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="UserId" value="@user.UserID" />
+                                                <input type="hidden" name="OrgName" value="@user.OrgName" />
+
+                                                <select name="role"
+                                                        class="rounded-md border border-slate-300 bg-white px-2 py-1 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                                    <option value="No Role" selected="@(user.CurrentRole == "No Role")">Ingen</option>
+                                                    @foreach (var role in user.AvailableRoles)
+                                                    {
+                                                        <option value="@role" selected="@(role == user.CurrentRole)">@role</option>
+                                                    }
+                                                </select>
+
+                                                <button type="submit"
+                                                        class="rounded-full bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-blue-700">
+                                                    Lagre
+                                                </button>
+                                            </form>
+
+                                            <form asp-action="DeleteUser" method="post" class="inline"
+                                                  onsubmit="return confirmDelete('@user.UserName')">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="UserId" value="@user.UserID" />
+                                                <button type="submit"
+                                                        class="rounded-full bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-rose-700">
+                                                    Slett
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-xs text-slate-500">Adminrolle kan ikke endres</span>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
+    
 </div>
 
 @section Scripts {
