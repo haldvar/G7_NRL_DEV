@@ -189,11 +189,23 @@
     // ------ MAP SETUP ------
     const map = L.map('mapDraw', {
         zoomControl: false, touchZoom: true, scrollWheelZoom: true, doubleClickZoom: true, boxZoom: false
-    }).setView([58.333, 8.233], 13);
+    }); // ⬅ no .setView here
 
     L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {
         layers: 'topo', format: 'image/png', transparent: false, attribution: '© Kartverket'
     }).addTo(map);
+
+    // Kick off geolocation immediately (or on DOM ready)
+    function autoLocate() {
+        map.locate({
+            setView: true,       // center on user
+            maxZoom: 18,         // cap zoom
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        });
+    }
+    autoLocate();
 
     // Keep the map tidy on resize
     const invalidateSoon = () => setTimeout(() => map.invalidateSize(), 220);
@@ -213,12 +225,14 @@
         map.locate({ setView: true, maxZoom: 18, enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
     }
     map.on("locationfound", e => {
+        map.setView(e.latlng, 18);
+        
         if (window.currentPosMarker) map.removeLayer(window.currentPosMarker);
         if (window.currentPosCircle) map.removeLayer(window.currentPosCircle);
 
         window.currentPosMarker = L.marker(e.latlng, { icon: helicopterIcon })
             .addTo(map)
-            .bindPopup(`<b>Helikopterposisjon</b><br/>Nøyaktighet: ±${Math.round(e.accuracy)} m`)
+            // .bindPopup(`<b>Helikopterposisjon</b><br/>Nøyaktighet: ±${Math.round(e.accuracy)} m`)
             .openPopup();
 
         setTimeout(() => window.currentPosMarker && window.currentPosMarker.closePopup(), 3000);
@@ -230,6 +244,10 @@
         if (typeof e.heading === "number" && !isNaN(e.heading)) {
             window.currentPosMarker.setRotationAngle(e.heading);
         }
+    });
+    // Fallback location if user blocks location
+    map.on("locationerror", () => {
+        map.setView([58.333, 8.233], 13);
     });
 
     // Draw controls

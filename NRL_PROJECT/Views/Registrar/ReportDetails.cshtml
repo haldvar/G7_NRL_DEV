@@ -33,6 +33,12 @@
             <p class="mt-1 text-slate-600">ID #@Model.ObstacleReportID</p>
         </div>
         <div class="h-2 w-40 rounded-full bg-gradient-to-r from-green-600 to-blue-600"></div>
+        <div class="mt-4">
+            <a asp-action="RegistrarView"
+               class="inline-flex shadow-sm items-center bg-white rounded-xl border border-slate-300 px-4 py-2 text-sm hover:bg-slate-50">
+                Tilbake
+            </a>
+        </div>
     </header>
 
     <!-- GRID: Status & Assign (map sits below assign) -->
@@ -289,12 +295,12 @@
                         </div>
                     </dl>
 
-                    <div class="mt-4">
+                    @*<div class="mt-4">
                         <a asp-action="RegistrarView"
                            class="inline-flex items-center rounded-xl border border-slate-300 px-4 py-2 text-sm hover:bg-slate-50">
                             Tilbake
                         </a>
-                    </div>
+                    </div>*@
                 </div>
             </div>
         </div>
