@@ -1,111 +1,181 @@
 @model List<NRL_PROJECT.Models.ViewModels.OrgExternalViewModel>
 
-<h1 class="text-3xl font-bold text-blue-700 mb-6 text-center">
-	📋 Rapporter fra din organisasjon
-</h1>
+@{
+    var qSearch = (string)Context.Request.Query["search"];
+    var qType   = (string)Context.Request.Query["type"];
+    var qStatus = (string)Context.Request.Query["status"];
+    var types   = (List<string>)ViewBag.Types ?? new();
+}
 
-<!-- FILTER SKJEMA -->
-<form method="get" class="mb-6 flex flex-wrap gap-4 items-end">
-	<!-- Søk -->
-	<div class="flex items-center gap-2">
-		<div>
-			<label class="block text-sm mb-1">Søk</label>
-			<input type="text"
-				   name="search"
-				   value="@Context.Request.Query["search"]"
-				   placeholder="Søk i type, innmelder, status, lokasjon..."
-				   class="border px-3 py-2 rounded w-72" />
-		</div>
+<div class="min-h-[100svh] w-full bg-gradient-to-b from-green-100 to-blue-100">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
 
-		<button type="submit"
-				class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">
-			Søk
-		</button>
-	</div>
+        <!-- HERO -->
+        <header class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-green-700">
+                    Rapporter fra din organisasjon
+                </h1>
+                <p class="mt-1 text-slate-600">
+                    Filtrer og søk i innmeldte hinder fra din organisasjon.
+                </p>
+            </div>
+            <div class="h-2 w-40 rounded-full bg-gradient-to-r from-green-600 to-blue-600"></div>
+        </header>
 
-	<!-- Type -->
-	<div>
-		<label class="block text-sm mb-1">Obstacle Type</label>
-		<select name="type" class="border px-3 py-2 rounded w-48">
-			<option value="">Alle typer</option>
-			@foreach (var t in (List<string>)ViewBag.Types)
-			{
-				<option value="@t" selected="@(Context.Request.Query["type"] == t)">
-					@t
-				</option>
-			}
-		</select>
-	</div>
+        <!-- FILTER BAR -->
+        @*<form method="get"
+              class="rounded-2xl border border-white/60 bg-white/80 backdrop-blur p-4 shadow-md">
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-12 md:items-end">
 
-	<!-- Status -->
-	<div>
-		<label class="block text-sm mb-1">Status</label>
-		<select name="status" class="border px-3 py-2 rounded w-40">
-			<option value="">Alle</option>
-			@foreach (var statusValue in Enum.GetNames(typeof(NRL_PROJECT.Models.ObstacleReportData.EnumTypes)))
-			{
-				var isSelected = Context.Request.Query["status"] == statusValue;
-				<option value="@statusValue" selected="@isSelected">
-					@statusValue
-				</option>
-			}
-		</select>
-	</div>
+                <!-- Search -->
+                <div class="md:col-span-5">
+                    <label class="block text-xs font-semibold text-slate-600">Søk</label>
+                    <div class="mt-1 relative">
+                        <input type="text"
+                               name="search"
+                               value="@qSearch"
+                               placeholder="Søk i type, innmelder, status, lokasjon…"
+                               class="w-full rounded-xl border border-slate-300/80 bg-white px-4 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400"
+                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                             d="M21 21l-5.2-5.2M10 18a8 8 0 110-16 8 8 0 010 16z"/></svg>
+                    </div>
+                </div>
 
-	<div>
-		<button type="submit"
-				class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded">
-			Filtrer
-		</button>
-	</div>
-</form>
+                <!-- Type -->
+                <div class="md:col-span-3">
+                    <label class="block text-xs font-semibold text-slate-600">Type</label>
+                    <select name="type"
+                            class="mt-1 w-full rounded-xl border border-slate-300/80 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Alle typer</option>
+                        @foreach (var t in types)
+                        {
+                            <option value="@t" selected="@(qType == t)">@t</option>
+                        }
+                    </select>
+                </div>
 
-<!-- RAPPORTTABELL -->
-<table class="table-auto w-full border border-gray-300 rounded-lg shadow-md">
-	<thead class="bg-gray-100 text-left">
-		<tr>
-			<th class="px-4 py-2">ObstacleReportID</th>
-			<th class="px-4 py-2">Innmelder</th>
-			<th class="px-4 py-2">ObstacleID</th>
-			<th class="px-4 py-2">ObstacleType</th>
-			<th class="px-4 py-2">Rapportdato</th>
-			<th class="px-4 py-2">Rapportstatus</th>
-			<th class="px-4 py-2">OrgName</th>
-			<th class="px-4 py-2">Koordinater</th>
-			<th class="px-4 py-2">Bilde</th>
-		</tr>
-	</thead>
+                <!-- Status -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-semibold text-slate-600">Status</label>
+                    <select name="status"
+                            class="mt-1 w-full rounded-xl border border-slate-300/80 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Alle</option>
+                        @foreach (var statusValue in Enum.GetNames(typeof(NRL_PROJECT.Models.ObstacleReportData.EnumTypes)))
+                        {
+                            var isSelected = qStatus == statusValue;
+                            <option value="@statusValue" selected="@isSelected">@statusValue</option>
+                        }
+                    </select>
+                </div>
 
-	<tbody>
-		@foreach (var report in Model)
-		{
-			<tr class="border-t hover:bg-gray-50">
+                <!-- Actions -->
+                <div class="md:col-span-2 flex gap-2">
+                    <button type="submit"
+                            class="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">
+                        Søk / Filtrer
+                    </button>
+                    <a href="@(Context.Request.Path)"
+                       class="mt-6 inline-flex w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                        Nullstill
+                    </a>
+                </div>
+            </div>
+        </form>*@
 
-				<td class="px-4 py-2">@report.ObstacleReportID</td>
-				<td class="px-4 py-2">@report.UserName</td>
-				<td class="px-4 py-2">@report.ObstacleID</td>
-				<td class="px-4 py-2">@report.ObstacleType</td>
-				<td class="px-4 py-2">@report.ObstacleReportDate.ToString("yyyy-MM-dd HH:mm")</td>
-				<td class="px-4 py-2">@report.ObstacleReportStatus</td>
-				<td class="px-4 py-2">@report.OrgName</td>
-				<td class="px-4 py-2">@report.CoordinateSummary</td>
+        <!-- TABLE WRAPPER -->
+        <div class="mt-6 overflow-hidden rounded-2xl border border-white/60 bg-white/80 backdrop-blur shadow">
+            <!-- Sticky header on wide screens -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-left text-sm">
+                    <thead class="bg-white/70 backdrop-blur sticky top-0 z-10">
+                        <tr class="text-slate-700">
+                            <th class="px-4 py-3 font-semibold">RapportID</th>
+                            <th class="px-4 py-3 font-semibold">Innmelder</th>
+                            <th class="px-4 py-3 font-semibold">ObstacleID</th>
+                            <th class="px-4 py-3 font-semibold">Type</th>
+                            <th class="px-4 py-3 font-semibold">Dato</th>
+                            <th class="px-4 py-3 font-semibold">Status</th>
+                            <th class="px-4 py-3 font-semibold">Org</th>
+                            <th class="px-4 py-3 font-semibold">Koordinater</th>
+                            <th class="px-4 py-3 font-semibold">Bilde</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @if (Model == null || Model.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="9" class="px-4 py-10 text-center text-slate-500">
+                                    Ingen rapporter funnet.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var report in Model)
+                            {
+                                <tr class="hover:bg-white/60">
+                                    <td class="px-4 py-3 font-medium text-slate-800">@report.ObstacleReportID</td>
+                                    <td class="px-4 py-3">@report.UserName</td>
+                                    <td class="px-4 py-3">@report.ObstacleID</td>
+                                    <td class="px-4 py-3">@report.ObstacleType</td>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        @report.ObstacleReportDate.ToString("dd.MM.yyyy HH:mm")
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold
+                                                     @GetStatusChipClasses(report.ObstacleReportStatus)">
+                                            @report.ObstacleReportStatus
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3">@report.OrgName</td>
+                                    <td class="px-4 py-3">@report.CoordinateSummary</td>
+                                    <td class="px-4 py-3">
+                                        @if (!string.IsNullOrWhiteSpace(report.ObstacleImageURL))
+                                        {
+                                            <a href="@report.ObstacleImageURL" target="_blank" class="inline-block">
+                                                <img src="@report.ObstacleImageURL"
+                                                     alt="Bilde"
+                                                     class="h-14 w-14 object-cover rounded-lg border border-slate-200 shadow-sm" />
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-slate-400 italic">Ingen</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
 
-				<!-- ⭐ BILDE (thumbnail) -->
-				<td class="px-4 py-2">
-					@if (!string.IsNullOrWhiteSpace(report.ObstacleImageURL))
-					{
-						<a href="@report.ObstacleImageURL" target="_blank">
-							<img src="@report.ObstacleImageURL"
-								 alt="Bilde"
-								 class="h-16 w-16 object-cover rounded border shadow" />
-						</a>
-					}
-					else
-					{
-						<span class="text-gray-400 italic">Ingen</span>
-					}
-				</td>
-			</tr>
-		}
-	</tbody>
-</table>
+            <!-- Footer: count -->
+            <div class="flex items-center justify-between border-t border-white/60 bg-white/60 px-4 py-3 text-xs text-slate-500">
+                <span>Totalt: <strong class="text-slate-700">@Model?.Count</strong> rapport(er)</span>
+                <span>NRL</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions{
+    // Small helper to color the status chip nicely
+    private string GetStatusChipClasses(NRL_PROJECT.Models.ObstacleReportData.EnumTypes status)
+    {
+        // Map to colors (adjust names if your enum differs)
+        return status switch
+        {
+            NRL_PROJECT.Models.ObstacleReportData.EnumTypes.New           => "border-blue-200 bg-blue-50 text-blue-700",
+            NRL_PROJECT.Models.ObstacleReportData.EnumTypes.Open          => "border-amber-200 bg-amber-50 text-amber-700",
+            NRL_PROJECT.Models.ObstacleReportData.EnumTypes.InProgress    => "border-amber-200 bg-amber-50 text-amber-700",
+            NRL_PROJECT.Models.ObstacleReportData.EnumTypes.Resolved      => "border-emerald-200 bg-emerald-50 text-emerald-700",
+            NRL_PROJECT.Models.ObstacleReportData.EnumTypes.Closed        => "border-emerald-200 bg-emerald-50 text-emerald-700",
+            NRL_PROJECT.Models.ObstacleReportData.EnumTypes.Deleted       => "border-rose-200 bg-rose-50 text-rose-700",
+            _                                                             => "border-slate-200 bg-slate-50 text-slate-700",
+        };
+    }
+}
