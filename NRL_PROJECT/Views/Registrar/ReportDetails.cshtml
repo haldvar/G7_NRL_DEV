@@ -24,15 +24,15 @@
     var latlngsJson = JsonSerializer.Serialize(latlngList);
 }
 
-<div class="max-w-6xl px-10 py-10 space-y-6">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
 
     <!-- Heading -->
-    <header class="flex items-end justify-between">
+    <header class="flex items-end justify-between mb-3">
         <div>
             <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-green-700">Rapportdetaljer</h1>
             <p class="mt-1 text-slate-600">ID #@Model.ObstacleReportID</p>
         </div>
-        <div class="h-2 w-40 rounded-full bg-gradient-to-r from-green-600 to-blue-600"></div>
+        @* <div class="h-2 w-40 rounded-full bg-gradient-to-r from-green-600 to-blue-600"></div> *@
         <div class="mt-4">
             <a asp-action="RegistrarView"
                class="inline-flex shadow-sm items-center bg-white rounded-xl border border-slate-300 px-4 py-2 text-sm hover:bg-slate-50">
@@ -53,7 +53,7 @@
                     <h2 class="text-slate-800 font-semibold">Endre status</h2>
                 </div>
                 <div class="p-5">
-                    <form asp-controller="Registrar" asp-action="UpdateStatus" method="post" class="space-y-4">
+                    <form asp-controller="Registrar" asp-action="UpdateStatus" method="post" class="">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="id" value="@Model.ObstacleReportID" />
 
@@ -144,7 +144,7 @@
                 <div class="p-5">
                     @if (hasCoords)
                     {
-                        <div id="map" class="w-full rounded-xl border border-slate-200" style="height: 420px;"></div>
+                        <div id="map" class="w-full rounded-xl border border-slate-200 z-10" style="height: 420px;"></div>
                     }
                     else
                     {
