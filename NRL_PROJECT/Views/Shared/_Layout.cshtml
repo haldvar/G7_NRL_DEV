@@ -59,10 +59,7 @@
         <nav class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
             <!-- Left side: Logo + navigation -->
             <div class="flex items-center space-x-8">
-                <a class="text-2xl font-bold tracking-wide text-blue-700 transition hover:text-blue-800"
-                   asp-area="" asp-controller="Home" asp-action="Index">
-                    <img src="~/Img/Kartverket_logo.svg.png" alt="Kartverket" class="h-14 opacity-90" />
-                </a>
+                <img src="~/Img/Kartverket_logo.svg.png" alt="Kartverket" class="h-14 opacity-90" />
 
                 <!-- Desktop menu -->
                 <div class="hidden space-x-6 font-medium md:flex">
@@ -144,7 +141,7 @@
                 }
 
                 <div class="border-t pt-4">
-                    <span class="mb-2 block text-gray-700">👤 Logget inn som <strong>@User.Identity.Name</strong></span>
+                    <span class="mb-2 block text-gray-700">Logget inn som <strong>@User.Identity.Name</strong></span>
                     <form asp-controller="Account" asp-action="Logout" method="post">
                         @Html.AntiForgeryToken()
                         <button type="submit" class="w-full rounded-full bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700">Logg ut</button>

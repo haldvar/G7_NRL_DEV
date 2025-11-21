@@ -6,6 +6,9 @@
 
     var successMsg = TempData["Success"] as string;
     var errorMsg   = TempData["Error"]   as string;
+    // Expect: ViewBag.Organizations as List<SelectListItem> (Value=OrgID, Text=OrgName)
+    var orgItems = ViewBag.Organizations as List<SelectListItem> ?? new();
+
 }
 
 <div class="min-h-[100svh] w-full bg-gradient-to-b from-green-100 to-blue-100">
@@ -106,8 +109,18 @@
 
                             <div>
                                 <label class="block text-sm font-medium text-slate-700">Organisasjon</label>
-                                <input type="text" name="OrgName" required
-                                       class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                <select name="OrgId" required
+                                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">— Velg organisasjon —</option>
+                                    @foreach (var o in orgItems)
+                                    {
+                                        <option value="@o.Value">@o.Text</option>
+                                    }
+                                </select>
+                                @if (!orgItems.Any())
+                                {
+                                    <p class="mt-2 text-xs text-amber-700">Ingen organisasjoner funnet. Opprett en organisasjon først.</p>
+                                }
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700">Rolle</label>

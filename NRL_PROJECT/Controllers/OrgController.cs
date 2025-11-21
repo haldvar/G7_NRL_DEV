@@ -131,7 +131,15 @@ namespace NRL_PROJECT.Controllers
                     ? query.OrderBy(r => r.ObstacleReportDate)
                     : query.OrderByDescending(r => r.ObstacleReportDate)
             };
+            
+            // using Microsoft.AspNetCore.Mvc.Rendering;
+            var orgs = await _context.Organisations
+                .OrderBy(o => o.OrgName)
+                .Select(o => new SelectListItem { Value = o.OrgID.ToString(), Text = o.OrgName })
+                .ToListAsync();
 
+            ViewBag.Organizations = orgs;
+            
             // Lag liste over alle unike obstacle types til dropdown i view
             ViewBag.Types = await _context.Obstacles
                 .Select(o => o.ObstacleType)
