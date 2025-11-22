@@ -160,7 +160,7 @@ namespace NRL_PROJECT.Controllers
                 ObstacleID = model.ObstacleID,
                 SubmittedByUserId = currentUserId, // 🔁 Bruker SubmittedByUserId i stedet for UserId
                 ObstacleReportComment = "Her skal Registerfører kunne skrive inn kommentar.",
-                ObstacleReportDate = DateTime.UtcNow,
+                ObstacleReportDate = DateTime.UtcNow.AddHours(1),
                 ObstacleReportStatus = ObstacleReportData.EnumTypes.New,
                 MapDataID = model.MapData?.MapDataID,
                 CoordinateSummary = model.MapData?.CoordinateSummary ?? string.Empty
@@ -218,7 +218,7 @@ namespace NRL_PROJECT.Controllers
             {
                 ObstacleID = obstacle.ObstacleID,
                 ObstacleReportComment = "New report submitted.",
-                ObstacleReportDate = DateTime.UtcNow,
+                ObstacleReportDate = DateTime.UtcNow.AddHours(1),
                 ObstacleReportStatus = ObstacleReportData.EnumTypes.New,
                 MapDataID = mapData.MapDataID,
                 

@@ -2,8 +2,17 @@
 @using NRL_PROJECT.Models
 @inject UserManager<User> UserManager
 
+@{
+    // Optional: use a transparent PNG/SVG to float over the gradient (like the login layout).
+    // Example in a controller: ViewBag.SiteBgUrl = Url.Content("~/Img/NRL_BG3.png");
+    var siteBgUrl = ViewBag.SiteBgUrl as string;
+    var hasBg = !string.IsNullOrWhiteSpace(siteBgUrl);
+    var hideChrome = (ViewBag.HideChrome as bool?) ?? false;
+
+}
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -21,30 +30,45 @@
     <link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
     <script src="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
     @RenderSection("Styles", required: false)
+
+    <style>
+        html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    </style>
 </head>
 
-<body class="flex min-h-screen flex-col bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800">
+<body class="relative m-0 flex min-h-[100dvh] flex-col text-gray-800">
+    <!-- NRL background layer (behind everything) -->
+    <div class="fixed inset-0 -z-10">
+        <!-- Always-on gradient base -->
+        <div class="absolute inset-0 bg-gradient-to-b from-green-100 to-blue-100"></div>
 
-    <!-- HEADER -->
-    <header class="sticky top-0 z-50 bg-white shadow-md">
+        @* Optional transparent overlay image (floats above gradient) *@
+        @if (hasBg)
+        {
+            <img src="@siteBgUrl" alt="" aria-hidden="true"
+                 class="absolute inset-0 h-full w-full object-cover select-none pointer-events-none" />
+        }
+        @* Optional subtle tint for readability (uncomment if you want a touch more contrast) *@
+        @* <div class="absolute inset-0 bg-black/5"></div> *@
+    </div>
+
+    @if (!hideChrome)
+    {
+        <!-- HEADER -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200 shadow-sm">
         <nav class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
             <!-- Left side: Logo + navigation -->
             <div class="flex items-center space-x-8">
-                <!-- Logo -->
-                <a class="text-2xl font-bold tracking-wide text-blue-700 transition hover:text-blue-800"
-                   asp-area="" asp-controller="Home" asp-action="Index">
-                    <img src="~/img/kartverket-logo.png" alt="Kartverket" class="h-14 w-auto opacity-90" />
-                </a>
+                <img src="~/Img/Kartverket_logo.svg.png" alt="Kartverket" class="h-14 opacity-90" />
 
                 <!-- Desktop menu -->
                 <div class="hidden space-x-6 font-medium md:flex">
-                   
-                   
-                    <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="About">Om oss</a>
-                    
+                    @* <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="About">Om oss</a> *@
+
                     @if (User.IsInRole("Admin"))
                     {
-                        <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Hjem</a>
+                        @* <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Hjem</a> *@
+                        <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Index</a>
                         <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ObstacleAndMapForm">Meld hinder</a>
                         <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Registrar" asp-action="RegistrarView">Rapporthåndtering</a>
                         <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Admin" asp-action="ManageUsers">Brukerhåndtering</a>
@@ -54,8 +78,8 @@
 
                     @if (User.IsInRole("Registrar"))
                     {
-                        <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Hjem</a>
-                        <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ObstacleAndMapForm">Meld hinder</a>
+                        @* <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Hjem</a> *@
+                        @* <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ObstacleAndMapForm">Meld hinder</a> *@
                         <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Registrar" asp-action="RegistrarView">Rapporthåndtering</a>
                         <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ReportListOverview">Hinderlogg</a>
                         <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="MapView">Situasjonskart</a>
@@ -73,33 +97,31 @@
 
             <!-- Right side: Statusbar -->
             <div class="hidden items-center space-x-6 text-sm font-medium md:flex">
-                <span class="text-gray-600">👤 Logget inn som <strong>@User.Identity.Name</strong></span>
-                <span class="text-gray-600">
-                    Antall rapporter:
-                    <span class="ml-2 text-2xl font-extrabold text-gray-600">@ViewBag.ReportCount</span>
-                </span>
+                <span class="text-gray-700">Logget inn som <strong>@User.Identity.Name</strong></span>
+                @* <span class="text-gray-700"> *@
+                @*     Antall rapporter: *@
+                @*     <span class="ml-2 text-2xl font-extrabold text-gray-700">@ViewBag.ReportCount</span> *@
+                @* </span> *@
                 <form asp-controller="Account" asp-action="Logout" method="post" class="inline">
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="rounded-lg bg-red-500 px-4 py-2 text-white transition hover:bg-red-600">Logg ut</button>
+                    <button type="submit" class="rounded-full bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700">Logg ut</button>
                 </form>
             </div>
 
             <!-- Mobile menu button -->
-            <button id="menu-btn" class="rounded-lg p-2 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none md:hidden">
+            <button id="menu-btn" class="rounded-lg p-2 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 md:hidden">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M4 6h16M4 12h16M4 18h16" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
             </button>
         </nav>
 
         <!-- Mobile dropdown -->
-        <div id="mobile-menu" class="hidden border-t bg-white shadow-sm md:hidden">
+        <div id="mobile-menu" class="hidden border-t bg-white/95 backdrop-blur shadow-sm md:hidden">
             <div class="space-y-2 px-6 py-4">
                 <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Hjem</a>
                 <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ObstacleAndMapForm">Meld hinder</a>
                 <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="About">Om oss</a>
-
 
                 @if (User.IsInRole("Admin"))
                 {
@@ -107,47 +129,47 @@
                     <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ReportListOverview">Hinderlogg</a>
                     <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="MapView">Situasjonskart</a>
                 }
-
                 @if (User.IsInRole("Registrar"))
                 {
                     <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Registrar" asp-action="RegistrarView">Rapporthåndtering</a>
                     <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ReportListOverview">Hinderlogg</a>
                     <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="MapView">Situasjonskart</a>
                 }
-
                 @if (User.IsInRole("Pilot"))
                 {
                     <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ReportListOverview">Hinderlogg</a>
                     <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="MapView">Situasjonskart</a>
                 }
 
-                <!-- Statusbar in mobile menu -->
                 <div class="border-t pt-4">
-                    <span class="mb-2 block text-gray-600">👤 Logget inn som <strong>@User.Identity.Name</strong></span>
+                    <span class="mb-2 block text-gray-700">Logget inn som <strong>@User.Identity.Name</strong></span>
                     <form asp-controller="Account" asp-action="Logout" method="post">
                         @Html.AntiForgeryToken()
-                        <button type="submit" class="w-full rounded-lg bg-red-500 px-4 py-2 text-white transition hover:bg-red-600">Log out</button>
+                        <button type="submit" class="w-full rounded-full bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700">Logg ut</button>
                     </form>
                 </div>
             </div>
         </div>
-       
-
-      </header>
-   
+    </header>
+    }
+    
+    
 
     <!-- MAIN CONTENT -->
-    <main role="main" class="mx-auto max-w-5xl flex-grow px-6 py-10">
+    <main role="main" class="flex-1 w-full">
         @RenderBody()
     </main>
-
-    <!-- FOOTER -->
-    <footer class="mt-8 border-t bg-white">
-        <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 text-sm text-gray-500">
-            <span>&copy; 2025 - NRL_PROJECT</span>
-            <a class="transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
+    
+    @if (!hideChrome)
+    {
+        <!-- FOOTER -->
+        <footer class="mt-8 border-t bg-white/90 backdrop-blur">
+            <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 text-sm text-gray-600">
+                <span>&copy; 2025 - NRL_PROJECT</span>
+                <a class="transition hover:text-blue-700" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            </div>
+        </footer>
+    }
 
     @await RenderSectionAsync("Scripts", required: false)
 
@@ -155,10 +177,9 @@
     <script>
         const menuBtn = document.getElementById("menu-btn");
         const mobileMenu = document.getElementById("mobile-menu");
-
-        menuBtn.addEventListener("click", () => {
-            mobileMenu.classList.toggle("hidden");
-        });
+        if (menuBtn && mobileMenu) {
+            menuBtn.addEventListener("click", () => mobileMenu.classList.toggle("hidden"));
+        }
     </script>
 </body>
 </html>

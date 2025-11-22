@@ -4,87 +4,89 @@
 @{
     ViewData["Title"] = "Register Map Location";
     Layout = "_Layout";
+    ViewBag.HideChrome = true;  // tells layout to hide header/footer
 
-    // Fallback til første koordinat
+
     var firstCoord = Model.Coordinates?.OrderBy(c => c.OrderIndex).FirstOrDefault();
     double startLat = firstCoord?.Latitude ?? 60.3913;
     double startLng = firstCoord?.Longitude ?? 5.3221;
     int zoom = Model.MapZoomLevel != 0 ? Model.MapZoomLevel : 12;
 
-    // Lag en liste med rapporterte hindere i ren, serialiserbar form
     var reportedItems = (Model.ObstacleReports ?? Enumerable.Empty<NRL_PROJECT.Models.ObstacleReportData>())
         .Where(r => r.MapData != null && !string.IsNullOrWhiteSpace(r.MapData.GeoJsonCoordinates))
         .Select(r => new
         {
             id = r.ObstacleReportID,
-            geometry = r.MapData.GeoJsonCoordinates,   // GeoJSON-streng
+            geometry = r.MapData.GeoJsonCoordinates,
             geometryType = r.MapData.GeometryType,
             comment = r.ObstacleReportComment,
-            user = r.SubmittedByUser != null
-            ? r.SubmittedByUser.UserName
-            : "(ukjent)",
+            user = r.SubmittedByUser != null ? r.SubmittedByUser.UserName : "(ukjent)",
             date = r.ObstacleReportDate
         })
         .ToList();
 }
 
-<!-- Kartet + form -->
-<partial name="_MapDrawPartial" model="Model" />
+<!-- Fullscreen map shell with small padding (NRL style) -->
+<div class="min-h-[100svh] w-full bg-gradient-to-b from-green-100 to-blue-100 p-4 md:p-6">
+    <div class="relative mx-auto max-w-7xl rounded-3xl border border-white/60 bg-white/40 backdrop-blur shadow-xl overflow-hidden
+                h-[calc(100svh-2rem)] md:h-[calc(100svh-3rem)]">
 
-<h1 class="text-5xl md:text-6xl font-extrabold text-purple-700 text-center mb-4 tracking-wide">
-    🗺️ Nylig innrapporterte luftfartshindre
-</h1>
+        <!-- MAP (now inherits rounding) -->
+        <div id="mapDraw" class="absolute inset-0 z-0" style="border-radius: inherit;"></div>
 
-<p class="text-gray-600 text-center text-lg md:text-xl mb-12">
-    Her vises luftfartshindre som er innmeldt den siste måneden.
-</p>
+        <!-- Top-left: Home button -->
+        <div class="absolute top-6 left-4 z-20">
+            <a asp-area="" asp-controller="Home" asp-action="Index"
+               class="h-16 w-16 md:h-20 md:w-20 rounded-full bg-white/85 backdrop-blur border border-white/70 shadow-lg
+                      hover:shadow-xl active:scale-95 transition inline-flex items-center justify-center"
+               title="Til forsiden" aria-label="Til forsiden">
+                <img src="/icons/home.svg" alt="Hjem" class="h-9 w-9 opacity-90 pointer-events-none" />
+            </a>
+        </div>
 
-<form method="post" asp-action="Submit" asp-controller="Map"
-      class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-6 z-10">
+        <!-- Top-center: subtle heading pill -->
+        <div class="pointer-events-none absolute left-1/2 top-6 z-20 -translate-x-1/2">
+            <div class="inline-flex items-center gap-2 rounded-full bg-white/85 backdrop-blur px-5 py-3
+                        border border-white/70 text-green-700 font-semibold shadow">
+                Nylig innrapporterte luftfartshindre
+            </div>
+        </div>
 
+        <!-- Bottom-center CTA buttons (outside map overlay for better hit targets) -->
+        <div class="absolute bottom-6 left-1/2 z-20 -translate-x-1/2">
+            <div class="flex flex-col md:flex-row items-center gap-3 md:gap-4">
+                <a asp-action="ReportListOverview" asp-controller="Map"
+                   class="inline-flex items-center justify-center rounded-full bg-gray-700 px-6 md:px-8 py-3 md:py-4
+                          text-white text-base md:text-lg font-semibold shadow hover:bg-gray-800 transition">
+                    Hinderlogg
+                </a>
+                <a asp-action="ObstacleAndMapForm" asp-controller="Map"
+                   class="inline-flex items-center justify-center rounded-full bg-blue-600 px-6 md:px-8 py-3 md:py-4
+                          text-white text-base md:text-lg font-semibold shadow hover:bg-blue-700 transition">
+                    Meld hinder
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form method="post" asp-action="Submit" asp-controller="Map" class="hidden">
     <input type="hidden" id="geoInput" name="GeoJsonCoordinates" />
-
-    <a asp-action="ReportListOverview" asp-controller="Map"
-       class="bg-green-600 text-white px-12 py-5 rounded-2xl font-semibold text-2xl md:text-3xl shadow-xl hover:bg-green-700 hover:shadow-2xl transition">
-        📋 Rapportoversikt
-    </a>
-
-    <a asp-action="ObstacleAndMapForm" asp-controller="Map"
-       class="bg-green-600 text-white px-12 py-5 rounded-2xl font-semibold text-2xl md:text-3xl shadow-xl hover:bg-green-700 hover:shadow-2xl transition">
-        ✅ Registrer nytt hinder
-    </a>
 </form>
 
 @section Styles {
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
-
     <style>
-        .report-tooltip {
-            font-weight: 700;
-            font-size: 0.95rem;
-            color: #111;
-        }
-
-        .label-control {
-            font-size: 0.9rem;
-            padding: 6px;
-        }
-
-            .label-control input {
-                margin-right: 6px;
-                vertical-align: middle;
-            }
-
-        .report-label-icon {
-            pointer-events: auto;
-        }
-
+        .report-tooltip { font-weight: 700; font-size: 0.95rem; color: #111; }
+        .report-label-icon { pointer-events: auto; }
         .report-label-div {
             background: rgba(255,255,255,0.9);
             padding: 2px 6px;
-            border-radius: 4px;
+            border-radius: 6px;
             border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            font-weight: 600;
         }
     </style>
 }
@@ -94,11 +96,13 @@
     <script src="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
 
     <script>
+        // ---------- Init map (no left-side controls) ----------
+        const map = L.map('mapDraw', {
+            zoomControl: true,   // keep zoom, but move it away from the left
+        }).setView([58.333, 8.233], 13);
 
-        //--------------------------
-        // Init kartet
-        //--------------------------
-        const map = L.map('mapDraw').setView([@startLat, @startLng], @zoom);
+        // Move zoom controls to bottom-right so nothing is on the left
+        map.zoomControl.setPosition('bottomright');
 
         L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {
             layers: 'topo',
@@ -107,119 +111,74 @@
             attribution: '© Kartverket'
         }).addTo(map);
 
-        //--------------------------
-        // Tegneverktøy
-        //--------------------------
-        map.pm.addControls({
-            position: 'topleft',
-            drawMarker: true,
-            drawPolyline: true,
-            drawPolygon: false,
-            drawCircle: false,
-            drawRectangle: false,
-            editMode: true,
-            removalMode: true
-        });
+        // ---------- Remove Geoman toolbar / draw buttons ----------
+        // Don't add any Geoman controls at all:
+        // map.pm.addControls(...) is intentionally omitted.
+        if (map.pm?.Toolbar) map.pm.Toolbar.removeControls();
 
-        map.on('pm:create', e => {
-            const geojson = e.layer.toGeoJSON();
-            document.getElementById('geoInput').value = JSON.stringify(geojson.geometry);
-        });
-
-        map.on('pm:remove', () => {
-            document.getElementById('geoInput').value = '';
-        });
-
-        //--------------------------
-        // Rapporter fra DB
-        //--------------------------
-
-        // JSON TRYGT serialisert via IJsonHelper
+        // ---------- Load reported items ----------
         const reportedItems = @Json.Serialize(reportedItems);
-
         const reportsGroup = L.featureGroup().addTo(map);
-        const labelMarkers = [];
-        let showLabelClick = true;
-
-        // Kontroll for toggle av click på labels
-        const labelControl = L.control({ position: 'topright' });
-        labelControl.onAdd = function () {
-            const container = L.DomUtil.create('div', 'label-control bg-white rounded shadow p-2');
-            container.innerHTML = '<label><input id="labelToggle" type="checkbox" checked /> Show report on label click</label>';
-            L.DomEvent.disableClickPropagation(container);
-            return container;
-        };
-        labelControl.addTo(map);
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const toggle = document.getElementById('labelToggle');
-            if (toggle) {
-                toggle.addEventListener('change', e => showLabelClick = e.target.checked);
-            }
-        });
 
         for (const rep of reportedItems) {
             try {
                 const geom = JSON.parse(rep.geometry);
-
                 if (!geom || !geom.type) continue;
 
-                const popupHtml =
-                    `<strong>Report #${rep.id}</strong><br/>${rep.comment || ""}<br/>${rep.user || ""}`;
-                const tooltipHtml = `<span class="report-tooltip">Report #${rep.id}</span>`;
+                const popupHtml = `
+                    <div class="space-y-1">
+                        <div class="font-semibold">Report #${rep.id}</div>
+                        ${rep.comment ? `<div>${rep.comment}</div>` : ``}
+                        <div class="text-sm text-slate-600">${rep.user || ""}</div>
+                    </div>`;
+
+                const tooltipHtml = `<span class="report-tooltip">#${rep.id}</span>`;
 
                 if (geom.type === "Point") {
                     const [lng, lat] = geom.coordinates;
-                    const marker = L.marker([lat, lng], { title: `Report #${rep.id}` });
-
-                    marker.bindPopup(popupHtml);
-                    marker.bindTooltip(tooltipHtml, { sticky: true, direction: 'top' });
-                    marker.addTo(reportsGroup);
-                }
-                else if (geom.type === "LineString") {
-                    const latlngs = geom.coordinates.map(p => [p[1], p[0]]);
-                    const poly = L.polyline(latlngs, { color: 'red', weight: 3, opacity: 0.8 });
-
+                    const m = L.marker([lat, lng], { title: `Report #${rep.id}` });
+                    m.bindPopup(popupHtml);
+                    m.bindTooltip(tooltipHtml, { sticky: true, direction: 'top' });
+                    m.addTo(reportsGroup);
+                } else if (geom.type === "LineString") {
+                    const latlngs = geom.coordinates.map(([lng, lat]) => [lat, lng]);
+                    const poly = L.polyline(latlngs, { color: 'red', weight: 3, opacity: 0.85 }).addTo(reportsGroup);
                     poly.bindPopup(popupHtml);
                     poly.bindTooltip(tooltipHtml, { sticky: true });
 
-                    const midIndex = Math.floor(latlngs.length / 2);
-                    const mid = latlngs[midIndex];
-
+                    // Midpoint label
+                    const mid = latlngs[Math.floor(latlngs.length / 2)];
                     if (mid) {
                         const label = L.marker(mid, {
                             interactive: true,
                             icon: L.divIcon({
-                                className: 'report-label-div report-label-icon',
+                                className: 'report-label-icon',
                                 html: `<div class="report-label-div">#${rep.id}</div>`,
-                                iconSize: [40, 18]
+                                iconSize: [42, 20]
                             })
-                        });
-
+                        }).addTo(reportsGroup);
                         label.on('click', () => {
-                            if (showLabelClick) {
-                                L.popup({ offset: [0, -10] })
-                                    .setLatLng(label.getLatLng())
-                                    .setContent(popupHtml)
-                                    .openOn(map);
-                            }
+                            L.popup({ offset: [0, -10] })
+                                .setLatLng(label.getLatLng())
+                                .setContent(popupHtml)
+                                .openOn(map);
                         });
-
-                        labelMarkers.push(label);
-                        label.addTo(reportsGroup);
                     }
-
-                    poly.addTo(reportsGroup);
                 }
-            }
-            catch (err) {
-                console.warn("Invalid geometry for report:", rep.id, err);
+            } catch (err) {
+                console.warn("Invalid geometry for report:", rep?.id, err);
             }
         }
 
-        // Fit bounds hvis rapporter finnes
         if (reportsGroup.getLayers().length > 0) {
             map.fitBounds(reportsGroup.getBounds().pad(0.15));
         }
+
+        // If you still want to capture drawn geometry later, leave the hidden input; otherwise it can be removed.
+        // document.getElementById('geoInput').value = ...;
+        
+        // Make sure the map sizes correctly on load
+        setTimeout(() => map.invalidateSize(), 200);
+        window.addEventListener('resize', () => setTimeout(() => map.invalidateSize(), 150));
     </script>
 }

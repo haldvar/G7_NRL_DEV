@@ -4,135 +4,247 @@
 @{
     ViewData["Title"] = "Map Confirmation";
     Layout = "_Layout";
+
+    // Hide header/footer if your layout supports it
+    ViewBag.HideChrome = true;
+
     int zoomLevel = Model.MapZoomLevel != 0 ? Model.MapZoomLevel : 12;
 
-    // Fallback til første koordinat hvis GeoJSON mangler
     var firstCoord = Model.Coordinates?.OrderBy(c => c.OrderIndex).FirstOrDefault();
     double fallbackLat = firstCoord?.Latitude ?? 60.0;
     double fallbackLng = firstCoord?.Longitude ?? 10.0;
 
-    // Ren GeoJSON-streng eller tom streng
     var geoJsonString = Model.GeoJsonCoordinates ?? "";
 }
-
-<div class="max-w-4xl mx-auto px-4 py-10">
-    <h1 class="text-4xl font-extrabold text-purple-700 text-center mb-4 tracking-wide">
-        ✅ Kartbekreftelse
-    </h1>
-    <p class="text-gray-600 text-center mb-8">
-        Kartdataene du sendte inn er visualisert nedenfor.
-    </p>
-
-    <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
-        <div id="mapConfirm" class="rounded-xl border border-gray-200 shadow-inner" style="height: 450px;"></div>
-        <p class="text-sm text-gray-500 mt-3">
-            Kartet er sentrert på koordinatene du oppga.
-        </p>
-    </div>
-
-    <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
-        <h2 class="text-xl font-semibold text-purple-700 mb-3 flex items-center">
-            📍 Rå kartdata
-        </h2>
-        <div id="rawDataContainer"
-             class="bg-gray-50 p-4 rounded-lg text-sm text-gray-800 space-y-1 border border-gray-200">
-            <div><em>Laster inn kartdata...</em></div>
+<div class="flex-1 px-4 sm:px-6 lg:px-8">
+    <div class="min-h-[100svh] w-full bg-gradient-to-b from-green-100 to-blue-100">
+    <!-- MAP AREA (≈67% height) -->
+    <section class="relative mx-auto max-w-7xl h-[67svh] mb-3 md:mb-4">
+        <div id="mapConfirm" class="absolute inset-0 rounded-b-3xl overflow-hidden border-b border-white/60 bg-white/40 backdrop-blur shadow">
         </div>
-    </div>
 
-    <div class="flex justify-center space-x-4">
-        <a asp-action="Index" asp-controller="Home"
-           class="bg-gray-600 text-white px-8 py-3 rounded-xl font-medium shadow-md hover:bg-gray-700 transition">
-            ⬅️ Hjem
-        </a>
-        <a asp-action="ObstacleAndMapForm" asp-controller="Map"
-           class="bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold shadow-md hover:bg-blue-700 transition">
-            🗺️ Meld nytt hider
-        </a>
-        <a asp-action="ReportListOverview" asp-controller="Map"
-           class="bg-gray-600 text-white px-8 py-3 rounded-xl font-medium shadow-md hover:bg-gray-700 transition">
-            Hinderlogg
-        </a>
-    </div>
+        <!-- Top-center success pill -->
+        <div class="pointer-events-none absolute left-1/2 top-4 z-20 -translate-x-1/2">
+            <div class="inline-flex items-center gap-2 rounded-full bg-white/90 px-5 py-3 text-green-700 font-semibold
+                        border border-white/70 shadow">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Takk for innmeldingen!
+            </div>
+        </div>
+
+        <!-- Top-left tag -->
+        <div class="pointer-events-none absolute left-4 top-4 z-20">
+            <div class="inline-flex items-center gap-2 rounded-full bg-white/85 backdrop-blur px-4 py-2
+                        border border-white/70 text-sm font-semibold text-green-700 shadow">
+                Kartbekreftelse
+            </div>
+        </div>
+    </section>
+    
+    <!-- BOTTOM PANEL (≈33% height) -->
+    <section class="h-[33svh]">
+        <div class="mx-auto max-w-7xl h-full">
+            <div class="relative h-full rounded-t-3xl border border-white/70 bg-white/85 backdrop-blur shadow-2xl">
+                <!-- Accent bar -->
+                @* <div class="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-green-600 via-blue-600 to-green-600 rounded-t-3xl"></div> *@
+
+                <div class="grid h-full grid-rows-[auto,1fr,auto] p-4 md:p-5">
+                    <!-- Title row -->
+                    <div class="flex items-center justify-between gap-4">
+                        <h2 class="text-base md:text-lg font-bold text-green-700">Koordinater</h2>
+                        <button id="copyCoordsBtn"
+                                class="rounded-full bg-blue-600 px-4 py-2 text-xs md:text-sm font-semibold text-white shadow hover:bg-blue-700 transition">
+                            Kopier koordinater
+                        </button>
+                    </div>
+
+                    <!-- Data row -->
+                    <div class="mt-3 overflow-y-auto">
+                        <div id="rawDataContainer"
+                             class="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm md:text-base text-gray-800 space-y-2">
+                            <div><em>Laster inn kartdata...</em></div>
+                        </div>
+                    </div>
+
+                    <!-- Actions row -->
+                    <div class="mt-4 grid grid-cols-3 gap-3">
+                        <a asp-action="Index" asp-controller="Home"
+                           class="inline-flex items-center justify-center rounded-full bg-gray-700 px-4 py-4 text-white text-xl font-semibold shadow hover:bg-gray-800 transition">
+                            Hjem
+                        </a>
+                        <a asp-action="ObstacleAndMapForm" asp-controller="Map"
+                           class="inline-flex items-center justify-center rounded-full bg-blue-600 px-4 py-4 text-white text-xl font-semibold shadow hover:bg-blue-700 transition">
+                            Ny innmelding
+                        </a>
+                        <a asp-action="ReportListOverview" asp-controller="Map"
+                           class="inline-flex items-center justify-center rounded-full bg-gray-700 px-4 py-4 text-white text-xl font-semibold shadow hover:bg-gray-800 transition">
+                            Hinderlogg
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
 </div>
 
+
 @section Scripts {
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    const map = L.map('mapConfirm', {
+        zoomControl: false,
+        touchZoom: true,
+        scrollWheelZoom: true,
+        doubleClickZoom: true,
+        boxZoom: false
+    }).setView([@fallbackLat, @fallbackLng], @zoomLevel);
 
-    <script>
-        const map = L.map('mapConfirm').setView([@fallbackLat, @fallbackLng], @zoomLevel);
+    L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {
+        layers: 'topo',
+        format: 'image/png',
+        transparent: false,
+        attribution: '© Kartverket'
+    }).addTo(map);
 
-        L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {
-            layers: 'topo',
-            format: 'image/png',
-            transparent: false,
-            attribution: '© Kartverket'
-        }).addTo(map);
+    // Keep map happy when the viewport changes
+    const invalidateSoon = () => setTimeout(() => map.invalidateSize(), 220);
+    window.addEventListener('resize', invalidateSoon);
+    setTimeout(invalidateSoon, 200);
 
-        // geoJsonRaw er nå en JS-strengliteral generert trygt av Json.Serialize
-        const geoJsonRaw = @Json.Serialize(geoJsonString);
+    // Safe string for GeoJSON from server
+    const geoJsonRaw = @Json.Serialize(geoJsonString);
 
-        if (geoJsonRaw && geoJsonRaw.length > 0) {
-            try {
-                const geometry = JSON.parse(geoJsonRaw);
+    // Haversine (for 2-point line distance)
+    function distanceMeters(a, b) {
+        const toRad = d => d * Math.PI / 180;
+        const R = 6371000;
+        const dLat = toRad(b.lat - a.lat);
+        const dLng = toRad(b.lng - a.lng);
+        const lat1 = toRad(a.lat);
+        const lat2 = toRad(b.lat);
+        const h = Math.sin(dLat/2)**2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng/2)**2;
+        return 2 * R * Math.asin(Math.sqrt(h));
+    }
 
-                if (geometry && geometry.type === "Point") {
-                    const [lng, lat] = geometry.coordinates;
-                    L.marker([lat, lng]).addTo(map).bindPopup("Hinderpunkt").openPopup();
-                    updateRawData([{ lat, lng }]);
+    function fmt(n) {
+        return n.toFixed(6);
+    }
 
-                } else if (geometry && geometry.type === "LineString") {
-                    const coords = geometry.coordinates;
-                    const markerList = [];
+    function updateRawData(markers) {
+        const container = document.querySelector("#rawDataContainer");
+        const copyBtn = document.getElementById("copyCoordsBtn");
+        if (!container) return;
 
-                    coords.forEach((coord, i) => {
-                        const [lng, lat] = coord;
-                        markerList.push({ lat, lng });
-                        L.marker([lat, lng]).addTo(map).bindPopup(`Markør ${i + 1}`);
-                    });
+        let html = `<div class="space-y-3">`;
+        let copyText = "";
 
-                    const latlngs = coords.map(c => [c[1], c[0]]);
-                    const line = L.polyline(latlngs, { color: 'orange', weight: 4 }).addTo(map);
-                    map.fitBounds(line.getBounds());
-
-                    updateRawData(markerList);
-                }
-            } catch (err) {
-                console.error("Failed to parse GeoJSON in MapConfirmation:", err);
-            }
+        if (!markers || markers.length === 0) {
+            html += `<div class="text-gray-500"><em>Ingen koordinater tilgjengelig.</em></div>`;
+            copyText = "";
+        } else if (markers.length === 1) {
+            const m = markers[0];
+            html += `
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-600">Type</span>
+                    <span class="font-semibold text-gray-900">Punkt</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <div class="text-gray-600">Breddegrad</div>
+                        <div class="font-mono text-sm md:text-base font-semibold">${fmt(m.lat)}</div>
+                    </div>
+                    <div>
+                        <div class="text-gray-600">Lengdegrad</div>
+                        <div class="font-mono text-sm md:text-base font-semibold">${fmt(m.lng)}</div>
+                    </div>
+                </div>`;
+            copyText = `${fmt(m.lat)}, ${fmt(m.lng)}`;
         } else {
-            // fallback: vis første koordinat
-            L.marker([@fallbackLat, @fallbackLng])
-                .addTo(map)
-                .bindPopup("Senterpunkt")
-                .openPopup();
+            const a = markers[0], b = markers[1];
+            const dist = distanceMeters(a, b);
+            html += `
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-600">Type</span>
+                    <span class="font-semibold text-gray-900">Linje (2 punkter)</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="rounded-lg bg-white border p-3">
+                        <div class="text-xs text-gray-500 mb-1">Markør 1</div>
+                        <div class="text-gray-600">Lat</div>
+                        <div class="font-mono text-sm md:text-base font-semibold">${fmt(a.lat)}</div>
+                        <div class="mt-1 text-gray-600">Lng</div>
+                        <div class="font-mono text-sm md:text-base font-semibold">${fmt(a.lng)}</div>
+                    </div>
+                    <div class="rounded-lg bg-white border p-3">
+                        <div class="text-xs text-gray-500 mb-1">Markør 2</div>
+                        <div class="text-gray-600">Lat</div>
+                        <div class="font-mono text-sm md:text-base font-semibold">${fmt(b.lat)}</div>
+                        <div class="mt-1 text-gray-600">Lng</div>
+                        <div class="font-mono text-sm md:text-base font-semibold">${fmt(b.lng)}</div>
+                    </div>
+                </div>
+                <div class="mt-1 text-sm text-gray-700">
+                    Avstand: <span class="font-semibold">${dist < 1000 ? dist.toFixed(1) + ' m' : (dist/1000).toFixed(2) + ' km'}</span>
+                </div>`;
+            copyText = `${fmt(a.lat)}, ${fmt(a.lng)} | ${fmt(b.lat)}, ${fmt(b.lng)}`;
+        }
 
+        html += `</div>`;
+        container.innerHTML = html;
+
+        if (copyBtn) {
+            copyBtn.onclick = () => {
+                if (!copyText) return;
+                navigator.clipboard.writeText(copyText).then(() => {
+                    const prev = copyBtn.textContent;
+                    copyBtn.textContent = "Kopiert!";
+                    setTimeout(() => copyBtn.textContent = prev, 1500);
+                });
+            };
+        }
+    }
+
+    // Render GeoJSON or fallback
+    if (geoJsonRaw && geoJsonRaw.length > 0) {
+        try {
+            const geometry = JSON.parse(geoJsonRaw);
+
+            if (geometry && geometry.type === "Point") {
+                const [lng, lat] = geometry.coordinates;
+                L.marker([lat, lng]).addTo(map).bindPopup("Hinderpunkt").openPopup();
+                updateRawData([{ lat, lng }]);
+
+            } else if (geometry && geometry.type === "LineString") {
+                const coords = geometry.coordinates;
+                const markers = [];
+
+                coords.slice(0, 2).forEach((c, i) => {
+                    const [lng, lat] = c;
+                    markers.push({ lat, lng });
+                    L.marker([lat, lng]).addTo(map).bindPopup(`Markør ${i + 1}`);
+                });
+
+                const latlngs = coords.map(c => [c[1], c[0]]);
+                const line = L.polyline(latlngs, { color: 'orange', weight: 4 }).addTo(map);
+                map.fitBounds(line.getBounds().pad(0.2));
+
+                updateRawData(markers);
+            } else {
+                // Unknown → fallback
+                L.marker([@fallbackLat, @fallbackLng]).addTo(map).bindPopup("Senterpunkt").openPopup();
+                updateRawData([{ lat: @fallbackLat, lng: @fallbackLng }]);
+            }
+        } catch {
+            L.marker([@fallbackLat, @fallbackLng]).addTo(map).bindPopup("Senterpunkt").openPopup();
             updateRawData([{ lat: @fallbackLat, lng: @fallbackLng }]);
         }
-
-        function updateRawData(markers) {
-            const container = document.querySelector("#rawDataContainer");
-            if (!container) return;
-
-            let html = "";
-
-            if (markers.length === 1) {
-                html += `
-                    <div><strong>Breddegrad (Latitude):</strong> ${markers[0].lat.toFixed(6)}</div>
-                    <div><strong>Lengdegrad (Longitude):</strong> ${markers[0].lng.toFixed(6)}</div>
-                    <div><strong>Type:</strong> Punkt</div>
-                `;
-            } else if (markers.length === 2) {
-                html += `
-                    <div><strong>Markør 1 Latitude:</strong> ${markers[0].lat.toFixed(6)}</div>
-                    <div><strong>Markør 1 Longitude:</strong> ${markers[0].lng.toFixed(6)}</div>
-                    <div><strong>Markør 2 Latitude:</strong> ${markers[1].lat.toFixed(6)}</div>
-                    <div><strong>Markør 2 Longitude:</strong> ${markers[1].lng.toFixed(6)}</div>
-                    <div><strong>Type:</strong> Linje (mellom 2 markører)</div>
-                `;
-            }
-
-            container.innerHTML = html;
-        }
-    </script>
+    } else {
+        // Fallback: first coord
+        L.marker([@fallbackLat, @fallbackLng]).addTo(map).bindPopup("Senterpunkt").openPopup();
+        updateRawData([{ lat: @fallbackLat, lng: @fallbackLng }]);
+    }
+</script>
 }

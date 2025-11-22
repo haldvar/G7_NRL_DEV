@@ -1,67 +1,223 @@
 @model List<NRL_PROJECT.Models.ObstacleReportData>
+@using NRL_PROJECT.Models
+@{
+    ViewData["Title"] = "Hinderlogg";
+    var q = (string)Context.Request.Query["q"];
+    var status = (string)Context.Request.Query["status"];
+    var type = (string)Context.Request.Query["type"];
+}
 
-<h1 class="text-3xl font-bold text-blue-700 mb-6 text-center">📋 Hinderlogg</h1>
+<div class="min-h-screen w-full bg-gradient-to-b from-green-100 to-blue-100">
+    <div class="mx-auto max-w-[90vw] px-4 sm:px-6 lg:px-8 py-10">
 
-<table class="table-auto w-full border border-gray-300 rounded-lg shadow-md">
-    <thead class="bg-gray-100 text-left">
-        <tr>
-            <th class="px-4 py-2">ObstacleReportID</th>
-            <th class="px-4 py-2">Innmelder</th>
-            <th class="px-4 py-2">Saksbehandler</th>
-            <th class="px-4 py-2">ObstacleID</th>
-            <th class="px-4 py-2">ObstacleType</th>
-            <th class="px-4 py-2">Kommentar fra innmelder</th>
-            <th class="px-4 py-2">Kommentar fra saksbehandler</th>
-            <th class="px-4 py-2">Rapportdato</th>
-            <th class="px-4 py-2">Rapportstatus</th>
-            <th class="px-4 py-2">Koordinater</th>
-            <th class="px-4 py-2">Bildefil</th>
-            
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var report in Model)
-        {
-            <tr class="border-t">
-                <td class="px-4 py-2">@report.ObstacleReportID</td>
-                <td class="px-4 py-2">
-                    @(report.SubmittedByUser != null
-                                    ? report.SubmittedByUser.UserName
-                                    : "(ukjent)")
-                                             </td>
+        <!-- Header -->
+        <header class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-green-700">
+                    Hinderlogg
+                </h1>
+                <p class="mt-1 text-gray-600">
+                    Oversikt over indrapporterte hinder.
+                </p>
+            </div>
+            <div class="h-2 w-40 rounded-full bg-gradient-to-r from-green-600 to-blue-600"></div>
+        </header>
 
-                <td class="px-4 py-2">
-                    @(report.Reviewer != null
-                                    ? report.Reviewer.UserName
-                                    : "(ingen)")
-                                              </td>
-                <td class="px-4 py-2">@report.ObstacleID</td>
-                <td class="px-4 py-2">@report.Obstacle?.ObstacleType</td>
-                <td class="px-4 py-2">@report.Obstacle?.ObstacleComment</td>
-                <td class="px-4 py-2">@report.ObstacleReportComment</td>
-                <td class="px-4 py-2">@report.ObstacleReportDate.ToString("yyyy-MM-dd HH:mm")</td>
-                <td class="px-4 py-2">@report.ObstacleReportStatus</td>
-                <td class="px-4 py-2">@report.MapData.CoordinateSummary</td>
-                <td class="px-4 py-2">
-                    @if (!string.IsNullOrEmpty(report.Obstacle?.ObstacleImageURL))
-                    {
-                        <a href="@report.Obstacle.ObstacleImageURL"
-                           target="_blank"
-                           class="flex items-center">
+        <!-- Filters -->
+        <form method="get" class="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-6">
+            <div class="sm:col-span-3">
+                <label for="q" class="sr-only">Søk</label>
+                <div class="relative">
+                    <input id="q" name="q" value="@q"
+                           placeholder="Søk på ID, type, innmelder, organisasjon…"
+                           class="w-full rounded-2xl border border-white/60 bg-white/80 backdrop-blur px-4 py-3 pr-10 shadow focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500"
+                         xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                         d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+            </div>
 
-                            <img src="@report.Obstacle.ObstacleImageURL"
-                                 alt="Bilde"
-                                 class="h-16 w-16 object-cover rounded shadow-md border border-gray-300" />
-                        </a>
-                    }
-                    else
-                    {
-                        <span class="text-gray-400 italic">Ingen</span>
-                    }
-                </td>  
-                
-            </tr>
+            <div class="sm:col-span-2">
+                <label class="sr-only" for="status">Status</label>
+                <select id="status" name="status" class="w-full rounded-2xl border border-white/60 bg-white/80 backdrop-blur px-4 py-3 shadow focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Alle statuser</option>
+                    <option value="New" selected="@(status=="New")">Ny</option>
+                    <option value="Open" selected="@(status=="Open")">Venter</option>
+                    <option value="InProgress" selected="@(status=="InProgress")">Under behandling</option>
+                    <option value="Resolved" selected="@(status=="Resolved")">Godkjent</option>
+                    <option value="Deleted" selected="@(status=="Deleted")">Avvist</option>
+                </select>
+            </div>
+
+            <div class="sm:col-span-1">
+                <button type="submit"
+                        class="w-full rounded-2xl bg-blue-600 px-4 py-3 font-semibold text-white shadow hover:bg-blue-700">
+                    Filtrer
+                </button>
+            </div>
+        </form>
+
+        <!-- Table shell -->
+        <div class="overflow-hidden rounded-3xl border border-white/60 bg-white/70 shadow-xl backdrop-blur">
+            <div class="flex items-center justify-between border-b border-white/60 px-4 py-3">
+                <div class="text-sm text-gray-700">
+                    Antall: <span id="rowCount" class="font-semibold">@Model.Count</span>
+                </div>
+                <div class="text-xs text-gray-500">Klikk på bilde for å åpne i ny fane</div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-white">
+                        <tr class="text-left text-gray-600 border-b">
+                            <th class="px-4 py-3">ID</th>
+                            <th class="px-4 py-3">Innmelder</th>
+                            <th class="px-4 py-3">Saksbehandler</th>
+                            <th class="px-4 py-3">Type</th>
+                            <th class="px-4 py-3">Kommentar (innmelder)</th>
+                            <th class="px-4 py-3">Kommentar (saksbehandler)</th>
+                            <th class="px-4 py-3">Dato</th>
+                            <th class="px-4 py-3">Status</th>
+                            <th class="px-4 py-3">Koordinater</th>
+                            <th class="px-4 py-3">Bilde</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logBody" class="divide-y divide-gray-100">
+                        @foreach (var report in Model)
+                        {
+                            // Helpers
+                            string submittedBy = report.SubmittedByUser?.UserName ?? "(ukjent)";
+                            string reviewer = report.Reviewer?.UserName ?? "(ingen)";
+                            string typeTxt = report.Obstacle?.ObstacleType ?? "—";
+                            string coordsTxt = report.MapData?.CoordinateSummary ?? "—";
+                            string imgUrl = report.Obstacle?.ObstacleImageURL;
+
+                            // Status pill
+                            string pillText;
+                            string pillClasses;
+                            switch (report.ObstacleReportStatus)
+                            {
+                                case ObstacleReportData.EnumTypes.New:
+                                    pillText = "Ny";
+                                    pillClasses = "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200";
+                                    break;
+                                case ObstacleReportData.EnumTypes.Open:
+                                    pillText = "Venter";
+                                    pillClasses = "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200";
+                                    break;
+                                case ObstacleReportData.EnumTypes.InProgress:
+                                    pillText = "Under behandling";
+                                    pillClasses = "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200";
+                                    break;
+                                case ObstacleReportData.EnumTypes.Resolved:
+                                    pillText = "Godkjent";
+                                    pillClasses = "bg-green-50 text-green-700 ring-1 ring-inset ring-green-200";
+                                    break;
+                                case ObstacleReportData.EnumTypes.Deleted:
+                                    pillText = "Avvist";
+                                    pillClasses = "bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200";
+                                    break;
+                                default:
+                                    pillText = report.ObstacleReportStatus.ToString();
+                                    pillClasses = "bg-gray-50 text-gray-700 ring-1 ring-inset ring-gray-200";
+                                    break;
+                            }
+
+                            <tr class="hover:bg-white/60 transition" data-q="@($"{report.ObstacleReportID} {submittedBy} {reviewer} {typeTxt} {report.Obstacle?.ObstacleComment} {report.ObstacleReportComment} {coordsTxt} {report.ObstacleReportStatus}")"
+                                data-status="@report.ObstacleReportStatus">
+                                <td class="px-4 py-3 font-semibold text-slate-900">@report.ObstacleReportID</td>
+                                <td class="px-4 py-3 text-slate-700">@submittedBy</td>
+                                <td class="px-4 py-3 text-slate-700">@reviewer</td>
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex items-center rounded-full bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-200">
+                                        @typeTxt
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-slate-700 max-w-[22rem] truncate" title="@report.Obstacle?.ObstacleComment">
+                                    @report.Obstacle?.ObstacleComment
+                                </td>
+                                <td class="px-4 py-3 text-slate-700 max-w-[22rem] truncate" title="@report.ObstacleReportComment">
+                                    @report.ObstacleReportComment
+                                </td>
+                                <td class="px-4 py-3 text-slate-700 whitespace-nowrap">
+                                    @report.ObstacleReportDate.ToString("dd.MM.yyyy HH:mm")
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold @pillClasses">
+                                        @pillText
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-slate-700">
+                                    <span class="inline-flex items-center rounded-md bg-white px-2.5 py-1 text-xs ring-1 ring-inset ring-gray-200">
+                                        @coordsTxt
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    @if (!string.IsNullOrWhiteSpace(imgUrl))
+                                    {
+                                        <a href="@imgUrl" target="_blank" class="inline-block">
+                                            <img src="@imgUrl" alt="Bilde" class="h-16 w-16 rounded-lg border border-gray-200 object-cover shadow-sm" />
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-gray-400 italic">Ingen</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Empty state (hidden by default, shown when filtered to zero) -->
+        <div id="emptyState" class="hidden mt-8 rounded-3xl border border-white/60 bg-white/80 p-8 text-center shadow">
+            <div class="mx-auto mb-2 h-10 w-10 rounded-full bg-gradient-to-r from-green-600 to-blue-600"></div>
+            <h3 class="text-lg font-semibold text-slate-800">Ingen treff</h3>
+            <p class="mt-1 text-slate-600 text-sm">Prøv et annet søk eller fjern filteret.</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    // Client-side filter (works in addition to server-side form submit)
+    (function () {
+        const qInput = document.getElementById('q');
+        const statusSel = document.getElementById('status');
+        const body = document.getElementById('logBody');
+        const empty = document.getElementById('emptyState');
+        const rowCount = document.getElementById('rowCount');
+
+        function norm(s){ return (s||"").toString().toLowerCase(); }
+
+        function applyFilter(){
+            const q = norm(qInput?.value);
+            const st = statusSel?.value || "";
+            let visible = 0;
+
+            body.querySelectorAll('tr').forEach(tr => {
+                const a = norm(tr.getAttribute('data-q'));
+                const s = tr.getAttribute('data-status') || "";
+                const matchQ = !q || a.indexOf(q) >= 0;
+                const matchS = !st || s === st;
+                const show = matchQ && matchS;
+                tr.style.display = show ? "" : "none";
+                if (show) visible++;
+            });
+
+            rowCount.textContent = visible;
+            if (visible === 0) empty.classList.remove('hidden'); else empty.classList.add('hidden');
         }
-    </tbody>
-</table>
 
+        let t;
+        qInput?.addEventListener('input', () => { clearTimeout(t); t = setTimeout(applyFilter, 120); });
+        statusSel?.addEventListener('change', applyFilter);
+
+        // Initial pass
+        applyFilter();
+    })();
+</script>
+}

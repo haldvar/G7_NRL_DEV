@@ -90,7 +90,19 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
 // ------------------------------------------------------------
 var app = builder.Build();
 
-// Content security policy CSP
+// ------------------------------------------------------------
+// SEEDING
+// ------------------------------------------------------------
+
+using (var scope = app.Services.CreateScope())
+{
+    await DataSeeder.SeedAsync(scope.ServiceProvider, builder.Configuration);
+}
+
+//
+// SIKKERHETSHEADERE
+//
+
 app.Use(async (context, next) =>
 {
     context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
@@ -98,23 +110,17 @@ app.Use(async (context, next) =>
     context.Response.Headers.Add("X-XSS-Protection", "1; mode=block");
     context.Response.Headers.Add("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
     context.Response.Headers.Add("Referrer-Policy", "no-referrer");
-    
-    // Klæsjer med _LoginLayout
-    //context.Response.Headers.Add("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';");
-    
-    // Add other headers as needed
+
+    // Denne fixer tilgang til apiene som er nevnt
+
+    context.Response.Headers.Add("Content-Security-Policy",
+        "default-src 'self'; " +
+        "script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://rawcdn.githack.com; " +
+        "style-src 'self' 'unsafe-inline' https://unpkg.com; " +
+        "img-src 'self' data: https://wms.geonorge.no https://*.tile.openstreetmap.org https://unpkg.com;");
     await next();
 });
 
-// ------------------------------------------------------------
-// SEEDING
-// ------------------------------------------------------------
-
-
-using (var scope = app.Services.CreateScope())
-{
-    await DataSeeder.SeedAsync(scope.ServiceProvider, builder.Configuration);
-}
 // ------------------------------------------------------------
 // KONFIGURER MIDDLEWARE (HTTP request pipeline)
 // ------------------------------------------------------------
