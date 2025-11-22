@@ -7,7 +7,6 @@
     var successMsg = TempData["Success"] as string;
     var errorMsg = TempData["Error"] as string;
 
-    // Tidligere hentet fra controlleren
     var orgItems = ViewBag.Organizations as List<SelectListItem> ?? new();
 }
 
@@ -29,6 +28,7 @@
                 ✔ @successMsg
             </div>
         }
+
         @if (!string.IsNullOrWhiteSpace(errorMsg))
         {
             <div class="mb-4 rounded-xl border border-rose-200 bg-white px-4 py-3 text-rose-700 shadow">
@@ -36,7 +36,7 @@
             </div>
         }
 
-        <!-- Admin warning -->
+        <!-- Admin safety -->
         @if (adminCount <= 1)
         {
             <div class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-700 shadow">
@@ -45,47 +45,47 @@
         }
 
         <!-- Action buttons -->
-        <div class="mb-6 flex items-center justify-between gap-3">
-            <div class="text-sm text-gray-600">
+        <div class="mb-6 flex items-center justify-between">
+            <div class="text-sm text-gray-700">
                 Antall brukere: <b>@Model.Count</b>
             </div>
 
             <div class="flex gap-3">
                 <button type="button"
-                        class="rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 shadow hover:bg-blue-50"
-                        onclick="togglePanel('createOrgForm')">
+                        onclick="togglePanel('createOrgForm')"
+                        class="rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 shadow hover:bg-blue-50">
                     Opprett ny organisasjon
                 </button>
 
                 <button type="button"
-                        class="rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 shadow hover:bg-blue-50"
-                        onclick="togglePanel('createUserForm')">
+                        onclick="togglePanel('createUserForm')"
+                        class="rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 shadow hover:bg-blue-50">
                     Opprett ny bruker
                 </button>
             </div>
         </div>
 
-        <!-- 🔵 Opprett ny organisasjon (skjult) -->
+        <!-- CREATE ORG PANEL -->
         <div id="createOrgForm" class="mb-8 hidden">
             <div class="rounded-2xl border bg-white p-5 shadow">
+
                 <h3 class="mb-4 text-xl font-bold text-blue-700">Opprett ny organisasjon</h3>
 
                 <form id="orgForm" class="grid grid-cols-1 gap-4 md:grid-cols-3">
                     @Html.AntiForgeryToken()
 
-                    <div class="md:col-span-1">
+                    <div>
                         <label class="text-sm font-medium">Organisasjonsnavn</label>
-                        <input type="text" id="OrgName" required class="mt-1 w-full rounded-lg border px-3 py-2" />
+                        <input id="OrgName" type="text" required class="mt-1 w-full rounded-lg border px-3 py-2" />
                     </div>
 
-                    <div class="md:col-span-1">
-                        <label class="text-sm font-medium">Kontakt-e-post (valgfritt)</label>
-                        <input type="email" id="OrgContactEmail" class="mt-1 w-full rounded-lg border px-3 py-2" />
+                    <div>
+                        <label class="text-sm font-medium">Kontakt-e-post</label>
+                        <input id="OrgContactEmail" type="email" class="mt-1 w-full rounded-lg border px-3 py-2" />
                     </div>
 
-                    <div class="md:col-span-1 flex items-end">
-                        <button type="button"
-                                id="createOrgBtn"
+                    <div class="flex items-end">
+                        <button type="button" id="createOrgBtn"
                                 class="w-full rounded-full bg-green-600 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-green-700">
                             Opprett organisasjon
                         </button>
@@ -96,7 +96,7 @@
             </div>
         </div>
 
-        <!-- 🟢 Opprett ny bruker (skjult) -->
+        <!-- CREATE USER PANEL -->
         <div id="createUserForm" class="mb-8 hidden">
             <div class="rounded-2xl border bg-white p-5 shadow">
 
@@ -106,6 +106,7 @@
                     @Html.AntiForgeryToken()
 
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+
                         <div>
                             <label class="text-sm font-medium">Brukernavn</label>
                             <input type="text" name="UserName" required class="mt-1 w-full rounded-lg border px-3 py-2" />
@@ -130,11 +131,10 @@
                             <label class="text-sm font-medium">Organisasjon</label>
                             <select name="OrgId" id="OrgDropdown" required class="mt-1 w-full rounded-lg border px-3 py-2">
                                 <option value="">— Velg organisasjon —</option>
-                                @foreach (var o in orgItems)
+                                @foreach (var org in orgItems)
                                 {
-                                    <option value="@o.Value">@o.Text</option>
+                                    <option value="@org.Value">@org.Text</option>
                                 }
-                                />
                             </select>
                         </div>
 
@@ -162,9 +162,10 @@
 
                     <button type="submit"
                             class="rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700">
-                        Opprett
+                        Opprett bruker
                     </button>
                 </form>
+
             </div>
         </div>
 
@@ -183,39 +184,68 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y">
-                        @foreach (var user in Model)
+                        @foreach (var u in Model)
                         {
-                            var isLastAdmin = (user.CurrentRole == "Admin" && adminCount <= 1);
+                            var isLastAdmin = (u.CurrentRole == "Admin" && adminCount <= 1);
 
                             <tr class="hover:bg-slate-50">
-                                <td class="px-4 py-3">@user.UserName</td>
-                                <td class="px-4 py-3">@user.Email</td>
-                                <td class="px-4 py-3">@user.FirstName @user.LastName</td>
-                                <td class="px-4 py-3">@user.OrgName</td>
-                                <td class="px-4 py-3">@user.CurrentRole</td>
+                                <td class="px-4 py-3">@u.UserName</td>
+                                <td class="px-4 py-3">@u.Email</td>
+                                <td class="px-4 py-3">@u.FirstName @u.LastName</td>
+                                <td class="px-4 py-3">@u.OrgName</td>
+                                <td class="px-4 py-3">@u.CurrentRole</td>
 
                                 <td class="px-4 py-3 text-right">
+
                                     @if (!isLastAdmin)
                                     {
-                                        <form asp-action="AssignRole" method="post" class="inline-flex gap-2">
+                                        <!-- ASSIGN ORGANISATION -->
+                                        <form asp-action="AssignOrganisation" method="post" class="inline-flex gap-2 mb-1">
                                             @Html.AntiForgeryToken()
-                                            <input type="hidden" name="UserID" value="@user.UserID" />
+                                            <input type="hidden" name="UserID" value="@u.UserID" />
 
-                                            <select name="role" class="rounded border px-2 py-1">
-                                                <option>No Role</option>
-                                                @foreach (var role in user.AvailableRoles)
+                                            <select name="OrgID" class="rounded border px-2 py-1 text-sm">
+                                                @foreach (var o in orgItems)
                                                 {
-                                                    <option value="@role" selected="@(role == user.CurrentRole)">@role</option>
+                                                    <option value="@o.Value"
+                                                            selected="@(u.OrgID.HasValue && u.OrgID.Value.ToString() == o.Value)">
+                                                        @o.Text
+                                                    </option>
                                                 }
                                             </select>
 
-                                            <button class="rounded bg-blue-600 px-3 py-1 text-white">Lagre</button>
+                                            <button class="rounded bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700">
+                                                Lagre org
+                                            </button>
                                         </form>
 
-                                        <form asp-action="DeleteUser" method="post" class="inline">
+                                        <!-- ASSIGN ROLE -->
+                                        <form asp-action="AssignRole" method="post" class="inline-flex gap-2 mb-1">
                                             @Html.AntiForgeryToken()
-                                            <input type="hidden" name="UserID" value="@user.UserID" />
-                                            <button class="rounded bg-rose-600 px-3 py-1 text-white">Slett</button>
+                                            <input type="hidden" name="UserID" value="@u.UserID" />
+
+                                            <select name="role" class="rounded border px-2 py-1 text-sm">
+                                                <option>No Role</option>
+                                                @foreach (var r in u.AvailableRoles)
+                                                {
+                                                    <option value="@r" selected="@(r == u.CurrentRole)">@r</option>
+                                                }
+                                            </select>
+
+                                            <button class="rounded bg-blue-600 px-3 py-1 text-xs text-white hover:bg-blue-700">
+                                                Lagre rolle
+                                            </button>
+                                        </form>
+
+                                        <!-- DELETE USER -->
+                                        <form asp-action="DeleteUser" method="post" class="inline"
+                                              onsubmit="return confirm('Slette brukeren @u.UserName?')">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="UserID" value="@u.UserID" />
+
+                                            <button class="rounded bg-rose-600 px-3 py-1 text-xs text-white hover:bg-rose-700">
+                                                Slett
+                                            </button>
                                         </form>
                                     }
                                     else
@@ -235,55 +265,56 @@
 
 @section Scripts {
     <script>
+
         function togglePanel(id) {
             document.getElementById(id).classList.toggle("hidden");
         }
 
-        // AJAX create org
+        // CREATE ORGANISATION AJAX
         document.getElementById("createOrgBtn").addEventListener("click", function () {
 
             const name = document.getElementById("OrgName").value.trim();
             const email = document.getElementById("OrgContactEmail").value.trim();
-            const message = document.getElementById("orgMessage");
+            const msg = document.getElementById("orgMessage");
 
             if (!name) {
-                message.innerHTML = "⛔ Organisasjonsnavn er påkrevd.";
-                message.className = "text-red-700";
+                msg.innerHTML = "⛔ Organisasjonsnavn er påkrevd.";
+                msg.className = "text-red-700";
                 return;
             }
 
             fetch("/Admin/CreateOrganisationAjax", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ orgName: name, orgContactEmail: email })
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ OrgName: name, OrgContactEmail: email })
             })
             .then(r => r.json())
             .then(data => {
 
                 if (!data.success) {
-                    message.innerHTML = "⛔ " + data.message;
-                    message.className = "text-red-700";
+                    msg.innerHTML = "⛔ " + data.message;
+                    msg.className = "text-red-700";
                     return;
                 }
 
-                // Add to dropdown
-                const dd = document.getElementById("OrgDropdown");
-                const o = document.createElement("option");
-                o.value = data.orgId;
-                o.textContent = data.orgName;
-                dd.appendChild(o);
+            // Add to dropdown
+            document.querySelectorAll("select[name='OrgId'], select[name='OrgID'], #OrgDropdown")
+            .forEach(select => {
+            const opt = document.createElement("option");
+            opt.value = data.orgId;
+            opt.textContent = data.orgName;
+            select.appendChild(opt);
+        });
 
-                message.innerHTML = "✔ Organisasjon opprettet!";
-                message.className = "text-green-700";
+                msg.innerHTML = "✔ Organisasjon opprettet!";
+                msg.className = "text-green-700";
 
                 document.getElementById("OrgName").value = "";
                 document.getElementById("OrgContactEmail").value = "";
             })
             .catch(() => {
-                message.innerHTML = "⛔ Serverfeil.";
-                message.className = "text-red-700";
+                msg.innerHTML = "⛔ Serverfeil.";
+                msg.className = "text-red-700";
             });
         });
     </script>

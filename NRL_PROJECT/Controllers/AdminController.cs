@@ -25,18 +25,21 @@ namespace NRL_PROJECT.Controllers
             _context = context;
         }
 
+        // ---------------------------------------------------------------------
         // DASHBOARD
+        // ---------------------------------------------------------------------
         [HttpGet]
         public async Task<IActionResult> Dashboard()
         {
-            var totalUsers = await _userManager.Users.CountAsync();
-            var admins = 0;
-            var pilots = 0;
-            var registrars = 0;
-            var external = 0;
-            var noRole = 0;
+            var allUsers = await _userManager.Users.ToListAsync();
 
-            foreach (var user in await _userManager.Users.ToListAsync())
+            int admins = 0;
+            int pilots = 0;
+            int registrars = 0;
+            int external = 0;
+            int noRole = 0;
+
+            foreach (var user in allUsers)
             {
                 var roles = await _userManager.GetRolesAsync(user);
                 if (roles.Contains("Admin")) admins++;
@@ -46,7 +49,7 @@ namespace NRL_PROJECT.Controllers
                 else noRole++;
             }
 
-            ViewBag.TotalUsers = totalUsers;
+            ViewBag.TotalUsers = allUsers.Count;
             ViewBag.Admins = admins;
             ViewBag.Pilots = pilots;
             ViewBag.Registrars = registrars;
@@ -56,40 +59,14 @@ namespace NRL_PROJECT.Controllers
             return View();
         }
 
+        // ---------------------------------------------------------------------
         // MANAGE USERS
+        // ---------------------------------------------------------------------
         [HttpGet]
         public async Task<IActionResult> ManageUsers()
         {
-            var users = await _userManager.Users
-                .Include(u => u.Organisation)
-                .ToListAsync();
-
-            var vmList = new List<UserManagementViewModel>();
-
-            int adminCount = 0;
-
-            foreach (var user in users)
-            {
-                var roles = await _userManager.GetRolesAsync(user);
-                if (roles.Contains("Admin")) adminCount++;
-
-                vmList.Add(new UserManagementViewModel
-                {
-                    UserID = user.Id,
-                    UserName = user.UserName,
-                    Email = user.Email,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    OrgName = user.Organisation?.OrgName,
-                    CurrentRole = roles.FirstOrDefault() ?? "No Role",
-                    AvailableRoles = new List<string> { "Admin", "Pilot", "Registrar", "ExternalOrg" }
-                });
-            }
-
-            ViewBag.AdminCount = adminCount;
-
-            // DROPDOWN FOR ORGANISATIONS
-            ViewBag.Organizations = await _context.Organisations
+            // 1. LAST ORGANISASJONENE (før vi lager viewmodels!)
+            var orgList = await _context.Organisations
                 .OrderBy(o => o.OrgName)
                 .Select(o => new SelectListItem
                 {
@@ -99,10 +76,48 @@ namespace NRL_PROJECT.Controllers
                 .AsNoTracking()
                 .ToListAsync();
 
+            ViewBag.Organizations = orgList;
+
+            // 2. LAST BRUKERE
+            var users = await _userManager.Users
+                .Include(u => u.Organisation)
+                .OrderBy(u => u.FirstName)
+                .ThenBy(u => u.LastName)
+                .ToListAsync();
+
+            var vmList = new List<UserManagementViewModel>();
+            int adminCount = 0;
+
+            // 3. LAG VIEWMODELS
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                if (roles.Contains("Admin"))
+                    adminCount++;
+
+                vmList.Add(new UserManagementViewModel
+                {
+                    UserID = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    OrgName = user.Organisation?.OrgName,
+                    OrgID = user.OrgID,
+                    CurrentRole = roles.FirstOrDefault() ?? "No Role",
+                    AvailableRoles = new List<string> { "Admin", "Pilot", "Registrar", "ExternalOrg" },
+                    AvailableOrganizations = orgList
+                });
+            }
+
+            ViewBag.AdminCount = adminCount;
+
             return View(vmList);
         }
 
+        // ---------------------------------------------------------------------
         // CREATE USER
+        // ---------------------------------------------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateUser(RegisterViewModel model, int OrgId)
@@ -129,22 +144,23 @@ namespace NRL_PROJECT.Controllers
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
-            if (result.Succeeded)
-            {
-                if (!string.IsNullOrWhiteSpace(model.RoleName) && model.RoleName != "No Role")
-                    await _userManager.AddToRoleAsync(user, model.RoleName);
 
-                TempData["Success"] = "Bruker opprettet.";
-            }
-            else
+            if (!result.Succeeded)
             {
                 TempData["Error"] = string.Join(", ", result.Errors.Select(e => e.Description));
+                return RedirectToAction("ManageUsers");
             }
 
+            if (!string.IsNullOrWhiteSpace(model.RoleName) && model.RoleName != "No Role")
+                await _userManager.AddToRoleAsync(user, model.RoleName);
+
+            TempData["Success"] = "Bruker opprettet.";
             return RedirectToAction("ManageUsers");
         }
 
-        // STANDARD POST (ikke AJAX)
+        // ---------------------------------------------------------------------
+        // CREATE ORGANISATION (POST)
+        // ---------------------------------------------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateOrganisation(string OrgName, string OrgContactEmail)
@@ -155,8 +171,7 @@ namespace NRL_PROJECT.Controllers
                 return RedirectToAction("ManageUsers");
             }
 
-            var exists = await _context.Organisations.AnyAsync(o => o.OrgName == OrgName.Trim());
-            if (exists)
+            if (await _context.Organisations.AnyAsync(o => o.OrgName == OrgName.Trim()))
             {
                 TempData["Error"] = "Organisasjonen finnes allerede.";
                 return RedirectToAction("ManageUsers");
@@ -175,7 +190,9 @@ namespace NRL_PROJECT.Controllers
             return RedirectToAction("ManageUsers");
         }
 
-        // AJAX ENDPOINT
+        // ---------------------------------------------------------------------
+        // AJAX: CREATE ORGANISATION
+        // ---------------------------------------------------------------------
         [HttpPost]
         [Route("Admin/CreateOrganisationAjax")]
         public async Task<IActionResult> CreateOrganisationAjax([FromBody] Organisation model)
@@ -183,14 +200,106 @@ namespace NRL_PROJECT.Controllers
             if (string.IsNullOrWhiteSpace(model.OrgName))
                 return Json(new { success = false, message = "Organisasjonsnavn må fylles inn." });
 
-            var exists = await _context.Organisations.AnyAsync(o => o.OrgName == model.OrgName);
-            if (exists)
+            if (await _context.Organisations.AnyAsync(o => o.OrgName == model.OrgName))
                 return Json(new { success = false, message = "Organisasjonen finnes allerede." });
 
             _context.Organisations.Add(model);
             await _context.SaveChangesAsync();
 
             return Json(new { success = true, orgId = model.OrgID, orgName = model.OrgName });
+        }
+
+        // ---------------------------------------------------------------------
+        // ASSIGN ORGANISATION TO USER
+        // ---------------------------------------------------------------------
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignOrganisation(string UserID, int OrgID)
+        {
+            var user = await _userManager.FindByIdAsync(UserID);
+            if (user == null)
+            {
+                TempData["Error"] = "Bruker ble ikke funnet.";
+                return RedirectToAction("ManageUsers");
+            }
+
+            var org = await _context.Organisations.FindAsync(OrgID);
+            if (org == null)
+            {
+                TempData["Error"] = "Organisasjon ikke funnet.";
+                return RedirectToAction("ManageUsers");
+            }
+
+            user.OrgID = OrgID;
+            user.OrgName = org.OrgName;
+
+            await _userManager.UpdateAsync(user);
+
+            TempData["Success"] = $"Organisasjon oppdatert for {user.UserName}.";
+            return RedirectToAction("ManageUsers");
+        }
+
+        // ---------------------------------------------------------------------
+        // ASSIGN ROLE
+        // ---------------------------------------------------------------------
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignRole(string UserID, string role)
+        {
+            var user = await _userManager.FindByIdAsync(UserID);
+            if (user == null)
+            {
+                TempData["Error"] = "Bruker ikke funnet.";
+                return RedirectToAction("ManageUsers");
+            }
+
+            var currentRoles = await _userManager.GetRolesAsync(user);
+            if (currentRoles.Any())
+                await _userManager.RemoveFromRolesAsync(user, currentRoles);
+
+            if (!string.IsNullOrEmpty(role) && role != "No Role")
+                await _userManager.AddToRoleAsync(user, role);
+
+            TempData["Success"] = $"Rolle oppdatert for {user.UserName}.";
+            return RedirectToAction("ManageUsers");
+        }
+
+        // ---------------------------------------------------------------------
+        // DELETE USER
+        // ---------------------------------------------------------------------
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteUser(string UserID)
+        {
+            var user = await _userManager.FindByIdAsync(UserID);
+            if (user == null)
+            {
+                TempData["Error"] = "Bruker ikke funnet.";
+                return RedirectToAction("ManageUsers");
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+            if (roles.Contains("Admin"))
+            {
+                int adminCount = 0;
+                foreach (var u in await _userManager.Users.ToListAsync())
+                {
+                    var rs = await _userManager.GetRolesAsync(u);
+                    if (rs.Contains("Admin"))
+                        adminCount++;
+                }
+
+                if (adminCount <= 1)
+                {
+                    TempData["Error"] = "Kan ikke slette siste admin.";
+                    return RedirectToAction("ManageUsers");
+                }
+            }
+
+            await _userManager.DeleteAsync(user);
+
+            TempData["Success"] = $"Bruker {user.UserName} ble slettet.";
+            return RedirectToAction("ManageUsers");
         }
     }
 }

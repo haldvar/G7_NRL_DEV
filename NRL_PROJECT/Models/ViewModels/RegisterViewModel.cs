@@ -34,8 +34,10 @@ namespace NRL_PROJECT.Models.ViewModels
         [Display(Name = "Organisasjons ID")]
         public int? OrgID { get; set; }
 
+        /*
         [Display(Name = "Organisasjonsnavn")]
         public string? OrgName { get; set; }
+        */
 
         [Display(Name = "Rolle ID")]
         public int? RoleID { get; set; }
