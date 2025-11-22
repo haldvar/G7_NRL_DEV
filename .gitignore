@@ -1,6 +1,7 @@
 /.vs
 /NRL_PROJECT/bin
 /NRL_PROJECT/obj
+/NRL_PROJECT/wwwroot/uploads
 /bin
 /obj
 NRL_PROJECT/NRL_PROJECT.csproj.user
