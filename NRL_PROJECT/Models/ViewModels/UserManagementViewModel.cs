@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Mvc.Rendering;
+
 namespace NRL_PROJECT.Models.ViewModels
 {
     public class UserManagementViewModel
@@ -10,5 +12,7 @@ namespace NRL_PROJECT.Models.ViewModels
         public string? OrgName { get; set; }
         public string CurrentRole { get; set; }
         public List<string> AvailableRoles { get; set; }
+        public int? OrgID { get; set; }
+        public List<SelectListItem>? AvailableOrganizations { get; set; }
     }
 }

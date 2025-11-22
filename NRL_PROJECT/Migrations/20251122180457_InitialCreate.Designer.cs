@@ -12,8 +12,8 @@ using NRL_PROJECT.Data;
 namespace NRL_PROJECT.Migrations
 {
     [DbContext(typeof(NRL_Db_Context))]
-    [Migration("20251119140212_InitialCreate1")]
-    partial class InitialCreate1
+    [Migration("20251122180457_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -157,28 +157,6 @@ namespace NRL_PROJECT.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("NRL_PROJECT.Models.AccessLevel", b =>
-                {
-                    b.Property<int>("AccessLevelID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("AccessLevelID"));
-
-                    b.Property<string>("AccessLevelDescription")
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
-
-                    b.Property<string>("AccessLevelName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.HasKey("AccessLevelID");
-
-                    b.ToTable("AccessLevels");
-                });
-
             modelBuilder.Entity("NRL_PROJECT.Models.MapCoordinate", b =>
                 {
                     b.Property<int>("CoordinateId")
@@ -290,7 +268,6 @@ namespace NRL_PROJECT.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ObstacleReportComment")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime>("ObstacleReportDate")
@@ -399,9 +376,6 @@ namespace NRL_PROJECT.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int?>("RoleID")
-                        .HasColumnType("int");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("longtext");
 
@@ -411,9 +385,6 @@ namespace NRL_PROJECT.Migrations
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
-
-                    b.Property<int?>("UserRoleRoleID")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -426,32 +397,7 @@ namespace NRL_PROJECT.Migrations
 
                     b.HasIndex("OrgID");
 
-                    b.HasIndex("UserRoleRoleID");
-
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("NRL_PROJECT.Models.UserRole", b =>
-                {
-                    b.Property<int>("RoleID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("RoleID"));
-
-                    b.Property<int>("AccessLevelID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("RoleName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.HasKey("RoleID");
-
-                    b.HasIndex("AccessLevelID");
-
-                    b.ToTable("UserRoles");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -562,27 +508,7 @@ namespace NRL_PROJECT.Migrations
                         .WithMany("Users")
                         .HasForeignKey("OrgID");
 
-                    b.HasOne("NRL_PROJECT.Models.UserRole", null)
-                        .WithMany("Users")
-                        .HasForeignKey("UserRoleRoleID");
-
                     b.Navigation("Organisation");
-                });
-
-            modelBuilder.Entity("NRL_PROJECT.Models.UserRole", b =>
-                {
-                    b.HasOne("NRL_PROJECT.Models.AccessLevel", "AccessLevel")
-                        .WithMany("UserRoles")
-                        .HasForeignKey("AccessLevelID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AccessLevel");
-                });
-
-            modelBuilder.Entity("NRL_PROJECT.Models.AccessLevel", b =>
-                {
-                    b.Navigation("UserRoles");
                 });
 
             modelBuilder.Entity("NRL_PROJECT.Models.MapData", b =>
@@ -607,11 +533,6 @@ namespace NRL_PROJECT.Migrations
                     b.Navigation("ObstacleReportsReviewed");
 
                     b.Navigation("ObstacleReportsSubmitted");
-                });
-
-            modelBuilder.Entity("NRL_PROJECT.Models.UserRole", b =>
-                {
-                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

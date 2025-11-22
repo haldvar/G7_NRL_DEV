@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace NRL_Prosjekt.Models
+namespace NRL_PROJECT.Models.ViewModels
 {
     public class RegistrarOverviewViewModel
     {
