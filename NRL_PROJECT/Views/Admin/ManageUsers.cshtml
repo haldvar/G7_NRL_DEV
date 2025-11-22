@@ -5,10 +5,10 @@
     var adminCount = (int?)ViewBag.AdminCount ?? 0;
 
     var successMsg = TempData["Success"] as string;
-    var errorMsg   = TempData["Error"]   as string;
-    // Expect: ViewBag.Organizations as List<SelectListItem> (Value=OrgID, Text=OrgName)
-    var orgItems = ViewBag.Organizations as List<SelectListItem> ?? new();
+    var errorMsg = TempData["Error"] as string;
 
+    // Tidligere hentet fra controlleren
+    var orgItems = ViewBag.Organizations as List<SelectListItem> ?? new();
 }
 
 <div class="min-h-[100svh] w-full bg-gradient-to-b from-green-100 to-blue-100">
@@ -22,153 +22,158 @@
             <div class="mt-3 h-1 w-48 rounded-full bg-gradient-to-r from-green-600 via-blue-600 to-green-600"></div>
         </header>
 
-        <!-- Flash toasts (TempData-based) -->
-        <div id="flash-area" class="fixed inset-x-0 top-4 z-50 flex justify-center px-4 pointer-events-none">
-            @if (!string.IsNullOrWhiteSpace(successMsg))
-            {
-                <div class="pointer-events-auto rounded-xl border border-green-200 bg-white/95 backdrop-blur px-4 py-3 text-green-800 shadow-xl">
-                    <div class="flex items-start gap-3">
-                        <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-green-600 text-white">✓</span>
-                        <div class="font-semibold">@successMsg</div>
-                        <button class="ml-2 rounded p-1 text-green-700/70 hover:bg-green-50" onclick="this.closest('div.pointer-events-auto').remove()">✕</button>
-                    </div>
-                </div>
-            }
-            @if (!string.IsNullOrWhiteSpace(errorMsg))
-            {
-                <div class="pointer-events-auto rounded-xl border border-rose-200 bg-white/95 backdrop-blur px-4 py-3 text-rose-700 shadow-xl">
-                    <div class="flex items-start gap-3">
-                        <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-rose-600 text-white">!</span>
-                        <div class="font-semibold">@errorMsg</div>
-                        <button class="ml-2 rounded p-1 text-rose-700/70 hover:bg-rose-50" onclick="this.closest('div.pointer-events-auto').remove()">✕</button>
-                    </div>
-                </div>
-            }
-        </div>
-
-        <!-- Admin safety notice -->
-        @if (adminCount <= 1)
+        <!-- Flash messages -->
+        @if (!string.IsNullOrWhiteSpace(successMsg))
         {
-            <div class="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800 shadow">
-                <div class="flex items-start gap-3">
-                    <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 text-white">!</span>
-                    <div>
-                        <div class="font-semibold">Obs!</div>
-                        <div>Det må alltid finnes minst én administrator.</div>
-                    </div>
-                </div>
+            <div class="mb-4 rounded-xl border border-green-200 bg-white px-4 py-3 text-green-800 shadow">
+                ✔ @successMsg
+            </div>
+        }
+        @if (!string.IsNullOrWhiteSpace(errorMsg))
+        {
+            <div class="mb-4 rounded-xl border border-rose-200 bg-white px-4 py-3 text-rose-700 shadow">
+                ⚠ @errorMsg
             </div>
         }
 
-        <!-- Actions row -->
-        <div class="mb-4 flex items-center justify-between gap-3">
+        <!-- Admin warning -->
+        @if (adminCount <= 1)
+        {
+            <div class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-700 shadow">
+                ❗ Det må alltid finnes minst én administrator.
+            </div>
+        }
+
+        <!-- Action buttons -->
+        <div class="mb-6 flex items-center justify-between gap-3">
             <div class="text-sm text-gray-600">
-                Antall brukere: <span class="font-semibold text-gray-900">@Model.Count</span>
+                Antall brukere: <b>@Model.Count</b>
             </div>
-            <button type="button"
-                    class="rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 shadow hover:bg-blue-50"
-                    onclick="toggleCreateUserForm()">
-                Opprett ny bruker
-            </button>
+
+            <div class="flex gap-3">
+                <button type="button"
+                        class="rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 shadow hover:bg-blue-50"
+                        onclick="togglePanel('createOrgForm')">
+                    Opprett ny organisasjon
+                </button>
+
+                <button type="button"
+                        class="rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 shadow hover:bg-blue-50"
+                        onclick="togglePanel('createUserForm')">
+                    Opprett ny bruker
+                </button>
+            </div>
         </div>
-        
-        <!-- Create user panel -->
-        <div id="createUserForm" class="mb-6 hidden">
-            <div class="rounded-2xl border border-white/60 bg-white/90 backdrop-blur shadow-xl">
-                <!-- Accent -->
-                @* <div class="h-1 w-full rounded-t-2xl bg-gradient-to-r from-green-600 via-blue-600 to-green-600"></div> *@
 
-                <div class="p-5 md:p-6">
-                    <h3 class="mb-4 text-xl font-bold text-green-700">Opprett ny bruker</h3>
+        <!-- 🔵 Opprett ny organisasjon (skjult) -->
+        <div id="createOrgForm" class="mb-8 hidden">
+            <div class="rounded-2xl border bg-white p-5 shadow">
+                <h3 class="mb-4 text-xl font-bold text-blue-700">Opprett ny organisasjon</h3>
 
-                    <form asp-action="CreateUser" method="post" class="space-y-4">
-                        @Html.AntiForgeryToken()
+                <form id="orgForm" class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    @Html.AntiForgeryToken()
 
-                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700">Brukernavn</label>
-                                <input type="text" name="UserName" required
-                                       class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700">E-post</label>
-                                <input type="email" name="Email" required
-                                       class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                            </div>
+                    <div class="md:col-span-1">
+                        <label class="text-sm font-medium">Organisasjonsnavn</label>
+                        <input type="text" id="OrgName" required class="mt-1 w-full rounded-lg border px-3 py-2" />
+                    </div>
 
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700">Fornavn</label>
-                                <input type="text" name="FirstName" required
-                                       class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700">Etternavn</label>
-                                <input type="text" name="LastName" required
-                                       class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                            </div>
+                    <div class="md:col-span-1">
+                        <label class="text-sm font-medium">Kontakt-e-post (valgfritt)</label>
+                        <input type="email" id="OrgContactEmail" class="mt-1 w-full rounded-lg border px-3 py-2" />
+                    </div>
 
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700">Organisasjon</label>
-                                <select name="OrgId" required
-                                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option value="">— Velg organisasjon —</option>
-                                    @foreach (var o in orgItems)
-                                    {
-                                        <option value="@o.Value">@o.Text</option>
-                                    }
-                                </select>
-                                @if (!orgItems.Any())
+                    <div class="md:col-span-1 flex items-end">
+                        <button type="button"
+                                id="createOrgBtn"
+                                class="w-full rounded-full bg-green-600 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-green-700">
+                            Opprett organisasjon
+                        </button>
+                    </div>
+                </form>
+
+                <p id="orgMessage" class="mt-3 text-sm"></p>
+            </div>
+        </div>
+
+        <!-- 🟢 Opprett ny bruker (skjult) -->
+        <div id="createUserForm" class="mb-8 hidden">
+            <div class="rounded-2xl border bg-white p-5 shadow">
+
+                <h3 class="mb-4 text-xl font-bold text-green-700">Opprett ny bruker</h3>
+
+                <form asp-action="CreateUser" method="post" class="space-y-4">
+                    @Html.AntiForgeryToken()
+
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div>
+                            <label class="text-sm font-medium">Brukernavn</label>
+                            <input type="text" name="UserName" required class="mt-1 w-full rounded-lg border px-3 py-2" />
+                        </div>
+
+                        <div>
+                            <label class="text-sm font-medium">E-post</label>
+                            <input type="email" name="Email" required class="mt-1 w-full rounded-lg border px-3 py-2" />
+                        </div>
+
+                        <div>
+                            <label class="text-sm font-medium">Fornavn</label>
+                            <input type="text" name="FirstName" required class="mt-1 w-full rounded-lg border px-3 py-2" />
+                        </div>
+
+                        <div>
+                            <label class="text-sm font-medium">Etternavn</label>
+                            <input type="text" name="LastName" required class="mt-1 w-full rounded-lg border px-3 py-2" />
+                        </div>
+
+                        <div>
+                            <label class="text-sm font-medium">Organisasjon</label>
+                            <select name="OrgId" id="OrgDropdown" required class="mt-1 w-full rounded-lg border px-3 py-2">
+                                <option value="">— Velg organisasjon —</option>
+                                @foreach (var o in orgItems)
                                 {
-                                    <p class="mt-2 text-xs text-amber-700">Ingen organisasjoner funnet. Opprett en organisasjon først.</p>
+                                    <option value="@o.Value">@o.Text</option>
                                 }
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700">Rolle</label>
-                                <select name="RoleName" required
-                                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option value="">Velg rolle</option>
-                                    <option value="Admin">Admin</option>
-                                    <option value="Pilot">Pilot</option>
-                                    <option value="Registrar">Registrar</option>
-                                    <option value="ExternalOrg">ExternalOrg</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700">Passord</label>
-                                <input type="password" name="Password" required
-                                       class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700">Bekreft passord</label>
-                                <input type="password" name="ConfirmPassword" required
-                                       class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                            </div>
+                                />
+                            </select>
                         </div>
 
-                        <div class="flex items-center gap-3 pt-2">
-                            <button type="submit"
-                                    class="rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-emerald-700">
-                                Opprett
-                            </button>
-                            <button type="button" onclick="toggleCreateUserForm()"
-                                    class="rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                                Avbryt
-                            </button>
+                        <div>
+                            <label class="text-sm font-medium">Rolle</label>
+                            <select name="RoleName" required class="mt-1 w-full rounded-lg border px-3 py-2">
+                                <option value="">Velg rolle</option>
+                                <option value="Admin">Admin</option>
+                                <option value="Pilot">Pilot</option>
+                                <option value="Registrar">Registrar</option>
+                                <option value="ExternalOrg">ExternalOrg</option>
+                            </select>
                         </div>
-                    </form>
-                </div>
 
-                <!-- Bottom accent -->
-                @* <div class="h-1 w-full bg-gradient-to-r from-blue-600 to-green-600 rounded-b-2xl"></div> *@
+                        <div>
+                            <label class="text-sm font-medium">Passord</label>
+                            <input type="password" name="Password" required class="mt-1 w-full rounded-lg border px-3 py-2" />
+                        </div>
+
+                        <div>
+                            <label class="text-sm font-medium">Bekreft passord</label>
+                            <input type="password" name="ConfirmPassword" required class="mt-1 w-full rounded-lg border px-3 py-2" />
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                            class="rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700">
+                        Opprett
+                    </button>
+                </form>
             </div>
         </div>
-        <!-- Users table -->
-        <div class="mx-auto max-w-7xl overflow-hidden rounded-2xl border border-white/60 bg-white/90 backdrop-blur shadow-xl">
+
+        <!-- USERS TABLE -->
+        <div class="rounded-2xl border bg-white shadow-xl">
             <div class="overflow-x-auto">
                 <table class="min-w-full text-left text-sm">
-                    <thead class="bg-gradient-to-r from-green-50 to-blue-50 text-slate-700">
-                        <tr class="border-b border-slate-200/70">
+                    <thead class="bg-gray-100">
+                        <tr>
                             <th class="px-4 py-3 font-semibold">Brukernavn</th>
                             <th class="px-4 py-3 font-semibold">E-post</th>
                             <th class="px-4 py-3 font-semibold">Navn</th>
@@ -177,63 +182,46 @@
                             <th class="px-4 py-3 text-right font-semibold">Handling</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody class="divide-y">
                         @foreach (var user in Model)
                         {
                             var isLastAdmin = (user.CurrentRole == "Admin" && adminCount <= 1);
 
-                            <tr class="hover:bg-slate-50/60">
-                                <td class="px-4 py-3 font-medium text-slate-900">@user.UserName</td>
-                                <td class="px-4 py-3 text-slate-700">@user.Email</td>
-                                <td class="px-4 py-3 text-slate-700">@user.FirstName @user.LastName</td>
-                                <td class="px-4 py-3 text-slate-700">@user.OrgName</td>
+                            <tr class="hover:bg-slate-50">
+                                <td class="px-4 py-3">@user.UserName</td>
+                                <td class="px-4 py-3">@user.Email</td>
+                                <td class="px-4 py-3">@user.FirstName @user.LastName</td>
+                                <td class="px-4 py-3">@user.OrgName</td>
+                                <td class="px-4 py-3">@user.CurrentRole</td>
 
-                                <td class="px-4 py-3">
-                                    <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
-                                        @user.CurrentRole
-                                    </span>
-                                </td>
+                                <td class="px-4 py-3 text-right">
+                                    @if (!isLastAdmin)
+                                    {
+                                        <form asp-action="AssignRole" method="post" class="inline-flex gap-2">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="UserID" value="@user.UserID" />
 
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center justify-end gap-2">
-                                        @if (!isLastAdmin)
-                                        {
-                                            <form asp-action="AssignRole" method="post" class="inline-flex items-center gap-2"
-                                                  onsubmit="return confirmRoleChange(this)">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="UserId" value="@user.UserID" />
-                                                <input type="hidden" name="OrgName" value="@user.OrgName" />
+                                            <select name="role" class="rounded border px-2 py-1">
+                                                <option>No Role</option>
+                                                @foreach (var role in user.AvailableRoles)
+                                                {
+                                                    <option value="@role" selected="@(role == user.CurrentRole)">@role</option>
+                                                }
+                                            </select>
 
-                                                <select name="role"
-                                                        class="rounded-md border border-slate-300 bg-white px-2 py-1 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                                                    <option value="No Role" selected="@(user.CurrentRole == "No Role")">Ingen</option>
-                                                    @foreach (var role in user.AvailableRoles)
-                                                    {
-                                                        <option value="@role" selected="@(role == user.CurrentRole)">@role</option>
-                                                    }
-                                                </select>
+                                            <button class="rounded bg-blue-600 px-3 py-1 text-white">Lagre</button>
+                                        </form>
 
-                                                <button type="submit"
-                                                        class="rounded-full bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-blue-700">
-                                                    Lagre
-                                                </button>
-                                            </form>
-
-                                            <form asp-action="DeleteUser" method="post" class="inline"
-                                                  onsubmit="return confirmDelete('@user.UserName')">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="UserId" value="@user.UserID" />
-                                                <button type="submit"
-                                                        class="rounded-full bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-rose-700">
-                                                    Slett
-                                                </button>
-                                            </form>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-xs text-slate-500">Adminrolle kan ikke endres</span>
-                                        }
-                                    </div>
+                                        <form asp-action="DeleteUser" method="post" class="inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="UserID" value="@user.UserID" />
+                                            <button class="rounded bg-rose-600 px-3 py-1 text-white">Slett</button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-xs text-gray-500">Kan ikke endre</span>
+                                    }
                                 </td>
                             </tr>
                         }
@@ -241,41 +229,62 @@
                 </table>
             </div>
         </div>
+
     </div>
-    
 </div>
 
 @section Scripts {
-<script>
-    // Auto-hide flash after 4 seconds
-    (function () {
-        const container = document.getElementById('flash-area');
-        if (!container) return;
-        const toast = container.querySelector('.pointer-events-auto');
-        if (!toast) return;
-        setTimeout(() => {
-            toast.classList.add('opacity-0', 'transition', 'duration-500');
-            setTimeout(() => toast.remove(), 600);
-        }, 4000);
-    })();
+    <script>
+        function togglePanel(id) {
+            document.getElementById(id).classList.toggle("hidden");
+        }
 
-    // Toggle create user form
-    function toggleCreateUserForm() {
-        const el = document.getElementById('createUserForm');
-        if (!el) return;
-        el.classList.toggle('hidden');
-    }
+        // AJAX create org
+        document.getElementById("createOrgBtn").addEventListener("click", function () {
 
-    // Confirm role change (client nudge)
-    function confirmRoleChange(formEl) {
-        const select = formEl.querySelector('select[name="role"]');
-        const role = select ? select.value : '';
-        return confirm(`Endre rolle til "${role}"?`);
-    }
+            const name = document.getElementById("OrgName").value.trim();
+            const email = document.getElementById("OrgContactEmail").value.trim();
+            const message = document.getElementById("orgMessage");
 
-    // Confirm delete (safer wording)
-    function confirmDelete(username) {
-        return confirm(`Slette brukeren "${username}"? Dette kan ikke angres.`);
-    }
-</script>
+            if (!name) {
+                message.innerHTML = "⛔ Organisasjonsnavn er påkrevd.";
+                message.className = "text-red-700";
+                return;
+            }
+
+            fetch("/Admin/CreateOrganisationAjax", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ orgName: name, orgContactEmail: email })
+            })
+            .then(r => r.json())
+            .then(data => {
+
+                if (!data.success) {
+                    message.innerHTML = "⛔ " + data.message;
+                    message.className = "text-red-700";
+                    return;
+                }
+
+                // Add to dropdown
+                const dd = document.getElementById("OrgDropdown");
+                const o = document.createElement("option");
+                o.value = data.orgId;
+                o.textContent = data.orgName;
+                dd.appendChild(o);
+
+                message.innerHTML = "✔ Organisasjon opprettet!";
+                message.className = "text-green-700";
+
+                document.getElementById("OrgName").value = "";
+                document.getElementById("OrgContactEmail").value = "";
+            })
+            .catch(() => {
+                message.innerHTML = "⛔ Serverfeil.";
+                message.className = "text-red-700";
+            });
+        });
+    </script>
 }
