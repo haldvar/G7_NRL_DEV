@@ -7,6 +7,11 @@ using System.Text.Json;
 
 namespace NRL_PROJECT.Controllers
 {
+    /// <summary>
+    /// Public-facing pages controller.
+    /// - Index shows basic application stats.
+    /// - About, Privacy and Error pages are served here.
+    /// </summary>
     public class HomeController : Controller
     {
         private readonly NRL_Db_Context _context;
@@ -19,7 +24,7 @@ namespace NRL_PROJECT.Controllers
         }
 
         // ------------------------------
-        //  INDEX / STARTPAGE
+        // Index / Startpage
         // ------------------------------
         public async Task<IActionResult> Index()
         {
@@ -35,38 +40,7 @@ namespace NRL_PROJECT.Controllers
         }
 
         // ------------------------------
-        //  OBSTACLE HANDLING
-        // ------------------------------
-
-        /*[HttpGet]
-        public IActionResult ObstacleDataForm() => View();
-
-        [HttpPost]
-        public async Task<IActionResult> SubmitObstacle(ObstacleData obstacle)
-        {
-            if (!ModelState.IsValid)
-                return View("ObstacleDataForm", obstacle);
-
-            _context.Obstacles.Add(obstacle);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(ObstacleOverview), new { id = obstacle.ObstacleID });
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> ObstacleOverview(int id)
-        {
-            var obstacle = await _context.Obstacles.FindAsync(id);
-            if (obstacle == null)
-                return NotFound();
-
-            return View(obstacle);
-        }
-        */
-       
-
-        // ------------------------------
-        //  STATIC PAGES
+        // Static pages
         // ------------------------------
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult About() => View();
@@ -81,7 +55,5 @@ namespace NRL_PROJECT.Controllers
                 RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
             });
         }
-
-       
     }
 }

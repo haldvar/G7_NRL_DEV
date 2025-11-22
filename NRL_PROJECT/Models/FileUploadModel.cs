@@ -3,7 +3,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace NRL_PROJECT.Models
 {
-    // Modell for å representere opplasting av én fil (brukes i form)
+    /// <summary>
+    /// Simple model used to represent a single file upload in forms.
+    /// Validation attributes produce user-friendly error messages in the UI.
+    /// </summary>
     public class FileUploadModel
     {
         [Required(ErrorMessage = "Du må velge en fil før du laster opp.")]

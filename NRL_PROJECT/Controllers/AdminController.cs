@@ -8,6 +8,11 @@ using NRL_PROJECT.Models.ViewModels;
 
 namespace NRL_PROJECT.Controllers
 {
+    /// <summary>
+    /// Admin area controller.
+    /// - Dashboard and user/organisation management.
+    /// - Creating users, assigning roles and organisations, deleting users.
+    /// </summary>
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
@@ -26,7 +31,7 @@ namespace NRL_PROJECT.Controllers
         }
 
         // ---------------------------------------------------------------------
-        // DASHBOARD
+        // Dashboard
         // ---------------------------------------------------------------------
         [HttpGet]
         public async Task<IActionResult> Dashboard()
@@ -60,12 +65,12 @@ namespace NRL_PROJECT.Controllers
         }
 
         // ---------------------------------------------------------------------
-        // MANAGE USERS
+        // Manage users
         // ---------------------------------------------------------------------
         [HttpGet]
         public async Task<IActionResult> ManageUsers()
         {
-            // 1. LAST ORGANISASJONENE (før vi lager viewmodels!)
+            // 1) Load organisations (used in viewmodels and dropdowns)
             var orgList = await _context.Organisations
                 .OrderBy(o => o.OrgName)
                 .Select(o => new SelectListItem
@@ -78,7 +83,7 @@ namespace NRL_PROJECT.Controllers
 
             ViewBag.Organizations = orgList;
 
-            // 2. LAST BRUKERE
+            // 2) Load users
             var users = await _userManager.Users
                 .Include(u => u.Organisation)
                 .OrderBy(u => u.FirstName)
@@ -88,7 +93,7 @@ namespace NRL_PROJECT.Controllers
             var vmList = new List<UserManagementViewModel>();
             int adminCount = 0;
 
-            // 3. LAG VIEWMODELS
+            // 3) Build viewmodels
             foreach (var user in users)
             {
                 var roles = await _userManager.GetRolesAsync(user);
@@ -116,7 +121,7 @@ namespace NRL_PROJECT.Controllers
         }
 
         // ---------------------------------------------------------------------
-        // CREATE USER
+        // Create user
         // ---------------------------------------------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -159,7 +164,7 @@ namespace NRL_PROJECT.Controllers
         }
 
         // ---------------------------------------------------------------------
-        // CREATE ORGANISATION (POST)
+        // Create organisation (POST) and AJAX variant
         // ---------------------------------------------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -190,9 +195,7 @@ namespace NRL_PROJECT.Controllers
             return RedirectToAction("ManageUsers");
         }
 
-        // ---------------------------------------------------------------------
-        // AJAX: CREATE ORGANISATION
-        // ---------------------------------------------------------------------
+        // AJAX: Create organisation
         [HttpPost]
         [Route("Admin/CreateOrganisationAjax")]
         public async Task<IActionResult> CreateOrganisationAjax([FromBody] Organisation model)
@@ -210,7 +213,7 @@ namespace NRL_PROJECT.Controllers
         }
 
         // ---------------------------------------------------------------------
-        // ASSIGN ORGANISATION TO USER
+        // Assign organisation and roles
         // ---------------------------------------------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -239,9 +242,6 @@ namespace NRL_PROJECT.Controllers
             return RedirectToAction("ManageUsers");
         }
 
-        // ---------------------------------------------------------------------
-        // ASSIGN ROLE
-        // ---------------------------------------------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AssignRole(string UserID, string role)
@@ -265,7 +265,7 @@ namespace NRL_PROJECT.Controllers
         }
 
         // ---------------------------------------------------------------------
-        // DELETE USER
+        // Delete user
         // ---------------------------------------------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]

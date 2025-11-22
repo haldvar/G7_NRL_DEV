@@ -15,6 +15,11 @@ using NRL_PROJECT.Models.ViewModels;
 
 namespace NRL_PROJECT.Controllers
 {
+    /// <summary>
+    /// Registrar area controller.
+    /// - Provides overview and detail pages for registrars.
+    /// - Enables updating report status, assigning registrars and editing obstacle data.
+    /// </summary>
     [Authorize(Roles = "Admin,Registrar")]
     public class RegistrarController : Controller
     {
@@ -27,6 +32,9 @@ namespace NRL_PROJECT.Controllers
             _userManager = userManager;
         }
 
+        // ---------------------------------------------------------------------
+        // Helpers / static mappings
+        // ---------------------------------------------------------------------
         private static UiStatus MapToUi(BackendStatus backendStatus)
         {
             return backendStatus switch
@@ -62,220 +70,9 @@ namespace NRL_PROJECT.Controllers
         }
 
         // ---------------------------------------------------------------------
-        // POST: UpdateStatus
-        // ---------------------------------------------------------------------
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateStatus(int id, string status, string? comment /* optional */)
-        {
-            var report = await _context.ObstacleReports
-                .FirstOrDefaultAsync(r => r.ObstacleReportID == id);
-            if (report == null) return NotFound();
-
-            var newBackendStatus = status switch
-            {
-                "UnderBehandling" => BackendStatus.InProgress,
-                "Godkjent"        => BackendStatus.Resolved,
-                "Avvist"          => BackendStatus.Deleted,
-                _                 => BackendStatus.Open
-            };
-
-            report.ObstacleReportStatus = newBackendStatus;
-
-            // Only update the comment if the form actually posted it
-            if (comment != null)
-                report.ObstacleReportComment = comment.Trim();
-
-            await _context.SaveChangesAsync();
-
-            TempData["StatusChanged"] = "Status ble oppdatert.";
-            return RedirectToAction(nameof(ReportDetails), new { id });
-        }
-
-        // ---------------------------------------------------------------------
-        // GET: ReportDetails
-        // ---------------------------------------------------------------------
-        [HttpGet]
-        public async Task<IActionResult> ReportDetails(int id)
-        {
-            var report = await _context.ObstacleReports
-                .Include(r => r.SubmittedByUser)
-                    .ThenInclude(u => u.Organisation)
-                .Include(r => r.Obstacle)
-                .Include(r => r.SubmittedByUser)
-                    .ThenInclude(u => u.Organisation)
-                .Include(r => r.Reviewer)
-                .Include(r => r.MapData)
-                    .ThenInclude(m => m.Coordinates)
-                .FirstOrDefaultAsync(r => r.ObstacleReportID == id);
-
-            if (report == null)
-                return NotFound();
-
-            var orderedCoords = report.MapData?.Coordinates?
-                .OrderBy(c => c.CoordinateId)
-                .ToList();
-
-            var first = orderedCoords?.FirstOrDefault();
-            var lat = first?.Latitude ?? 0;
-            var lng = first?.Longitude ?? 0;
-
-            var latLngPairs = orderedCoords != null
-                ? orderedCoords.Select(c => new[] { c.Latitude, c.Longitude }).ToList()
-                : new List<double[]>();
-
-            var json = JsonSerializer.Serialize(latLngPairs,
-                new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.Never });
-
-            var reportedLocation = first != null ? $"{lat},{lng}" : string.Empty;
-
-            var registrars = await GetRegistrarsAsync();
-            ViewBag.Registrars = registrars
-                .Select(x => new SelectListItem
-                {
-                    Value = x.Id,
-                    Text = x.Name,
-                    Selected = (x.Id == report.ReviewedByUserID)
-                })
-                .ToList();
-
-            var vm = new ObstacleReportViewModel
-            {
-                ObstacleReportID = report.ObstacleReportID,
-                ObstacleReportDate = report.ObstacleReportDate,
-                ObstacleID = report.Obstacle?.ObstacleID ?? 0,
-                ObstacleType = report.Obstacle?.ObstacleType ?? "",
-                ObstacleComment = report.Obstacle?.ObstacleComment ?? "",
-                ObstacleHeight = report.Obstacle?.ObstacleHeight ?? 0,
-                ObstacleWidth = report.Obstacle?.ObstacleWidth ?? 0,
-
-                // ⭐ BILDESTØTTE
-                ObstacleImageURL = report.Obstacle?.ObstacleImageURL,
-
-                MapData = report.MapData,
-                Latitude = lat,
-                Longitude = lng,
-                Reported_Location = reportedLocation,
-                GeoJsonCoordinates = json,
-
-                ReportStatus = MapToUi(report.ObstacleReportStatus),
-                ObstacleReportComment = report.ObstacleReportComment ?? "",
-
-                UserName = report.SubmittedByUser != null
-                    ? report.SubmittedByUser.UserName
-                    : "Ukjent",
-
-                OrgName = report.SubmittedByUser?.Organisation?.OrgName ?? "Ukjent",
-
-                AssignedRegistrarUserID = report.ReviewedByUserID,
-                ReviewerName = report.Reviewer?.UserName
-            };
-
-            ViewBag.ObstacleTypes = PredefinedObstacleTypes
-                .Select(t => new SelectListItem { Value = t, Text = t, Selected = (t == vm.ObstacleType) })
-                .ToList();
-
-            return View(vm);
-        }
-
-        // ---------------------------------------------------------------------
-        // POST: UpdateObstacleData
-        // ---------------------------------------------------------------------
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateObstacleData(int id, string? obstacleType, double? obstacleHeight)
-        {
-            var report = await _context.ObstacleReports
-                .Include(r => r.Obstacle)
-                .FirstOrDefaultAsync(r => r.ObstacleReportID == id);
-
-            if (report == null)
-            {
-                TempData["Error"] = "Rapporten finnes ikke.";
-                return RedirectToAction(nameof(RegistrarView));
-            }
-
-            if (obstacleHeight is < 0 or > 10000)
-            {
-                TempData["Error"] = "Ugyldig høyde (0–10 000).";
-                return RedirectToAction(nameof(ReportDetails), new { id });
-            }
-
-            if (report.Obstacle == null)
-                report.Obstacle = new ObstacleData();
-
-            if (!string.IsNullOrWhiteSpace(obstacleType))
-                report.Obstacle.ObstacleType = obstacleType.Trim();
-
-            if (obstacleHeight.HasValue)
-                report.Obstacle.ObstacleHeight = obstacleHeight.Value;
-
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] = "Hindring oppdatert.";
-            return RedirectToAction(nameof(ReportDetails), new { id });
-        }
-
-        // ---------------------------------------------------------------------
-        // POST: TransferReport
-        // ---------------------------------------------------------------------
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> TransferReport(int id, string transferToUserId)
-        {
-            if (string.IsNullOrWhiteSpace(transferToUserId))
-            {
-                TempData["Error"] = "Velg en registerfører.";
-                return RedirectToAction(nameof(ReportDetails), new { id });
-            }
-
-            var report = await _context.ObstacleReports
-                .FirstOrDefaultAsync(r => r.ObstacleReportID == id);
-
-            if (report == null)
-            {
-                TempData["Error"] = "Rapporten finnes ikke.";
-                return RedirectToAction(nameof(RegistrarView));
-            }
-
-            var targetUser = await _userManager.FindByIdAsync(transferToUserId);
-            if (targetUser == null || !(await _userManager.IsInRoleAsync(targetUser, "Registrar")))
-            {
-                TempData["Error"] = "Valgt bruker er ikke registerfører.";
-                return RedirectToAction(nameof(ReportDetails), new { id });
-            }
-
-            report.ReviewedByUserID = transferToUserId;
-            await _context.SaveChangesAsync();
-
-            // TempData["Success"] = "Rapporten er overført.";
-            TempData["RegistrarAssigned"] = "Ny registerfører ble tildelt.";
-            return RedirectToAction(nameof(ReportDetails), new { id });
-        }
-        
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SaveComment(int id, string? ObstacleReportComment)
-        {
-            var report = await _context.ObstacleReports.FindAsync(id);
-            if (report == null) return NotFound();
-
-            // Never store null if the column is NOT NULL
-            report.ObstacleReportComment = (ObstacleReportComment ?? string.Empty).Trim();
-
-            // Mark single prop modified (optional but clean)
-            _context.Attach(report);
-            _context.Entry(report).Property(r => r.ObstacleReportComment).IsModified = true;
-
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] = "Kommentar lagret.";
-            return RedirectToAction(nameof(ReportDetails), new { id });
-        }
-
+        // Views / GET
         // ---------------------------------------------------------------------
         // GET: RegistrarView
-        // ---------------------------------------------------------------------
         [HttpGet]
         public async Task<IActionResult> RegistrarView(string? status = "Alle", string? q = null)
         {
@@ -330,7 +127,7 @@ namespace NRL_PROJECT.Controllers
                     ObstacleComment = r.Obstacle != null ? (r.Obstacle.ObstacleComment ?? "") : "",
                     ObstacleHeight = r.Obstacle != null ? r.Obstacle.ObstacleHeight : 0,
 
-                    // ⭐ BILDESTØTTE
+                    // ⭐ File support
                     ObstacleImageURL = r.Obstacle != null ? r.Obstacle.ObstacleImageURL : null,
 
                     Latitude = (r.MapData != null && r.MapData.Coordinates.Any())
@@ -360,6 +157,214 @@ namespace NRL_PROJECT.Controllers
 
             ViewBag.SelectedStatus = status ?? "Alle";
             return View(model);
+        }
+
+        // GET: ReportDetails
+        [HttpGet]
+        public async Task<IActionResult> ReportDetails(int id)
+        {
+            var report = await _context.ObstacleReports
+                .Include(r => r.SubmittedByUser)
+                    .ThenInclude(u => u.Organisation)
+                .Include(r => r.Obstacle)
+                .Include(r => r.SubmittedByUser)
+                    .ThenInclude(u => u.Organisation)
+                .Include(r => r.Reviewer)
+                .Include(r => r.MapData)
+                    .ThenInclude(m => m.Coordinates)
+                .FirstOrDefaultAsync(r => r.ObstacleReportID == id);
+
+            if (report == null)
+                return NotFound();
+
+            var orderedCoords = report.MapData?.Coordinates?
+                .OrderBy(c => c.CoordinateId)
+                .ToList();
+
+            var first = orderedCoords?.FirstOrDefault();
+            var lat = first?.Latitude ?? 0;
+            var lng = first?.Longitude ?? 0;
+
+            var latLngPairs = orderedCoords != null
+                ? orderedCoords.Select(c => new[] { c.Latitude, c.Longitude }).ToList()
+                : new List<double[]>();
+
+            var json = JsonSerializer.Serialize(latLngPairs,
+                new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.Never });
+
+            var reportedLocation = first != null ? $"{lat},{lng}" : string.Empty;
+
+            var registrars = await GetRegistrarsAsync();
+            ViewBag.Registrars = registrars
+                .Select(x => new SelectListItem
+                {
+                    Value = x.Id,
+                    Text = x.Name,
+                    Selected = (x.Id == report.ReviewedByUserID)
+                })
+                .ToList();
+
+            var vm = new ObstacleReportViewModel
+            {
+                ObstacleReportID = report.ObstacleReportID,
+                ObstacleReportDate = report.ObstacleReportDate,
+                ObstacleID = report.Obstacle?.ObstacleID ?? 0,
+                ObstacleType = report.Obstacle?.ObstacleType ?? "",
+                ObstacleComment = report.Obstacle?.ObstacleComment ?? "",
+                ObstacleHeight = report.Obstacle?.ObstacleHeight ?? 0,
+               
+
+                // ⭐ Image support
+                ObstacleImageURL = report.Obstacle?.ObstacleImageURL,
+
+                MapData = report.MapData,
+                Latitude = lat,
+                Longitude = lng,
+                Reported_Location = reportedLocation,
+                GeoJsonCoordinates = json,
+
+                ReportStatus = MapToUi(report.ObstacleReportStatus),
+                ObstacleReportComment = report.ObstacleReportComment ?? "",
+
+                UserName = report.SubmittedByUser != null
+                    ? report.SubmittedByUser.UserName
+                    : "Ukjent",
+
+                OrgName = report.SubmittedByUser?.Organisation?.OrgName ?? "Ukjent",
+
+                AssignedRegistrarUserID = report.ReviewedByUserID,
+                ReviewerName = report.Reviewer?.UserName
+            };
+
+            ViewBag.ObstacleTypes = PredefinedObstacleTypes
+                .Select(t => new SelectListItem { Value = t, Text = t, Selected = (t == vm.ObstacleType) })
+                .ToList();
+
+            return View(vm);
+        }
+
+        // ---------------------------------------------------------------------
+        // Actions / POST that modify data
+        // ---------------------------------------------------------------------
+        // POST: UpdateStatus
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateStatus(int id, string status, string? comment /* optional */)
+        {
+            var report = await _context.ObstacleReports
+                .FirstOrDefaultAsync(r => r.ObstacleReportID == id);
+            if (report == null) return NotFound();
+
+            var newBackendStatus = status switch
+            {
+                "UnderBehandling" => BackendStatus.InProgress,
+                "Godkjent"        => BackendStatus.Resolved,
+                "Avvist"          => BackendStatus.Deleted,
+                _                 => BackendStatus.Open
+            };
+
+            report.ObstacleReportStatus = newBackendStatus;
+
+            // Only update the comment if the form actually posted it
+            if (comment != null)
+                report.ObstacleReportComment = comment.Trim();
+
+            await _context.SaveChangesAsync();
+
+            TempData["StatusChanged"] = "Status ble oppdatert.";
+            return RedirectToAction(nameof(ReportDetails), new { id });
+        }
+
+        // POST: UpdateObstacleData
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateObstacleData(int id, string? obstacleType, double? obstacleHeight)
+        {
+            var report = await _context.ObstacleReports
+                .Include(r => r.Obstacle)
+                .FirstOrDefaultAsync(r => r.ObstacleReportID == id);
+
+            if (report == null)
+            {
+                TempData["Error"] = "Rapporten finnes ikke.";
+                return RedirectToAction(nameof(RegistrarView));
+            }
+
+            if (obstacleHeight is < 0 or > 10000)
+            {
+                TempData["Error"] = "Ugyldig høyde (0–10 000).";
+                return RedirectToAction(nameof(ReportDetails), new { id });
+            }
+
+            if (report.Obstacle == null)
+                report.Obstacle = new ObstacleData();
+
+            if (!string.IsNullOrWhiteSpace(obstacleType))
+                report.Obstacle.ObstacleType = obstacleType.Trim();
+
+            if (obstacleHeight.HasValue)
+                report.Obstacle.ObstacleHeight = obstacleHeight.Value;
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Hindring oppdatert.";
+            return RedirectToAction(nameof(ReportDetails), new { id });
+        }
+
+        // POST: TransferReport
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> TransferReport(int id, string transferToUserId)
+        {
+            if (string.IsNullOrWhiteSpace(transferToUserId))
+            {
+                TempData["Error"] = "Velg en registerfører.";
+                return RedirectToAction(nameof(ReportDetails), new { id });
+            }
+
+            var report = await _context.ObstacleReports
+                .FirstOrDefaultAsync(r => r.ObstacleReportID == id);
+
+            if (report == null)
+            {
+                TempData["Error"] = "Rapporten finnes ikke.";
+                return RedirectToAction(nameof(RegistrarView));
+            }
+
+            var targetUser = await _userManager.FindByIdAsync(transferToUserId);
+            if (targetUser == null || !(await _userManager.IsInRoleAsync(targetUser, "Registrar")))
+            {
+                TempData["Error"] = "Valgt bruker er ikke registerfører.";
+                return RedirectToAction(nameof(ReportDetails), new { id });
+            }
+
+            report.ReviewedByUserID = transferToUserId;
+            await _context.SaveChangesAsync();
+
+            // TempData["Success"] = "Rapporten er overført.";
+            TempData["RegistrarAssigned"] = "Ny registerfører ble tildelt.";
+            return RedirectToAction(nameof(ReportDetails), new { id });
+        }
+
+        // POST: SaveComment
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveComment(int id, string? ObstacleReportComment)
+        {
+            var report = await _context.ObstacleReports.FindAsync(id);
+            if (report == null) return NotFound();
+
+            // Never store null if the column is NOT NULL
+            report.ObstacleReportComment = (ObstacleReportComment ?? string.Empty).Trim();
+
+            // Mark single prop modified (optional but clean)
+            _context.Attach(report);
+            _context.Entry(report).Property(r => r.ObstacleReportComment).IsModified = true;
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Kommentar lagret.";
+            return RedirectToAction(nameof(ReportDetails), new { id });
         }
     }
 }

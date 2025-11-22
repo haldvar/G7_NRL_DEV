@@ -1,8 +1,13 @@
-namespace NRL_PROJECT.Models;
-
-public class ErrorViewModel
+namespace NRL_PROJECT.Models
 {
-    public string? RequestId { get; set; }
+    /// <summary>
+    /// Error view model passed to the Error view.
+    /// Contains the RequestId so the view can display it when helpful for support.
+    /// </summary>
+    public class ErrorViewModel
+    {
+        public string? RequestId { get; set; }
 
-    public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+        public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+    }
 }

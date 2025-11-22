@@ -1,19 +1,28 @@
 @model List<NRL_PROJECT.Models.ViewModels.UserManagementViewModel>
-
 @{
+    // Page metadata
     ViewData["Title"] = "Brukerhåndtering";
-    var adminCount = (int?)ViewBag.AdminCount ?? 0;
 
+    // Counters and transient messages (populated by controller)
+    var adminCount = (int?)ViewBag.AdminCount ?? 0;
     var successMsg = TempData["Success"] as string;
     var errorMsg = TempData["Error"] as string;
 
+    // Organisations list used for dropdowns (populated in controller)
     var orgItems = ViewBag.Organizations as List<SelectListItem> ?? new();
 }
+
+@* 
+  ManageUsers view
+  - Admin UI for creating organisations and users, assigning roles/orgs, and deleting users.
+  - Preserves all existing forms, post targets and client-side behaviors.
+  - This file contains brief section headers and small inline comments for maintainability.
+*@
 
 <div class="min-h-[100svh] w-full bg-gradient-to-b from-green-100 to-blue-100">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
 
-        <!-- Title -->
+        <!-- Title / header -->
         <header class="mb-6">
             <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-green-700">
                 Brukerhåndtering
@@ -21,7 +30,7 @@
             <div class="mt-3 h-1 w-48 rounded-full bg-gradient-to-r from-green-600 via-blue-600 to-green-600"></div>
         </header>
 
-        <!-- Flash messages -->
+        <!-- Flash / status messages -->
         @if (!string.IsNullOrWhiteSpace(successMsg))
         {
             <div class="mb-4 rounded-xl border border-green-200 bg-white px-4 py-3 text-green-800 shadow">
@@ -36,7 +45,7 @@
             </div>
         }
 
-        <!-- Admin safety -->
+        <!-- Admin safety notice: ensure at least one admin remains -->
         @if (adminCount <= 1)
         {
             <div class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-700 shadow">
@@ -44,13 +53,14 @@
             </div>
         }
 
-        <!-- Action buttons -->
+        <!-- Top action buttons -->
         <div class="mb-6 flex items-center justify-between">
             <div class="text-sm text-gray-700">
                 Antall brukere: <b>@Model.Count</b>
             </div>
 
             <div class="flex gap-3">
+                <!-- Toggle panels to create org / user -->
                 <button type="button"
                         onclick="togglePanel('createOrgForm')"
                         class="rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 shadow hover:bg-blue-50">
@@ -65,12 +75,12 @@
             </div>
         </div>
 
-        <!-- CREATE ORG PANEL -->
+        <!-- CREATE ORGANISATION PANEL -->
         <div id="createOrgForm" class="mb-8 hidden">
             <div class="rounded-2xl border bg-white p-5 shadow">
-
                 <h3 class="mb-4 text-xl font-bold text-blue-700">Opprett ny organisasjon</h3>
 
+                @* The org creation form uses AJAX to call Admin/CreateOrganisationAjax *@
                 <form id="orgForm" class="grid grid-cols-1 gap-4 md:grid-cols-3">
                     @Html.AntiForgeryToken()
 
@@ -99,14 +109,13 @@
         <!-- CREATE USER PANEL -->
         <div id="createUserForm" class="mb-8 hidden">
             <div class="rounded-2xl border bg-white p-5 shadow">
-
                 <h3 class="mb-4 text-xl font-bold text-green-700">Opprett ny bruker</h3>
 
+                @* CreateUser posts to Admin/CreateUser (preserves anti-forgery token) *@
                 <form asp-action="CreateUser" method="post" class="space-y-4">
                     @Html.AntiForgeryToken()
 
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-
                         <div>
                             <label class="text-sm font-medium">Brukernavn</label>
                             <input type="text" name="UserName" required class="mt-1 w-full rounded-lg border px-3 py-2" />
@@ -165,11 +174,10 @@
                         Opprett bruker
                     </button>
                 </form>
-
             </div>
         </div>
 
-        <!-- USERS TABLE -->
+        <!-- USERS TABLE: displays users, allows assigning org/roles and deleting -->
         <div class="rounded-2xl border bg-white shadow-xl">
             <div class="overflow-x-auto">
                 <table class="min-w-full text-left text-sm">
@@ -265,57 +273,62 @@
 
 @section Scripts {
     <script>
-
+        // Utility: toggle visibility of panels (create org / create user)
         function togglePanel(id) {
             document.getElementById(id).classList.toggle("hidden");
         }
 
         // CREATE ORGANISATION AJAX
-        document.getElementById("createOrgBtn").addEventListener("click", function () {
+        // - Sends JSON to Admin/CreateOrganisationAjax and, on success, appends new org to all organisation selects.
+        const createOrgBtn = document.getElementById("createOrgBtn");
+        if (createOrgBtn) {
+            createOrgBtn.addEventListener("click", function () {
 
-            const name = document.getElementById("OrgName").value.trim();
-            const email = document.getElementById("OrgContactEmail").value.trim();
-            const msg = document.getElementById("orgMessage");
+                const name = document.getElementById("OrgName").value.trim();
+                const email = document.getElementById("OrgContactEmail").value.trim();
+                const msg = document.getElementById("orgMessage");
 
-            if (!name) {
-                msg.innerHTML = "⛔ Organisasjonsnavn er påkrevd.";
-                msg.className = "text-red-700";
-                return;
-            }
-
-            fetch("/Admin/CreateOrganisationAjax", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ OrgName: name, OrgContactEmail: email })
-            })
-            .then(r => r.json())
-            .then(data => {
-
-                if (!data.success) {
-                    msg.innerHTML = "⛔ " + data.message;
+                if (!name) {
+                    msg.innerHTML = "⛔ Organisasjonsnavn er påkrevd.";
                     msg.className = "text-red-700";
                     return;
                 }
 
-            // Add to dropdown
-            document.querySelectorAll("select[name='OrgId'], select[name='OrgID'], #OrgDropdown")
-            .forEach(select => {
-            const opt = document.createElement("option");
-            opt.value = data.orgId;
-            opt.textContent = data.orgName;
-            select.appendChild(opt);
-        });
+                fetch("/Admin/CreateOrganisationAjax", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ OrgName: name, OrgContactEmail: email })
+                })
+                .then(r => r.json())
+                .then(data => {
 
-                msg.innerHTML = "✔ Organisasjon opprettet!";
-                msg.className = "text-green-700";
+                    if (!data.success) {
+                        msg.innerHTML = "⛔ " + data.message;
+                        msg.className = "text-red-700";
+                        return;
+                    }
 
-                document.getElementById("OrgName").value = "";
-                document.getElementById("OrgContactEmail").value = "";
-            })
-            .catch(() => {
-                msg.innerHTML = "⛔ Serverfeil.";
-                msg.className = "text-red-700";
+                    // Add to dropdowns used across the page (keeps UI in sync)
+                    document.querySelectorAll("select[name='OrgId'], select[name='OrgID'], #OrgDropdown")
+                    .forEach(select => {
+                        const opt = document.createElement("option");
+                        opt.value = data.orgId;
+                        opt.textContent = data.orgName;
+                        select.appendChild(opt);
+                    });
+
+                    msg.innerHTML = "✔ Organisasjon opprettet!";
+                    msg.className = "text-green-700";
+
+                    // Reset inputs
+                    document.getElementById("OrgName").value = "";
+                    document.getElementById("OrgContactEmail").value = "";
+                })
+                .catch(() => {
+                    msg.innerHTML = "⛔ Serverfeil.";
+                    msg.className = "text-red-700";
+                });
             });
-        });
+        }
     </script>
 }
