@@ -15,17 +15,14 @@ namespace NRL_PROJECT.Models
 
         [Required, StringLength(100)]
         public string LastName { get; set; }
-        
+       
         public int? OrgID { get; set; }
         public string? OrgName { get; set; }
 
         [ForeignKey(nameof(OrgID))]
         public Organisation Organisation { get; set; }
-
-        
-        [ForeignKey("UserRole")]
-        public int? RoleID { get; set; } // nullable
-        
+      
+                               
         public ICollection<ObstacleReportData> ObstacleReportsSubmitted { get; set; }
         public ICollection<ObstacleReportData> ObstacleReportsReviewed { get; set; }
     }

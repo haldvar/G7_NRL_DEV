@@ -1,7 +1,7 @@
 using static NRL_PROJECT.Models.ObstacleReportData;
 using EnumStatus = NRL_PROJECT.Models.ObstacleReportData.EnumTypes;
 
-namespace NRL_PROJECT.Models
+namespace NRL_PROJECT.Models.ViewModels
 
 {
     public class ObstacleReportViewModel

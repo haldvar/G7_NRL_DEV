@@ -226,12 +226,12 @@ namespace NRL_PROJECT.Data
 
                 if (isLine)
                 {
-                    // Kraftlinje-stil koordinater
+                    // Alltid nøyaktig 2 punkter for linje
                     coords = new List<MapCoordinate>();
                     var baseLat = 59.90 + random.NextDouble() / 100;
                     var baseLng = 10.75 + random.NextDouble() / 100;
 
-                    for (int p = 0; p < random.Next(3, 7); p++)
+                    for (int p = 0; p < 2; p++)
                     {
                         coords.Add(new MapCoordinate
                         {
@@ -245,15 +245,16 @@ namespace NRL_PROJECT.Data
                 {
                     // Et enkelt punkt
                     coords = new List<MapCoordinate>
-            {
-                new MapCoordinate
-                {
-                    Latitude = 59.90 + random.NextDouble()/100,
-                    Longitude = 10.75 + random.NextDouble()/100,
-                    OrderIndex = 0
+    {
+        new MapCoordinate
+        {
+            Latitude = 59.90 + random.NextDouble()/100,
+            Longitude = 10.75 + random.NextDouble()/100,
+            OrderIndex = 0
+        }
+    };
                 }
-            };
-                }
+
 
                 var mapData = new MapData
                 {

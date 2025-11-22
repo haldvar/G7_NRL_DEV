@@ -11,6 +11,7 @@ using System.Text.Json.Serialization;
 using static NRL_PROJECT.Models.ObstacleReportData;
 using BackendStatus = NRL_PROJECT.Models.ObstacleReportData.EnumTypes;
 using UiStatus = NRL_PROJECT.Models.EnumStatus;
+using NRL_PROJECT.Models.ViewModels;
 
 namespace NRL_PROJECT.Controllers
 {
