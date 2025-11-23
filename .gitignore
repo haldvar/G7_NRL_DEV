@@ -7,3 +7,70 @@
 NRL_PROJECT/NRL_PROJECT.csproj.user
 
 /node_modules
+
+
+
+# .gitignore - common for .NET / Visual Studio projects
+
+# Build / publish outputs
+/bin/
+/obj/
+/**/bin/
+/**/obj/
+/**/publish/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider / IntelliJ
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs, temp files
+*.log
+*.tmp
+
+# Test results / coverage
+TestResults/
+coverage/
+*.trx
+*.coverage
+*.coveragexml
+
+# NuGet
+*.nupkg
+.packages/
+
+# User secrets and local config
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+.env
+
+# Docker Compose local overrides (keep main docker-compose.yml committed)
+docker-compose.override.yml
+docker-compose.vs.debug.yml
+docker-compose.vs.release.yml
+
+# Node (if present)
+node_modules/
+
+# Certificates / private keys
+*.pfx
+*.pem
+*.key
+
+# Ignore compiled test binaries
+**/NRL_PROJECT.Tests/bin/
+**/NRL_PROJECT.Tests/obj/

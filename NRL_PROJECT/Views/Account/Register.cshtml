@@ -1,33 +1,43 @@
 @model NRL_PROJECT.Models.ViewModels.RegisterViewModel
 
 @{
+    // Page metadata
     ViewData["Title"] = "Registrer ny bruker";
     Layout = "~/Views/Shared/_LoginLayout.cshtml";
 }
 
-<!-- Fade-in via transition (no keyframes needed) -->
+@* 
+  Register view
+  - Presents a registration form bound to RegisterViewModel.
+  - Preserves client-side validation via unobtrusive scripts.
+  - Visual styling and transitions are purely presentational.
+*@
+
+<!-- Container: centered card with subtle entrance animation -->
 <div class="min-h-[100dvh] flex items-center justify-center px-4">
     <div id="register-card" class="w-full max-w-md opacity-0 translate-y-2 transition-all duration-500 ease-out">
         <div class="relative rounded-3xl bg-white/95 backdrop-blur shadow-2xl border border-gray-200 overflow-hidden">
-            <!-- Accent bar -->
+            <!-- Top accent bar -->
             <div class="h-2 bg-gradient-to-r from-green-600 via-blue-600 to-green-600"></div>
 
             <div class="p-6 sm:p-7">
+                <!-- Header -->
                 <div class="mb-6 text-center">
                     <h1 class="text-2xl font-extrabold tracking-tight text-green-700">@ViewData["Title"]</h1>
                     <p class="text-gray-600 text-sm mt-1">Fyll inn feltene under for å opprette en konto.</p>
                 </div>
 
-                <form asp-action="Register" method="post" class="space-y-5">
+                @* Form: posts back to Account/Register (preserves anti-forgery) *@
+                <form asp-action="Register" method="post" class="space-y-5" novalidate>
                     @Html.AntiForgeryToken()
 
-                    <!-- Validation summary -->
+                    <!-- Validation summary: model-level errors -->
                     <div asp-validation-summary="ModelOnly" class="text-sm text-red-600"></div>
 
-                    <!-- UserName -->
+                    <!-- Username -->
                     <div>
                         <label asp-for="UserName" class="block text-sm font-semibold text-gray-700 mb-1"></label>
-                        <input asp-for="UserName"
+                        <input asp-for="UserName" aria-label="Brukernavn"
                                class="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400
                                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                         <span asp-validation-for="UserName" class="mt-1 block text-sm text-red-600"></span>
@@ -36,7 +46,7 @@
                     <!-- Email -->
                     <div>
                         <label asp-for="Email" class="block text-sm font-semibold text-gray-700 mb-1"></label>
-                        <input asp-for="Email" type="email" autocomplete="email"
+                        <input asp-for="Email" type="email" autocomplete="email" aria-label="E-post"
                                class="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400
                                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                         <span asp-validation-for="Email" class="mt-1 block text-sm text-red-600"></span>
@@ -45,7 +55,7 @@
                     <!-- Password -->
                     <div>
                         <label asp-for="Password" class="block text-sm font-semibold text-gray-700 mb-1"></label>
-                        <input asp-for="Password" type="password" autocomplete="new-password"
+                        <input asp-for="Password" type="password" autocomplete="new-password" aria-label="Passord"
                                class="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400
                                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                         <span asp-validation-for="Password" class="mt-1 block text-sm text-red-600"></span>
@@ -54,38 +64,32 @@
                     <!-- Confirm Password -->
                     <div>
                         <label asp-for="ConfirmPassword" class="block text-sm font-semibold text-gray-700 mb-1"></label>
-                        <input asp-for="ConfirmPassword" type="password" autocomplete="new-password"
+                        <input asp-for="ConfirmPassword" type="password" autocomplete="new-password" aria-label="Gjenta passord"
                                class="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400
                                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                         <span asp-validation-for="ConfirmPassword" class="mt-1 block text-sm text-red-600"></span>
                     </div>
 
-                    <!-- First/Last name -->
+                    <!-- First / Last name (side-by-side on larger screens) -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label asp-for="FirstName" class="block text-sm font-semibold text-gray-700 mb-1"></label>
-                            <input asp-for="FirstName"
+                            <input asp-for="FirstName" aria-label="Fornavn"
                                    class="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400
                                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                             <span asp-validation-for="FirstName" class="mt-1 block text-sm text-red-600"></span>
                         </div>
                         <div>
                             <label asp-for="LastName" class="block text-sm font-semibold text-gray-700 mb-1"></label>
-                            <input asp-for="LastName"
+                            <input asp-for="LastName" aria-label="Etternavn"
                                    class="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400
                                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                             <span asp-validation-for="LastName" class="mt-1 block text-sm text-red-600"></span>
                         </div>
                     </div>
 
-                    <!-- OrgName -->
-                    <!-- <div>
-                        <label asp-for="OrgName" class="block text-sm font-semibold text-gray-700 mb-1"></label>
-                        <input asp-for="OrgName"
-                               class="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400
-                                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                        <span asp-validation-for="OrgName" class="mt-1 block text-sm text-red-600"></span>
-                    </div> -->
+                    @* Optional fields like OrgID / RoleName are intentionally not displayed here (keeps form minimal).
+                       They are available in the RegisterViewModel for admin flows. *@
 
                     <!-- Actions -->
                     <div class="pt-2 flex flex-col sm:flex-row gap-3">
@@ -94,6 +98,7 @@
                                        bg-blue-600 text-white shadow-md hover:bg-blue-700 transition">
                             Opprett ny bruker
                         </button>
+
                         <a asp-controller="Account" asp-action="Login"
                            class="inline-flex justify-center items-center px-6 py-3 rounded-full font-semibold
                                   bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-center">
@@ -113,7 +118,7 @@
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 
     <script>
-        // Trigger fade-in after mount
+        // Entrance animation: remove the hidden classes after mount to trigger CSS transition.
         document.addEventListener('DOMContentLoaded', () => {
             const el = document.getElementById('register-card');
             if (el) requestAnimationFrame(() => el.classList.remove('opacity-0', 'translate-y-2'));

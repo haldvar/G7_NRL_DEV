@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- use a published test sdk version -->
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+    <PackageReference Include="xunit" Version="2.5.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+    <PackageReference Include="Moq" Version="4.20.69" />
+    <!-- Match the EF Core InMemory version used by the main project -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Reference the main project under test (adjust path if needed) -->
+    <ProjectReference Include="..\NRL_PROJECT\NRL_PROJECT.csproj" />
+  </ItemGroup>
+
+</Project>

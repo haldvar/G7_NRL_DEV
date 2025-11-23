@@ -8,12 +8,13 @@ using NRL_PROJECT.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ------------------------------------------------------------
-// KONFIGURER TJENESTER (Dependency Injection)
-// ------------------------------------------------------------
+// -----------------------------------------------------------------
+// Service registration (Dependency Injection)
+// -----------------------------------------------------------------
 
-// Legg til støtte for MVC (Controllers + Views)
-// + Gjør alle sidene/funksjonene utilgjengelig by default, utenom der [AllowAnonymous] finnes (Login)
+// Add MVC (Controllers + Views)
+// Apply a global authorization policy that requires authenticated users
+// unless [AllowAnonymous] is used on specific actions.
 builder.Services.AddControllersWithViews(options =>
 {
     var policy = new AuthorizationPolicyBuilder()
@@ -22,87 +23,89 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add(new AuthorizeFilter(policy));
 });
 
-// hide server header
+// Hide server header for slightly improved security posture
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
     serverOptions.AddServerHeader = false;
 });
 
-// Database configuration (Entity Framework + MySQL)
-// KOMMENTERES UT UNDER TESTING:
-
- builder.Services.AddDbContext<NRL_Db_Context>(options =>
+// -----------------------------------------------------------------
+// Database configuration (EF Core + MySQL)
+// -----------------------------------------------------------------
+// NOTE: The MySQL registration is active. Switch to the in-memory option
+// below only during tests as indicated.
+builder.Services.AddDbContext<NRL_Db_Context>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
-        mySqlOptions => mySqlOptions.EnableRetryOnFailure()); // retry logic - robustness
+        mySqlOptions => mySqlOptions.EnableRetryOnFailure()); // retry logic for robustness
 });
 
-// BRUK DENNE (in-memory database i stedet for MySQL) VED TESTING: 
+// BRING THIS BLOCK BACK DURING UNIT/INTEGRATION TESTING if you prefer an in-memory DB:
 /*
- builder.Services.AddDbContext<NRL_Db_Context>(options =>
+builder.Services.AddDbContext<NRL_Db_Context>(options =>
     options.UseInMemoryDatabase("TestDb"));
 */
 
-//-------------------------------------------------------------
+// -----------------------------------------------------------------
 // Identity configuration
-//-------------------------------------------------------------
+// -----------------------------------------------------------------
+builder.Services.AddIdentity<User, IdentityRole>(options =>
+    {
+        // Lockout settings
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+        options.Lockout.MaxFailedAccessAttempts = 5;
+        options.Lockout.AllowedForNewUsers = false;
 
- builder.Services.AddIdentity<User, IdentityRole>(options =>
-     {
-         // Lockout settings
-         options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-         options.Lockout.MaxFailedAccessAttempts = 5;
-         options.Lockout.AllowedForNewUsers = false;
-         // Sign in settings
-         options.SignIn.RequireConfirmedPhoneNumber = false;
-         options.SignIn.RequireConfirmedEmail = false;
-         options.SignIn.RequireConfirmedAccount = false;
-         // User settings
-         options.User.RequireUniqueEmail = true;
-         // Password settings
-         options.Password.RequireDigit = true;
-         options.Password.RequireLowercase = true;
-         options.Password.RequireUppercase = true;
-         options.Password.RequireNonAlphanumeric = true;
-         options.Password.RequiredLength = 8;
-     })
-     .AddEntityFrameworkStores<NRL_Db_Context>()
-     .AddDefaultTokenProviders();
+        // Sign-in settings
+        options.SignIn.RequireConfirmedPhoneNumber = false;
+        options.SignIn.RequireConfirmedEmail = false;
+        options.SignIn.RequireConfirmedAccount = false;
 
-// Configure application cookie
- builder.Services.ConfigureApplicationCookie(options =>
- {
-     options.LoginPath = "/Account/Login";
-     options.LogoutPath = "/Account/Logout";
-     options.AccessDeniedPath = "/Account/AccessDenied";
-     options.ExpireTimeSpan = TimeSpan.FromHours(2);
-     options.SlidingExpiration = true;
- });
+        // User settings
+        options.User.RequireUniqueEmail = true;
 
-// Registrer e-posttjeneste (dummy for testing)
+        // Password complexity
+        options.Password.RequireDigit = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireNonAlphanumeric = true;
+        options.Password.RequiredLength = 8;
+    })
+    .AddEntityFrameworkStores<NRL_Db_Context>()
+    .AddDefaultTokenProviders();
 
- builder.Services.AddTransient<IEmailSender, AuthMessageSender>();
+// Configure application cookie paths and expiration
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+    options.LogoutPath = "/Account/Logout";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+    options.ExpireTimeSpan = TimeSpan.FromHours(2);
+    options.SlidingExpiration = true;
+});
 
+// Register a transient email sender (dummy implementation used in Program.cs)
+builder.Services.AddTransient<IEmailSender, AuthMessageSender>();
 
-// ------------------------------------------------------------
-// BYGG APPEN
-// ------------------------------------------------------------
+// -----------------------------------------------------------------
+// Build the app
+// -----------------------------------------------------------------
 var app = builder.Build();
 
-// ------------------------------------------------------------
-// SEEDING
-// ------------------------------------------------------------
-
+// -----------------------------------------------------------------
+// Seeding (run within a scoped service provider)
+// -----------------------------------------------------------------
 using (var scope = app.Services.CreateScope())
 {
     await DataSeeder.SeedAsync(scope.ServiceProvider, builder.Configuration);
 }
 
-//
-// SIKKERHETSHEADERE
-//
-
+// -----------------------------------------------------------------
+// Security headers middleware
+// - Adds a small set of HTTP headers to improve security posture.
+// - Keep CSP restrictive but allow the CDN/script sources used by the app.
+// -----------------------------------------------------------------
 app.Use(async (context, next) =>
 {
     context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
@@ -111,8 +114,7 @@ app.Use(async (context, next) =>
     context.Response.Headers.Add("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
     context.Response.Headers.Add("Referrer-Policy", "no-referrer");
 
-    // Denne fixer tilgang til apiene som er nevnt
-
+    // Content-Security-Policy: restrict as tightly as possible while allowing necessary CDNs and tile providers.
     context.Response.Headers.Add("Content-Security-Policy",
         "default-src 'self'; " +
         "script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://rawcdn.githack.com; " +
@@ -121,53 +123,48 @@ app.Use(async (context, next) =>
     await next();
 });
 
-// ------------------------------------------------------------
-// KONFIGURER MIDDLEWARE (HTTP request pipeline)
-// ------------------------------------------------------------
-
+// -----------------------------------------------------------------
+// Middleware pipeline configuration
+// -----------------------------------------------------------------
 if (!app.Environment.IsDevelopment())
 {
-    // Bruk en egen feilhåndteringsside i produksjon
+    // Use custom error handling in production
     app.UseExceptionHandler("/Home/Error");
 
-    // Aktiver HSTS (sikkerhetsheader for HTTPS)
+    // Enable HSTS in non-development environments
     app.UseHsts();
 }
 
-// Tving all trafikk til HTTPS
+// Redirect HTTP to HTTPS
 app.UseHttpsRedirection();
 
-// Gjør wwwroot-innhold tilgjengelig (CSS, JS, bilder osv.)
+// Serve static files from wwwroot (CSS, JS, images)
 app.UseStaticFiles();
 
-// Aktiver ruting (slik at /Home/Index m.m. fungerer)
+// Routing
 app.UseRouting();
 
-// Legger til Authentication
+// Authentication & Authorization
 app.UseAuthentication();
-
-// Aktiver eventuell autorisasjon (hvis prosjektet bruker det)
 app.UseAuthorization();
 
-// ------------------------------------------------------------
-// KONFIGURER STANDARD RUTE (MVC)
-// ------------------------------------------------------------
+// -----------------------------------------------------------------
+// MVC route configuration
+// -----------------------------------------------------------------
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}"
 );
 
-
-// ------------------------------------------------------------
-// KJØR APPEN
-// ------------------------------------------------------------
-
+// -----------------------------------------------------------------
+// Run the application
+// -----------------------------------------------------------------
 app.Run();
 
-//-------------------------------------------------------------
-// EPOST TJENESTE IMPLEMENTASJON
-//-------------------------------------------------------------
-
+// -----------------------------------------------------------------
+// Simple email sender used for development/testing (console sink).
+// Keeps IEmailSender registered above functional without external SMTP.
+// -----------------------------------------------------------------
 public class AuthMessageSender : IEmailSender
 {
     public Task SendEmailAsync(string email, string subject, string htmlMessage)

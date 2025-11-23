@@ -4,6 +4,10 @@ using NRL_PROJECT.Data;
 
 namespace NRL_PROJECT.Controllers
 {
+    /// <summary>
+    /// Lightweight health probe controller used by uptime checks and orchestrators.
+    /// Returns 200 if database connectivity works, otherwise 503 with error details.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class HealthController : ControllerBase
@@ -15,13 +19,15 @@ namespace NRL_PROJECT.Controllers
             _context = context;
         }
 
+        // GET /api/Health
+        // Simple DB connectivity health probe; returns 200 when DB accessible.
         [HttpGet]
         public async Task<IActionResult> CheckDatabase()
         {
             try
             {
                 var test = await _context.Obstacles.AnyAsync();
-                
+
                 return Ok(new
                 {
                     status = "Healthy",
