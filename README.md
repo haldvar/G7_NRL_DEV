@@ -57,7 +57,10 @@ Brukere kan opprette egne kontoer, som deretter godkjennes av en administrator s
 ### 2. Åpne prosjektet
 Åpne `.sln` i **Visual Studio** eller **Rider**.
 
-### 3. Klargjør database via Docker
+### 3. Bygg prosjektet
+Kjør løsning som docker compose
+
+### 4. Klargjør database via Docker
 Åpne Docker-terminal:
 
 ```bash
@@ -80,19 +83,14 @@ dotnet ef migrations add InitialCreate
 dotnet ef database update
 ```
 ### 5. Start applikasjonen
-Kjør med docker-compose, åpne Docker Desktop og trykk på:
+Åpne Docker Desktop og trykk på:
 localhost:5001
-Nettleseren åpnes automatisk.
 
 ## Feilsøking
 Hvis løsningen ikke vil kjøre:
 - Stopp NRL_PROJECT-containeren i Docker
 - Kjør docker compose på nytt fra IDE
 - Start containere igjen i Docker Desktop
-
-## Trenger du fortsatt hjelp?
-- Kontakt et av gruppemeldemmer (gruppe 7)
-- Spør ChatGPT
 
 --- 
 
