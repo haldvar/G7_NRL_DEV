@@ -259,15 +259,21 @@ namespace NRL_PROJECT.Controllers
 
         // GET: /Map/ReportListOverview
         [HttpGet]
+        // I din MapController.cs, endre ReportListOverview metoden til dette:
+
+// GET: /Map/ReportListOverview
+        [HttpGet]
         public async Task<IActionResult> ReportListOverview()
         {
             // Load reports including related data for the overview
+           
             var reports = await _context.ObstacleReports
                 .Include(r => r.Obstacle)
                 .Include(r => r.SubmittedByUser)
                 .Include(r => r.Reviewer)
                 .Include(r => r.MapData)
-                    .ThenInclude(m => m.Coordinates)
+                .ThenInclude(m => m.Coordinates)
+                .OrderByDescending(r => r.ObstacleReportDate)   // Newest report from top
                 .ToListAsync();
 
             return View(reports);

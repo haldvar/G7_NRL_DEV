@@ -8,39 +8,39 @@
 }
 
 <div class="min-h-screen w-full bg-gradient-to-b from-green-100 to-blue-100">
-    <div class="mx-auto max-w-[90vw] px-4 sm:px-6 lg:px-8 py-10">
+    <div class="mx-auto max-w-[95vw] px-2 sm:px-4 lg:px-8 py-4 sm:py-10">
 
         <!-- Header -->
-        <header class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <header class="mb-4 sm:mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-                <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-green-700">
+                <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-green-700">
                     Hinderlogg
                 </h1>
-                <p class="mt-1 text-gray-600">
+                <p class="mt-1 text-sm sm:text-base text-gray-600">
                     Oversikt over indrapporterte hinder.
                 </p>
             </div>
-            <div class="h-2 w-40 rounded-full bg-gradient-to-r from-green-600 to-blue-600"></div>
+            <div class="h-2 w-32 sm:w-40 rounded-full bg-gradient-to-r from-green-600 to-blue-600"></div>
         </header>
 
         <!-- Filters -->
-        <form method="get" class="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-6">
+        <div class="mb-4 sm:mb-5 grid grid-cols-1 gap-3 sm:grid-cols-6">
             <div class="sm:col-span-3">
                 <label for="q" class="sr-only">Søk</label>
                 <div class="relative">
                     <input id="q" name="q" value="@q"
-                           placeholder="Søk på ID, type, innmelder, organisasjon…"
-                           class="w-full rounded-2xl border border-white/60 bg-white/80 backdrop-blur px-4 py-3 pr-10 shadow focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500"
+                           placeholder="Søk på ID, type, innmelder…"
+                           class="w-full rounded-2xl border border-white/60 bg-white/80 backdrop-blur px-3 sm:px-4 py-2 sm:py-3 pr-10 shadow focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" />
+                    <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-500"
                          xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                          stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                          d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
             </div>
 
-            <div class="sm:col-span-2">
+            <div class="sm:col-span-3">
                 <label class="sr-only" for="status">Status</label>
-                <select id="status" name="status" class="w-full rounded-2xl border border-white/60 bg-white/80 backdrop-blur px-4 py-3 shadow focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select id="status" name="status" class="w-full rounded-2xl border border-white/60 bg-white/80 backdrop-blur px-3 sm:px-4 py-2 sm:py-3 shadow focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                     <option value="">Alle statuser</option>
                     <option value="New" selected="@(status=="New")">Ny</option>
                     <option value="Open" selected="@(status=="Open")">Venter</option>
@@ -49,36 +49,72 @@
                     <option value="Deleted" selected="@(status=="Deleted")">Avvist</option>
                 </select>
             </div>
-
-            <div class="sm:col-span-1">
-                <button type="submit"
-                        class="w-full rounded-2xl bg-blue-600 px-4 py-3 font-semibold text-white shadow hover:bg-blue-700">
-                    Filtrer
-                </button>
-            </div>
-        </form>
+        </div>
 
         <!-- Table shell -->
-        <div class="overflow-hidden rounded-3xl border border-white/60 bg-white/70 shadow-xl backdrop-blur">
-            <div class="flex items-center justify-between border-b border-white/60 px-4 py-3">
-                <div class="text-sm text-gray-700">
+        <div class="overflow-hidden rounded-2xl sm:rounded-3xl border border-white/60 bg-white/70 shadow-xl backdrop-blur">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-white/60 px-3 sm:px-4 py-2 sm:py-3 gap-2">
+                <div class="text-xs sm:text-sm text-gray-700">
                     Antall: <span id="rowCount" class="font-semibold">@Model.Count</span>
                 </div>
                 <div class="text-xs text-gray-500">Klikk på bilde for å åpne i ny fane</div>
             </div>
 
-            <div class="overflow-x-auto">
+            <!-- Desktop Table View -->
+            <div class="hidden lg:block overflow-x-auto">
                 <table class="min-w-full text-sm">
                     <thead class="bg-white">
                         <tr class="text-left text-gray-600 border-b">
-                            <th class="px-4 py-3">ID</th>
-                            <th class="px-4 py-3">Innmelder</th>
-                            <th class="px-4 py-3">Saksbehandler</th>
-                            <th class="px-4 py-3">Type</th>
+                            <th class="px-4 py-3 cursor-pointer hover:bg-gray-50 group" data-sort="id">
+                                <div class="flex items-center gap-1">
+                                    ID
+                                    <svg class="h-4 w-4 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                    </svg>
+                                </div>
+                            </th>
+                            <th class="px-4 py-3 cursor-pointer hover:bg-gray-50 group" data-sort="submitter">
+                                <div class="flex items-center gap-1">
+                                    Innmelder
+                                    <svg class="h-4 w-4 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                    </svg>
+                                </div>
+                            </th>
+                            <th class="px-4 py-3 cursor-pointer hover:bg-gray-50 group" data-sort="reviewer">
+                                <div class="flex items-center gap-1">
+                                    Saksbehandler
+                                    <svg class="h-4 w-4 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                    </svg>
+                                </div>
+                            </th>
+                            <th class="px-4 py-3 cursor-pointer hover:bg-gray-50 group" data-sort="type">
+                                <div class="flex items-center gap-1">
+                                    Type
+                                    <svg class="h-4 w-4 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                    </svg>
+                                </div>
+                            </th>
                             <th class="px-4 py-3">Kommentar (innmelder)</th>
                             <th class="px-4 py-3">Kommentar (saksbehandler)</th>
-                            <th class="px-4 py-3">Dato</th>
-                            <th class="px-4 py-3">Status</th>
+                            <th class="px-4 py-3 cursor-pointer hover:bg-gray-50 group" data-sort="date">
+                                <div class="flex items-center gap-1">
+                                    Dato
+                                    <svg class="h-4 w-4 text-blue-600 group-hover:text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                    </svg>
+                                </div>
+                            </th>
+                            <th class="px-4 py-3 cursor-pointer hover:bg-gray-50 group" data-sort="status">
+                                <div class="flex items-center gap-1">
+                                    Status
+                                    <svg class="h-4 w-4 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                    </svg>
+                                </div>
+                            </th>
                             <th class="px-4 py-3">Koordinater</th>
                             <th class="px-4 py-3">Bilde</th>
                         </tr>
@@ -124,8 +160,14 @@
                                     break;
                             }
 
-                            <tr class="hover:bg-white/60 transition" data-q="@($"{report.ObstacleReportID} {submittedBy} {reviewer} {typeTxt} {report.Obstacle?.ObstacleComment} {report.ObstacleReportComment} {coordsTxt} {report.ObstacleReportStatus}")"
-                                data-status="@report.ObstacleReportStatus">
+                            <tr class="hover:bg-white/60 transition" 
+                                data-q="@($"{report.ObstacleReportID} {submittedBy} {reviewer} {typeTxt} {report.Obstacle?.ObstacleComment} {report.ObstacleReportComment} {coordsTxt} {report.ObstacleReportStatus}")"
+                                data-status="@report.ObstacleReportStatus"
+                                data-id="@report.ObstacleReportID"
+                                data-submitter="@submittedBy"
+                                data-reviewer="@reviewer"
+                                data-type="@typeTxt"
+                                data-date="@report.ObstacleReportDate.ToString("yyyy-MM-dd HH:mm:ss")">
                                 <td class="px-4 py-3 font-semibold text-slate-900">@report.ObstacleReportID</td>
                                 <td class="px-4 py-3 text-slate-700">@submittedBy</td>
                                 <td class="px-4 py-3 text-slate-700">@reviewer</td>
@@ -170,26 +212,137 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Mobile Card View -->
+            <div class="lg:hidden divide-y divide-gray-100" id="mobileLogBody">
+                @foreach (var report in Model)
+                {
+                    string submittedBy = report.SubmittedByUser?.UserName ?? "(ukjent)";
+                    string reviewer = report.Reviewer?.UserName ?? "(ingen)";
+                    string typeTxt = report.Obstacle?.ObstacleType ?? "—";
+                    string coordsTxt = report.MapData?.CoordinateSummary ?? "—";
+                    string imgUrl = report.Obstacle?.ObstacleImageURL;
+
+                    string pillText;
+                    string pillClasses;
+                    switch (report.ObstacleReportStatus)
+                    {
+                        case ObstacleReportData.EnumTypes.New:
+                            pillText = "Ny";
+                            pillClasses = "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200";
+                            break;
+                        case ObstacleReportData.EnumTypes.Open:
+                            pillText = "Venter";
+                            pillClasses = "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200";
+                            break;
+                        case ObstacleReportData.EnumTypes.InProgress:
+                            pillText = "Under behandling";
+                            pillClasses = "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200";
+                            break;
+                        case ObstacleReportData.EnumTypes.Resolved:
+                            pillText = "Godkjent";
+                            pillClasses = "bg-green-50 text-green-700 ring-1 ring-inset ring-green-200";
+                            break;
+                        case ObstacleReportData.EnumTypes.Deleted:
+                            pillText = "Avvist";
+                            pillClasses = "bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200";
+                            break;
+                        default:
+                            pillText = report.ObstacleReportStatus.ToString();
+                            pillClasses = "bg-gray-50 text-gray-700 ring-1 ring-inset ring-gray-200";
+                            break;
+                    }
+
+                    <div class="p-3 sm:p-4 hover:bg-white/60 transition mobile-card"
+                         data-q="@($"{report.ObstacleReportID} {submittedBy} {reviewer} {typeTxt} {report.Obstacle?.ObstacleComment} {report.ObstacleReportComment} {coordsTxt} {report.ObstacleReportStatus}")"
+                         data-status="@report.ObstacleReportStatus"
+                         data-id="@report.ObstacleReportID"
+                         data-submitter="@submittedBy"
+                         data-reviewer="@reviewer"
+                         data-type="@typeTxt"
+                         data-date="@report.ObstacleReportDate.ToString("yyyy-MM-dd HH:mm:ss")">
+                        
+                        <div class="flex items-start justify-between mb-2">
+                            <div class="font-semibold text-slate-900 text-base">ID: @report.ObstacleReportID</div>
+                            <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold @pillClasses">
+                                @pillText
+                            </span>
+                        </div>
+
+                        <div class="space-y-1.5 text-sm">
+                            <div class="flex items-start">
+                                <span class="text-gray-500 min-w-[100px] sm:min-w-[120px]">Innmelder:</span>
+                                <span class="text-slate-700">@submittedBy</span>
+                            </div>
+                            <div class="flex items-start">
+                                <span class="text-gray-500 min-w-[100px] sm:min-w-[120px]">Saksbehandler:</span>
+                                <span class="text-slate-700">@reviewer</span>
+                            </div>
+                            <div class="flex items-start">
+                                <span class="text-gray-500 min-w-[100px] sm:min-w-[120px]">Type:</span>
+                                <span class="inline-flex items-center rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-200">
+                                    @typeTxt
+                                </span>
+                            </div>
+                            <div class="flex items-start">
+                                <span class="text-gray-500 min-w-[100px] sm:min-w-[120px]">Dato:</span>
+                                <span class="text-slate-700">@report.ObstacleReportDate.ToString("dd.MM.yyyy HH:mm")</span>
+                            </div>
+                            @if (!string.IsNullOrWhiteSpace(report.Obstacle?.ObstacleComment))
+                            {
+                                <div class="flex items-start">
+                                    <span class="text-gray-500 min-w-[100px] sm:min-w-[120px]">Kommentar:</span>
+                                    <span class="text-slate-700">@report.Obstacle?.ObstacleComment</span>
+                                </div>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(report.ObstacleReportComment))
+                            {
+                                <div class="flex items-start">
+                                    <span class="text-gray-500 min-w-[100px] sm:min-w-[120px]">Saksbehandler:</span>
+                                    <span class="text-slate-700">@report.ObstacleReportComment</span>
+                                </div>
+                            }
+                            <div class="flex items-start">
+                                <span class="text-gray-500 min-w-[100px] sm:min-w-[120px]">Koordinater:</span>
+                                <span class="inline-flex items-center rounded-md bg-white px-2 py-0.5 text-xs ring-1 ring-inset ring-gray-200">
+                                    @coordsTxt
+                                </span>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(imgUrl))
+                        {
+                            <div class="mt-3">
+                                <a href="@imgUrl" target="_blank" class="inline-block">
+                                    <img src="@imgUrl" alt="Bilde" class="h-24 w-24 sm:h-32 sm:w-32 rounded-lg border border-gray-200 object-cover shadow-sm" />
+                                </a>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
         </div>
 
-        <!-- Empty state (hidden by default, shown when filtered to zero) -->
-        <div id="emptyState" class="hidden mt-8 rounded-3xl border border-white/60 bg-white/80 p-8 text-center shadow">
-            <div class="mx-auto mb-2 h-10 w-10 rounded-full bg-gradient-to-r from-green-600 to-blue-600"></div>
-            <h3 class="text-lg font-semibold text-slate-800">Ingen treff</h3>
-            <p class="mt-1 text-slate-600 text-sm">Prøv et annet søk eller fjern filteret.</p>
+        <!-- Empty state -->
+        <div id="emptyState" class="hidden mt-6 sm:mt-8 rounded-2xl sm:rounded-3xl border border-white/60 bg-white/80 p-6 sm:p-8 text-center shadow">
+            <div class="mx-auto mb-2 h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gradient-to-r from-green-600 to-blue-600"></div>
+            <h3 class="text-base sm:text-lg font-semibold text-slate-800">Ingen treff</h3>
+            <p class="mt-1 text-slate-600 text-xs sm:text-sm">Prøv et annet søk eller fjern filteret.</p>
         </div>
     </div>
 </div>
 
 @section Scripts {
 <script>
-    // Client-side filter (works in addition to server-side form submit)
     (function () {
         const qInput = document.getElementById('q');
         const statusSel = document.getElementById('status');
         const body = document.getElementById('logBody');
+        const mobileBody = document.getElementById('mobileLogBody');
         const empty = document.getElementById('emptyState');
         const rowCount = document.getElementById('rowCount');
+
+        let currentSort = { column: 'date', direction: 'desc' };
 
         function norm(s){ return (s||"").toString().toLowerCase(); }
 
@@ -198,25 +351,121 @@
             const st = statusSel?.value || "";
             let visible = 0;
 
-            body.querySelectorAll('tr').forEach(tr => {
-                const a = norm(tr.getAttribute('data-q'));
-                const s = tr.getAttribute('data-status') || "";
-                const matchQ = !q || a.indexOf(q) >= 0;
-                const matchS = !st || s === st;
-                const show = matchQ && matchS;
-                tr.style.display = show ? "" : "none";
-                if (show) visible++;
-            });
+            // Filter desktop table
+            if (body) {
+                body.querySelectorAll('tr').forEach(tr => {
+                    const a = norm(tr.getAttribute('data-q'));
+                    const s = tr.getAttribute('data-status') || "";
+                    const matchQ = !q || a.indexOf(q) >= 0;
+                    const matchS = !st || s === st;
+                    const show = matchQ && matchS;
+                    tr.style.display = show ? "" : "none";
+                    if (show) visible++;
+                });
+            }
+
+            // Filter mobile cards
+            if (mobileBody) {
+                const cards = mobileBody.querySelectorAll('.mobile-card');
+                let mobileVisible = 0;
+                cards.forEach(card => {
+                    const a = norm(card.getAttribute('data-q'));
+                    const s = card.getAttribute('data-status') || "";
+                    const matchQ = !q || a.indexOf(q) >= 0;
+                    const matchS = !st || s === st;
+                    const show = matchQ && matchS;
+                    card.style.display = show ? "" : "none";
+                    if (show) mobileVisible++;
+                });
+                if (body) visible = Math.max(visible, mobileVisible);
+                else visible = mobileVisible;
+            }
 
             rowCount.textContent = visible;
             if (visible === 0) empty.classList.remove('hidden'); else empty.classList.add('hidden');
         }
 
+        function sortTable(column) {
+            // Toggle direction if same column, otherwise default to ascending
+            if (currentSort.column === column) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = column;
+                currentSort.direction = column === 'date' ? 'desc' : 'asc';
+            }
+
+            // Sort desktop table
+            if (body) {
+                const rows = Array.from(body.querySelectorAll('tr'));
+                rows.sort((a, b) => {
+                    let aVal = a.getAttribute('data-' + column) || '';
+                    let bVal = b.getAttribute('data-' + column) || '';
+
+                    // Handle numeric sorting for ID
+                    if (column === 'id') {
+                        aVal = parseInt(aVal) || 0;
+                        bVal = parseInt(bVal) || 0;
+                    }
+
+                    if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
+                    if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
+                    return 0;
+                });
+
+                rows.forEach(row => body.appendChild(row));
+            }
+
+            // Sort mobile cards
+            if (mobileBody) {
+                const cards = Array.from(mobileBody.querySelectorAll('.mobile-card'));
+                cards.sort((a, b) => {
+                    let aVal = a.getAttribute('data-' + column) || '';
+                    let bVal = b.getAttribute('data-' + column) || '';
+
+                    if (column === 'id') {
+                        aVal = parseInt(aVal) || 0;
+                        bVal = parseInt(bVal) || 0;
+                    }
+
+                    if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
+                    if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
+                    return 0;
+                });
+
+                cards.forEach(card => mobileBody.appendChild(card));
+            }
+
+            // Update sort indicators
+            document.querySelectorAll('th[data-sort]').forEach(th => {
+                const svg = th.querySelector('svg');
+                if (svg) {
+                    if (th.getAttribute('data-sort') === column) {
+                        svg.classList.add('text-blue-600');
+                        svg.classList.remove('text-gray-400');
+                    } else {
+                        svg.classList.remove('text-blue-600');
+                        svg.classList.add('text-gray-400');
+                    }
+                }
+            });
+        }
+
+        // Event listeners
         let t;
         qInput?.addEventListener('input', () => { clearTimeout(t); t = setTimeout(applyFilter, 120); });
         statusSel?.addEventListener('change', applyFilter);
 
-        // Initial pass
+        // Add click handlers for sortable columns
+        document.querySelectorAll('th[data-sort]').forEach(th => {
+            th.addEventListener('click', () => {
+                sortTable(th.getAttribute('data-sort'));
+            });
+        });
+
+        // Initial sort by date descending (newest first)
+        sortTable('date');
+        
+        // Then apply filters
         applyFilter();
     })();
 </script>
