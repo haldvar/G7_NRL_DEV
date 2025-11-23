@@ -4,8 +4,7 @@
 @{
     ViewData["Title"] = "Register Map Location";
     Layout = "_Layout";
-    ViewBag.HideChrome = true;  // tells layout to hide header/footer
-
+    ViewBag.HideChrome = true;
 
     var firstCoord = Model.Coordinates?.OrderBy(c => c.OrderIndex).FirstOrDefault();
     double startLat = firstCoord?.Latitude ?? 60.3913;
@@ -26,15 +25,12 @@
         .ToList();
 }
 
-<!-- Fullscreen map shell with small padding (NRL style) -->
 <div class="min-h-[100svh] w-full bg-gradient-to-b from-green-100 to-blue-100 p-4 md:p-6">
     <div class="relative mx-auto max-w-7xl rounded-3xl border border-white/60 bg-white/40 backdrop-blur shadow-xl overflow-hidden
                 h-[calc(100svh-2rem)] md:h-[calc(100svh-3rem)]">
 
-        <!-- MAP (now inherits rounding) -->
         <div id="mapDraw" class="absolute inset-0 z-0" style="border-radius: inherit;"></div>
 
-        <!-- Top-left: Home button -->
         <div class="absolute top-6 left-4 z-20">
             <a asp-area="" asp-controller="Home" asp-action="Index"
                class="h-16 w-16 md:h-20 md:w-20 rounded-full bg-white/85 backdrop-blur border border-white/70 shadow-lg
@@ -44,7 +40,6 @@
             </a>
         </div>
 
-        <!-- Top-center: subtle heading pill -->
         <div class="pointer-events-none absolute left-1/2 top-6 z-20 -translate-x-1/2">
             <div class="inline-flex items-center gap-2 rounded-full bg-white/85 backdrop-blur px-5 py-3
                         border border-white/70 text-green-700 font-semibold shadow">
@@ -52,7 +47,6 @@
             </div>
         </div>
 
-        <!-- Bottom-center CTA buttons (outside map overlay for better hit targets) -->
         <div class="absolute bottom-6 left-1/2 z-20 -translate-x-1/2">
             <div class="flex flex-col md:flex-row items-center gap-3 md:gap-4">
                 <a asp-action="ReportListOverview" asp-controller="Map"
@@ -78,8 +72,16 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
     <style>
-        .report-tooltip { font-weight: 700; font-size: 0.95rem; color: #111; }
-        .report-label-icon { pointer-events: auto; }
+        .report-tooltip {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #111;
+        }
+
+        .report-label-icon {
+            pointer-events: auto;
+        }
+
         .report-label-div {
             background: rgba(255,255,255,0.9);
             padding: 2px 6px;
@@ -96,12 +98,7 @@
     <script src="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
 
     <script>
-        // ---------- Init map (no left-side controls) ----------
-        const map = L.map('mapDraw', {
-            zoomControl: true,   // keep zoom, but move it away from the left
-        }).setView([58.333, 8.233], 13);
-
-        // Move zoom controls to bottom-right so nothing is on the left
+        const map = L.map('mapDraw', { zoomControl: true }).setView([58.333, 8.233], 13);
         map.zoomControl.setPosition('bottomright');
 
         L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {
@@ -111,19 +108,15 @@
             attribution: '© Kartverket'
         }).addTo(map);
 
-        // ---------- Remove Geoman toolbar / draw buttons ----------
-        // Don't add any Geoman controls at all:
-        // map.pm.addControls(...) is intentionally omitted.
         if (map.pm?.Toolbar) map.pm.Toolbar.removeControls();
 
-        // ---------- Load reported items ----------
         const reportedItems = @Json.Serialize(reportedItems);
         const reportsGroup = L.featureGroup().addTo(map);
 
         for (const rep of reportedItems) {
             try {
                 const geom = JSON.parse(rep.geometry);
-                if (!geom || !geom.type) continue;
+                if (!geom) continue;
 
                 const popupHtml = `
                     <div class="space-y-1">
@@ -134,29 +127,34 @@
 
                 const tooltipHtml = `<span class="report-tooltip">#${rep.id}</span>`;
 
+                // -------------------------------
+                // Case 1: RAW GEOMETRY (UI)
+                // -------------------------------
                 if (geom.type === "Point") {
                     const [lng, lat] = geom.coordinates;
-                    const m = L.marker([lat, lng], { title: `Report #${rep.id}` });
+                    const m = L.marker([lat, lng]);
                     m.bindPopup(popupHtml);
                     m.bindTooltip(tooltipHtml, { sticky: true, direction: 'top' });
                     m.addTo(reportsGroup);
-                } else if (geom.type === "LineString") {
+                    continue;
+                }
+
+                if (geom.type === "LineString") {
                     const latlngs = geom.coordinates.map(([lng, lat]) => [lat, lng]);
                     const poly = L.polyline(latlngs, { color: 'red', weight: 3, opacity: 0.85 }).addTo(reportsGroup);
                     poly.bindPopup(popupHtml);
                     poly.bindTooltip(tooltipHtml, { sticky: true });
 
-                    // Midpoint label
                     const mid = latlngs[Math.floor(latlngs.length / 2)];
                     if (mid) {
                         const label = L.marker(mid, {
-                            interactive: true,
                             icon: L.divIcon({
                                 className: 'report-label-icon',
                                 html: `<div class="report-label-div">#${rep.id}</div>`,
                                 iconSize: [42, 20]
                             })
                         }).addTo(reportsGroup);
+
                         label.on('click', () => {
                             L.popup({ offset: [0, -10] })
                                 .setLatLng(label.getLatLng())
@@ -164,7 +162,47 @@
                                 .openOn(map);
                         });
                     }
+                    continue;
                 }
+
+                // -------------------------------
+                // Case 2: FEATURE (seeding)
+                // -------------------------------
+                if (geom.type === "Feature" && geom.geometry?.type === "Point") {
+                    const [lng, lat] = geom.geometry.coordinates;
+                    const m = L.marker([lat, lng]);
+                    m.bindPopup(popupHtml);
+                    m.bindTooltip(tooltipHtml, { sticky: true, direction: 'top' });
+                    m.addTo(reportsGroup);
+                    continue;
+                }
+
+                if (geom.type === "Feature" && geom.geometry?.type === "LineString") {
+                    const latlngs = geom.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+                    const poly = L.polyline(latlngs, { color: 'red', weight: 3, opacity: 0.85 }).addTo(reportsGroup);
+                    poly.bindPopup(popupHtml);
+                    poly.bindTooltip(tooltipHtml, { sticky: true });
+
+                    const mid = latlngs[Math.floor(latlngs.length / 2)];
+                    if (mid) {
+                        const label = L.marker(mid, {
+                            icon: L.divIcon({
+                                className: 'report-label-icon',
+                                html: `<div class="report-label-div">#${rep.id}</div>`,
+                                iconSize: [42, 20]
+                            })
+                        }).addTo(reportsGroup);
+
+                        label.on('click', () => {
+                            L.popup({ offset: [0, -10] })
+                                .setLatLng(label.getLatLng())
+                                .setContent(popupHtml)
+                                .openOn(map);
+                        });
+                    }
+                    continue;
+                }
+
             } catch (err) {
                 console.warn("Invalid geometry for report:", rep?.id, err);
             }
@@ -174,10 +212,6 @@
             map.fitBounds(reportsGroup.getBounds().pad(0.15));
         }
 
-        // If you still want to capture drawn geometry later, leave the hidden input; otherwise it can be removed.
-        // document.getElementById('geoInput').value = ...;
-        
-        // Make sure the map sizes correctly on load
         setTimeout(() => map.invalidateSize(), 200);
         window.addEventListener('resize', () => setTimeout(() => map.invalidateSize(), 150));
     </script>

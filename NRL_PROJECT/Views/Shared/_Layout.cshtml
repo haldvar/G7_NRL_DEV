@@ -67,8 +67,7 @@
 
                     @if (User.IsInRole("Admin"))
                     {
-                        @* <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Hjem</a> *@
-                        <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Index</a>
+                        <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Home" asp-action="Index">Hjem</a>
                         <a class="block text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Map" asp-action="ObstacleAndMapForm">Meld hinder</a>
                         <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Registrar" asp-action="RegistrarView">Rapporthåndtering</a>
                         <a class="text-gray-700 transition hover:text-blue-600" asp-area="" asp-controller="Admin" asp-action="ManageUsers">Brukerhåndtering</a>

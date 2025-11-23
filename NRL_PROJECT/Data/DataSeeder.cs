@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NRL_PROJECT.Models;
+using System.Text.Json;
 
 namespace NRL_PROJECT.Data
 {
@@ -101,7 +102,7 @@ namespace NRL_PROJECT.Data
             var organisations = await context.Organisations.OrderBy(o => o.OrgID).ToListAsync();
             int orgCount = organisations.Count;
 
-            for (int i = 1; i <= 10; i++)
+            for (int i = 1; i <= 3; i++)
             {
                 var assignedOrg = organisations[(i - 1) % orgCount];
 
@@ -129,7 +130,7 @@ namespace NRL_PROJECT.Data
             if (await userManager.Users.AnyAsync(u => u.UserName.StartsWith("reg")))
                 return;
 
-            for (int i = 1; i <= 5; i++)
+            for (int i = 1; i <= 2; i++)
             {
                 var user = new User
                 {
@@ -181,7 +182,7 @@ namespace NRL_PROJECT.Data
         }
 
         // --------------------------------------------------------------------
-        // 7. Realistiske demo-hinderrapporter
+        // 7. Demo-hinderrapporter
         // --------------------------------------------------------------------
         private static async Task SeedDemoReports(NRL_Db_Context context, UserManager<User> userManager)
         {
@@ -192,126 +193,176 @@ namespace NRL_PROJECT.Data
             var pilots = await userManager.GetUsersInRoleAsync("Pilot");
             var registrars = await userManager.GetUsersInRoleAsync("Registrar");
 
-            // 6 forskjellige hindertyper
             string[] obstacleTypes =
             {
-        "Radio-/Mobilmast",
-        "Kran",
-        "Bygning/Konstruksjon",
-        "Vindmølle",
-        "Høyspentlinje",
-        "Tårn"
-    };
+                "Radio-/Mobilmast",
+                "Kran",
+                "Bygning/Konstruksjon",
+                "Vindmølle",
+                "Høyspentlinje",
+                "Tårn"
+            };
 
-            // Statusvariasjon
             var statusValues = new[]
             {
-        ObstacleReportData.EnumTypes.New,
-        ObstacleReportData.EnumTypes.Open,
-        ObstacleReportData.EnumTypes.InProgress,
-        ObstacleReportData.EnumTypes.Resolved,
-        ObstacleReportData.EnumTypes.Deleted
-    };
+                ObstacleReportData.EnumTypes.New,
+                ObstacleReportData.EnumTypes.Open,
+                ObstacleReportData.EnumTypes.InProgress,
+                ObstacleReportData.EnumTypes.Resolved,
+                ObstacleReportData.EnumTypes.Deleted
+            };
 
-            for (int i = 1; i <= 25; i++)
+           
+            // Ulike områder i Agder (INGEN byer utenfor regionen)
+            var baseLocations = new (double Lat, double Lng)[]
+            {
+                (58.2040, 8.0855), // Kjevik
+                (58.1467, 7.9956), // Kristiansand vest
+                (58.1700, 8.0500), // Tveit / Kjevik innflyging
+                (58.2500, 8.0000), // Vennesla sør
+                (58.3500, 7.9500), // Vennesla nord
+                (58.3480, 8.5934), // Grimstad vest
+                (58.3400, 8.6500), // Grimstad øst
+                (58.2600, 8.3500), // Lillesand
+                (58.1500, 8.3500), // Høvåg
+                (58.1000, 7.7000), // Søgne indre
+                (58.0300, 7.8000), // Søgne kyst
+                (58.5800, 7.8000), // Evje
+                (58.6700, 7.8200), // Byglandsfjord
+                (58.8500, 7.3500), // Åseral
+                (58.7000, 7.6000), // Hægeland
+            };
+
+
+            for (int i = 1; i <= 10; i++)
             {
                 var reporter = pilots[random.Next(pilots.Count)];
                 var registrar = registrars.Any() ? registrars[random.Next(registrars.Count)] : null;
 
-                // ---------------------------------------------------------
-                // 1. Generer realistisk koordinatsett
-                // ---------------------------------------------------------
-                bool isLine = random.Next(0, 4) == 0;   // 25% sjanse for LineString
+                bool isLine = random.Next(0, 2) == 0;
+
+                // Velg en tilfeldig base-lokasjon i Norge
+                var baseLoc = baseLocations[random.Next(baseLocations.Length)];
+                var baseLat = baseLoc.Lat;
+                var baseLng = baseLoc.Lng;
+
+                // ---------------------------
+                // 1. Coordinates
+                // ---------------------------
                 List<MapCoordinate> coords;
 
                 if (isLine)
                 {
-                    // Alltid nøyaktig 2 punkter for linje
                     coords = new List<MapCoordinate>();
-                    var baseLat = 59.90 + random.NextDouble() / 100;
-                    var baseLng = 10.75 + random.NextDouble() / 100;
+
+                    // Litt jitter rundt base-posisjon for linje
+                    var startLat = baseLat + (random.NextDouble() - 0.5) / 100;  // ~±0.005°
+                    var startLng = baseLng + (random.NextDouble() - 0.5) / 100;
 
                     for (int p = 0; p < 2; p++)
                     {
                         coords.Add(new MapCoordinate
                         {
-                            Latitude = baseLat + (p * 0.001),
-                            Longitude = baseLng + (p * 0.0015),
+                            Latitude = startLat + (p * 0.01),   // ca 1 km mellom punkter (litt overdrevet, men fint visuelt)
+                            Longitude = startLng + (p * 0.015),
                             OrderIndex = p
                         });
                     }
                 }
                 else
                 {
-                    // Et enkelt punkt
+                    // Punkt nær base-posisjon med liten variasjon
                     coords = new List<MapCoordinate>
-    {
-        new MapCoordinate
-        {
-            Latitude = 59.90 + random.NextDouble()/100,
-            Longitude = 10.75 + random.NextDouble()/100,
-            OrderIndex = 0
-        }
-    };
+                    {
+                        new MapCoordinate
+                        {
+                            Latitude = baseLat + (random.NextDouble() - 0.5)/100,
+                            Longitude = baseLng + (random.NextDouble() - 0.5)/100,
+                            OrderIndex = 0
+                        }
+                    };
                 }
 
+                // ---------------------------
+                // 2. Build GeoJSON (compact)
+                // ---------------------------
+                string geoJson;
 
+                if (isLine)
+                {
+                    geoJson = JsonSerializer.Serialize(new
+                    {
+                        type = "Feature",
+                        geometry = new
+                        {
+                            type = "LineString",
+                            coordinates = coords.Select(c => new[] { c.Longitude, c.Latitude })
+                        }
+                    });
+                }
+                else
+                {
+                    var p = coords.First();
+                    geoJson = JsonSerializer.Serialize(new
+                    {
+                        type = "Feature",
+                        geometry = new
+                        {
+                            type = "Point",
+                            coordinates = new[] { p.Longitude, p.Latitude }
+                        }
+                    });
+                }
+
+                // ---------------------------
+                // 3. MapData
+                // ---------------------------
                 var mapData = new MapData
                 {
                     Coordinates = coords,
                     GeometryType = isLine ? "LineString" : "Point",
-                    MapZoomLevel = 14
+                    MapZoomLevel = 11, // Litt mer "regionalt" zoomnivå
+                    GeoJsonCoordinates = geoJson
                 };
 
                 context.MapDatas.Add(mapData);
                 await context.SaveChangesAsync();
 
-                // ---------------------------------------------------------
-                // 2. Lag hindring
-                // ---------------------------------------------------------
-
+                // ---------------------------
+                // 4. Obstacle
+                // ---------------------------
                 var obstacle = new ObstacleData
                 {
                     ObstacleType = obstacleTypes[random.Next(obstacleTypes.Length)],
-                    ObstacleHeight = random.Next(20, 300),  // 20–300 meter
+                    ObstacleHeight = random.Next(20, 300),
                     ObstacleWidth = random.Next(2, 20),
                     ObstacleComment = random.Next(0, 4) == 0
                         ? "Automatisk generert hindring."
                         : "Rapportert av pilot."
-
                 };
-
-                // 50% sannsynlighet for et illustrasjonsbilde
-                if (random.NextDouble() < 0.5)
-                {
-                    obstacle.ObstacleImageURL = "/example/demo" + random.Next(1, 4) + ".jpg";
-                }
 
                 context.Obstacles.Add(obstacle);
                 await context.SaveChangesAsync();
 
-                // ---------------------------------------------------------
-                // 3. Lag koordinatsammendrag
-                // ---------------------------------------------------------
+                // ---------------------------
+                // 5. Summary
+                // ---------------------------
                 var first = coords.First();
                 string summary = isLine
                     ? $"{first.Latitude:F4}, {first.Longitude:F4} (linje med {coords.Count} punkter)"
                     : $"{first.Latitude:F4}, {first.Longitude:F4}";
 
-                // ---------------------------------------------------------
-                // 4. Lag rapport
-                // ---------------------------------------------------------
+                // ---------------------------
+                // 6. Report
+                // ---------------------------
                 var report = new ObstacleReportData
                 {
                     ObstacleID = obstacle.ObstacleID,
                     MapDataID = mapData.MapDataID,
-
                     SubmittedByUserId = reporter.Id,
-
-                    ObstacleReportComment =
-                        isLine ? "Mulig høyspentlinje observert."
-                               : "Objekt observert og rapportert.",
-
+                    ObstacleReportComment = isLine
+                        ? "Mulig høyspentlinje observert."
+                        : "Objekt observert og rapportert.",
                     CoordinateSummary = summary,
                     ObstacleReportStatus = statusValues[random.Next(statusValues.Length)],
                     ObstacleReportDate = DateTime.Now.AddDays(-random.Next(60)),
@@ -322,7 +373,5 @@ namespace NRL_PROJECT.Data
                 await context.SaveChangesAsync();
             }
         }
-
     }
 }
-
