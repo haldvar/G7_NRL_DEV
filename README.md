@@ -14,10 +14,10 @@
 
 Målet med prosjektet er å utvikle en web-løsning for **NRL** som gjør det mulig å rapportere og registrere nye luftfartshindre over hele Norge.  
 
-Brukere kan opprette egne kontoer, som deretter godkjennes av en administrator som tildeler riktig rolle:
+Brukere kan opprette egne kontoer, som deretter godkjennes av en administrator som tildeler riktig rolle og organisasjonstilhørighet:
 
 ### Brukerroller
-**Flybesetning**  
+**Pilot**  
 - Lager og sender rapporter om nye luftfartshindre  
 - Kan se hinderlogg  
 - Løsningen støtter bruk på nettbrett  
