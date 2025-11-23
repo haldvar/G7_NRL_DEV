@@ -1,79 +1,124 @@
-# G7_NRL_DEV
-Utvikling av NRL system
+# NRL PROSJEKT – GRUPPE 7
 
-Dette repositoryet følger utviklingen av et verktøy for registrering av luftfartshindre for vår klient Kartverket(NRL) og Norsk Luftambulanse. Utviklerne i Gruppe 7 er:_ 
+## Gruppemedlemmer
+- Karoline  
+- Milana  
+- Jan Kåre  
+- Emma  
+- Elise  
+- Halvard  
 
-**Karoline, Milana, Jan Kåre, Halvard, Elise and Emma.**
+---
 
+## Om prosjektet
 
-# Dokumentasjon
-## Gruppe 7 – ASP.NET MVC Webapplikasjon
+Målet med prosjektet er å utvikle en web-løsning for **NRL** som gjør det mulig å rapportere og registrere nye luftfartshindre over hele Norge.  
 
-Dette prosjektet er utviklet som en del av 3. semester, bachelorstudiet i IT og informasjonssystemer. Løsningen demonstrerer en moderne webapplikasjon bygget med **ASP.NET MVC**, **Tailwind CSS**, **Leaflet.js** og **MariaDB**.  
-Applikasjonen er containerisert med **Docker** for enkel drift og distribusjon, og har **Docker Orchestration Support** aktivert i Visual Studio. For håndtering av geografiske data benytter systemet GeoJSON som standardformat.
+Brukere kan opprette egne kontoer, som deretter godkjennes av en administrator som tildeler riktig rolle:
 
-### Drift og kjøring
+### Brukerroller
+**Flybesetning**  
+- Lager og sender rapporter om nye luftfartshindre  
+- Kan se hinderlogg  
+- Løsningen støtter bruk på nettbrett  
 
-#### Krav
--   Docker og Docker Compose installert
+**Registerfører**  
+- Kan se rapporter  
+- Endre status  
+- Delegere rapporter  
+- Endre/legge til opplysninger (hindertype, høyde osv.)
 
-#### Starte systemet
--   Åpne solution i Visual Studio
--   Start prosjektet ved å trykke **Run** (F5)
--   Containere blir bygget automatisk 
--   Et internt nettverk kalt **appnet** starter og knytter tjenestene sammen
--   Applikasjonen startes
+**Ekstern organisasjon**  
+- Kan se rapporter som er sendt inn av flybesetninger i egen organisasjon
 
-#### Funksjonalitet
-MVC-struktur
--    Prosjektet benytter *Models*, *Views* og *Controllers* for å separere data, presentasjon og logikk 
--    *ViewModels* skal benyttes for å kombinere flere datamodeller i ett view. (Per 01.10.2025 er det ikke laget sammenslått ViewModel, men det kommer.)
-Responsivt design
--   Sidene i applikasjonen er designet ved hjelp av Tailwind CSS og ved hjelp av generativ KI.
--   Applikasjonen skal til slutt fungere på mobil, nettbrett og desktop. Her gjenstår mye arbeid.
-HTTP-håndtering
--   Applikasjonen støtter både **GET**- og **POST**-forespørsler
--   GET brukes til å hente data fra serveren
--   POST brukes til å sende data via skjema
-Skjema
--   Brukeren kan fylle inn informasjon via skjema
--   Innsendt data lagres lokalt og vises på en annen side
--   Data skal på sikt lagres i en database
-Kartintegrasjon
--   Applikasjonen inkluderer et kart gjennom tjenesten Leaflet.js
--   Brukeren kan markere posisjon(er) i kartet
--   Kartdata med markør i kartet og nedtegnede koordinater lagres via GeoJSON og vises på ny side etter registrering
+**Administrator**  
+- Full tilgang  
+- Brukerhåndtering (roller, organisasjoner, godkjenning)
 
-### System arkitektur
--   Komponenter involvert i prosjektet:
-    - **ASP.NET MVC** – backend og logikk
-    - **Tailwind CSS** – responsivt UI
-    - **Leaflet.js** – kartvisning
-    - **GeoJson** - standardformat for lagring og utveksling av geografiske data. 
-    - **MariaDB** – database
-    - **Docker** – drift, kjører applikasjon og database i containere koblet via nettwerket **appnet**
+---
 
-### Testscenarier og resultater
-#### Foreløpig teststrategi:
+## Dokumentasjon
 
-Manuell testing
+### Verktøy brukt
+- **Docker** (Docker Desktop)  
+- **MariaDB**  
+- **Entity Framework** (migrations)  
+- **ASP.NET MVC** (på .NET 9.0)  
+- **Tailwind CSS**  
 
- - Gå gjennom løsningen i nettleseren og bekreft at:
+---
 
- - GET-forespørsler returnerer riktig data
+## Installasjon og kjøring
 
- - POST via skjema fungerer og viser data på ny side
+### 1. Last ned prosjektet
+- Last ned `.zip` **eller**  
+- `git clone <repo-url>`
 
- - Kartet laster og koordinater hentes korrekt
+### 2. Åpne prosjektet
+Åpne `.sln` i **Visual Studio** eller **Rider**.
 
-#### Integrasjonstesting
+### 3. Klargjør database via Docker
+Åpne Docker-terminal:
 
-Test at databasen og applikasjonen kommuniserer korrekt. Her gjenstår arbeid, siden vi ikke har hatt særlig fokus på databasen enda.
+```bash
+docker exec -it mariadbcontainer mariadb -u root -p
+```
+Passord:
+```bash
+Begripeligvis1214
+```
+Slett eksisterende database:
+```bash
+drop database nrl_project_db;
+```
+### 4. Kjør migrations
+Naviger til:
+~/G7_NRL_DEV/NRL_PROJECT
+Kjør:
+```bash
+dotnet ef migrations add InitialCreate
+dotnet ef database update
+```
+### 5. Start applikasjonen
+Kjør med docker-compose, åpne Docker Desktop og trykk på:
+localhost:5001
+Nettleseren åpnes automatisk.
 
-#### Fremtidige forbedringer
+## Feilsøking
+Hvis løsningen ikke vil kjøre:
+- Stopp NRL_PROJECT-containeren i Docker
+- Kjør docker compose på nytt fra IDE
+- Start containere igjen i Docker Desktop
 
-Legge til enhetstesting 
+## Trenger du fortsatt hjelp?
+- Kontakt et av gruppemeldemmer (gruppe 7)
+- Spør ChatGPT
 
-Vurdere bruk av automatiserte testverktøy (f.eks. Playwright).
+--- 
 
-Pull request i test!!!
+### Login-informasjon (for testing)
+#### Administrator
+- E-post: admin@nrl.no
+- Passord: Admin@123
+#### Registerfører
+- E-post: reg4@test.no
+- Passord: Heisann1!
+#### Flybesetning / Piloter
+- pilot7@test.no (Forsvaret) – Heisann1!
+- pilot6@test.no (Politiet) – Heisann1!
+#### Eksterne organisasjoner
+- ext2_Politiet@test.no – Heisann1!
+- ext1_Forsvaret@test.no – Heisann1!
+
+## Testing
+Testing-scenarier og unit-testing er gjennomført (flere detaljer kan legges til senere).
+
+## Forbedringspotensial
+- Administrator-godkjenning for nyregistrerte brukere
+- Tilbakemeldingssystem fra registerfører til innmelder
+- Varsling ved statusendring
+- Offline-modus (per nå kun draft ved manglende dekning)
+- Mulighet for bruker å endre/slette innmeldinger på kartet
+
+## Videreutvikling
+Prosjektet er åpent for videre utvidelser og forbedringer.
