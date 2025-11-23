@@ -51,26 +51,49 @@ namespace NRL_PROJECT.Controllers
         // GET: /Map/MapView
         public async Task<IActionResult> MapView(int? id)
         {
-            // Load MapData if id provided, otherwise use an empty model.
-            MapData model;
-            if (id.HasValue)
+            // 1) Load all reports with GeoJSON + MapData
+            var reportsWithGeometry = await _context.ObstacleReports
+                .Include(r => r.MapData)
+                .Include(r => r.SubmittedByUser)
+                .Where(r => r.MapData != null &&
+                    !string.IsNullOrWhiteSpace(r.MapData.GeoJsonCoordinates))
+                .ToListAsync();
+
+            // 2) Create a MapData to funcion as ViewModel
+            var model = new MapData
             {
-                model = await _context.MapDatas
-                    .Include(m => m.Coordinates)
-                    .FirstOrDefaultAsync(m => m.MapDataID == id.Value) ?? new MapData();
+                ObstacleReports = reportsWithGeometry,
+                Coordinates = new List<MapCoordinate>()  // unngå null
+            };
+
+            // 3) Place initial view based on first report
+            var firstReport = reportsWithGeometry.FirstOrDefault();
+            if (firstReport != null && firstReport.MapData?.Coordinates?.Any() == true)
+            {
+                var firstCoord = firstReport.MapData.Coordinates
+                    .OrderBy(c => c.OrderIndex)
+                    .First();
+
+                model.Coordinates.Add(new MapCoordinate
+                {
+                    Latitude = firstCoord.Latitude,
+                    Longitude = firstCoord.Longitude,
+                    OrderIndex = 0
+                });
+
+                model.MapZoomLevel = firstReport.MapData.MapZoomLevel != 0 ? firstReport.MapData.MapZoomLevel : 12;
             }
             else
             {
-                model = new MapData();
+                // fallback: norge
+                model.MapZoomLevel = 6;
+                model.Coordinates.Add(new MapCoordinate
+                {
+                    Latitude = 64.0,
+                    Longitude = 11.0,
+                    OrderIndex = 0
+                });
             }
-
-            // Load reports that include geometry and attach to model for the view
-            var reportsWithGeometry = await _context.ObstacleReports
-                .Include(r => r.MapData)
-                .Where(r => r.MapData != null && !string.IsNullOrWhiteSpace(r.MapData.GeoJsonCoordinates))
-                .ToListAsync();
-
-            model.ObstacleReports = reportsWithGeometry;
 
             return View(model);
         }
@@ -106,7 +129,7 @@ namespace NRL_PROJECT.Controllers
             model.MapData ??= new MapData();
 
             if (string.IsNullOrWhiteSpace(model.ObstacleComment))
-                model.ObstacleComment = "No comment registred";
+                model.ObstacleComment = "Ingen kommentar registrert";
 
             if (string.IsNullOrWhiteSpace(model.MapData.GeoJsonCoordinates))
             {
