@@ -2,6 +2,10 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace NRL_PROJECT.Models.ViewModels
 {
+    /// <summary>
+    /// View model used by the Admin UI to represent a user and available actions.
+    /// Contains basic identity information, current role and available organisations/roles.
+    /// </summary>
     public class UserManagementViewModel
     {
         public string UserID { get; set; }

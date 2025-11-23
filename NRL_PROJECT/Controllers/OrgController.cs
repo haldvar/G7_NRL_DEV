@@ -16,8 +16,12 @@ using EnumStatus = NRL_PROJECT.Models.ObstacleReportData.EnumTypes;
 using UiStatus = NRL_PROJECT.Models.EnumStatus;
 
 namespace NRL_PROJECT.Controllers
-
 {
+    /// <summary>
+    /// Organisation-facing controller.
+    /// - Shows organisation landing page and organisation-specific report listings.
+    /// - Supports filtering, sorting and searching for reports belonging to the user's organisation.
+    /// </summary>
     [Authorize(Roles = "ExternalOrg, Admin, Registrar")]
     public class OrgController : Controller
     {
@@ -30,8 +34,10 @@ namespace NRL_PROJECT.Controllers
             _userManager = userManager;
         }
 
-
-        // === ORG VIEW ===
+        // ---------------------------------------------------------------------
+        // ORG landing view
+        // ---------------------------------------------------------------------
+        // GET: /Org/OrgView
         public async Task<IActionResult> OrgView()
         {
             var user = await _userManager.Users
@@ -41,17 +47,14 @@ namespace NRL_PROJECT.Controllers
             if (user == null)
                 return Unauthorized();
 
-            // Hvis bruker har rolle som gir tilgang, men MANGLER organisasjon
-            if (user.Organisation == null)
-            {
-                // Vis view — men uten link til rapporter
-                return View(user);
-            }
-
+            // If user is allowed but lacks organisation, still show view (no links to reports)
             return View(user);
         }
 
-        // === ORG REPORT VIEW ===
+        // ---------------------------------------------------------------------
+        // Org reports listing (with filters & sorting)
+        // ---------------------------------------------------------------------
+        // GET: /Org/OrgReportView
         public async Task<IActionResult> OrgReportView(
             string search,
             string status,
@@ -75,9 +78,8 @@ namespace NRL_PROJECT.Controllers
                 .Where(r => r.SubmittedByUser.Organisation.OrgID == user.OrgID)
                 .AsQueryable();
 
-
             // -----------------------------
-            // 🔍 SØK
+            // Search
             // -----------------------------
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -90,7 +92,7 @@ namespace NRL_PROJECT.Controllers
             }
 
             // -----------------------------
-            // 🎚️ FILTER: STATUS
+            // Filter by status
             // -----------------------------
             if (!string.IsNullOrWhiteSpace(status))
             {
@@ -101,13 +103,13 @@ namespace NRL_PROJECT.Controllers
             }
 
             // -----------------------------
-            // 🛑 FILTER: TYPE
+            // Filter by type
             // -----------------------------
             if (!string.IsNullOrWhiteSpace(type))
                 query = query.Where(r => r.Obstacle.ObstacleType == type);
 
             // -----------------------------
-            // 🔽 SORTERING
+            // Sorting
             // -----------------------------
             query = sortField switch
             {
@@ -131,48 +133,46 @@ namespace NRL_PROJECT.Controllers
                     ? query.OrderBy(r => r.ObstacleReportDate)
                     : query.OrderByDescending(r => r.ObstacleReportDate)
             };
-            
-            // using Microsoft.AspNetCore.Mvc.Rendering;
+
+            // Populate dropdowns for the view
             var orgs = await _context.Organisations
                 .OrderBy(o => o.OrgName)
                 .Select(o => new SelectListItem { Value = o.OrgID.ToString(), Text = o.OrgName })
                 .ToListAsync();
 
             ViewBag.Organizations = orgs;
-            
-            // Lag liste over alle unike obstacle types til dropdown i view
+
             ViewBag.Types = await _context.Obstacles
                 .Select(o => o.ObstacleType)
                 .Distinct()
                 .ToListAsync();
 
-            // Send sorteringsinfo tilbake til view
             ViewBag.SortField = sortField;
             ViewBag.SortDir = sortDir;
 
             var reports = await query
-    .Select(r => new OrgExternalViewModel
-    {
-        ObstacleReportID = r.ObstacleReportID,
-        ObstacleReportDate = r.ObstacleReportDate,
-        ObstacleReportStatus = r.ObstacleReportStatus,
+                .Select(r => new OrgExternalViewModel
+                {
+                    ObstacleReportID = r.ObstacleReportID,
+                    ObstacleReportDate = r.ObstacleReportDate,
+                    ObstacleReportStatus = r.ObstacleReportStatus,
 
-        // Innmelder
-        UserName = r.SubmittedByUser.UserName,
-        Email = r.SubmittedByUser.Email,
-        OrgName = r.SubmittedByUser.Organisation.OrgName,
+                    // Submitter of report
+                    UserName = r.SubmittedByUser.UserName,
+                    Email = r.SubmittedByUser.Email,
+                    OrgName = r.SubmittedByUser.Organisation.OrgName,
 
-        // Hindring
-        ObstacleID = r.Obstacle.ObstacleID,
-        ObstacleType = r.Obstacle.ObstacleType,
+                    // Obstacle
+                    ObstacleID = r.Obstacle.ObstacleID,
+                    ObstacleType = r.Obstacle.ObstacleType,
 
-        //  BILDESTØTTE
-        ObstacleImageURL = r.Obstacle.ObstacleImageURL,
+                    //  Image support
+                    ObstacleImageURL = r.Obstacle.ObstacleImageURL,
 
-        // Kart
-        CoordinateSummary = r.MapData != null ? r.MapData.CoordinateSummary : "",
-    })
-    .ToListAsync();
+                    // Kart
+                    CoordinateSummary = r.MapData != null ? r.MapData.CoordinateSummary : "",
+                })
+                .ToListAsync();
 
             return View(reports);
         }

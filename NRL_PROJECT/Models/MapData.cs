@@ -3,24 +3,32 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NRL_PROJECT.Models
 {
+    /// <summary>
+    /// Holds geometry and display information for map features.
+    /// Stores GeoJSON text and related MapCoordinate list.
+    /// </summary>
     public class MapData
     {
+        // Primary key
         [Key]
         public int MapDataID { get; set; }
 
-        public string GeometryType { get; set; } = "Point"; // "Point" eller "LineString"
+        // Geometry type ("Point" or "LineString")
+        public string GeometryType { get; set; } = "Point";
+
+        // Zoom level used when rendering the map
         public int MapZoomLevel { get; set; }
 
+        // GeoJSON geometry stored as text (server expects this format)
         public string GeoJsonCoordinates { get; set; } = string.Empty;
 
+        // Coordinates related to this MapData (ordered by OrderIndex)
         public ICollection<MapCoordinate> Coordinates { get; set; } = new List<MapCoordinate>();
 
-
-        // Relasjon til rapporter
+        // Back-reference: reports attached to this MapData
         public ICollection<ObstacleReportData> ObstacleReports { get; set; } = new List<ObstacleReportData>();
 
-
-        // For tabellvisning
+        // Computed helper for friendly display in UIs; not persisted
         [NotMapped]
         public string CoordinateSummary
         {

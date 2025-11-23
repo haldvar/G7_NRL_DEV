@@ -9,7 +9,13 @@ using NRL_PROJECT.Models;
 using NRL_PROJECT.Models.ViewModels;
 
 namespace NRL_PROJECT.Controllers
-{
+{           
+    /// <summary>
+    /// AccountController
+    /// - Handles registration, login, logout, password reset and two-factor flows.
+    /// - Methods are grouped: ctor, public auth endpoints (GET/POST pairs), helpers.
+    /// </summary>
+
     public class AccountController : Controller
     {
         private readonly UserManager<User> _userManager;
@@ -17,24 +23,31 @@ namespace NRL_PROJECT.Controllers
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
 
-        [AllowAnonymous]
-        public IActionResult AccessDenied()
-        {
-            return View();
-        }
-
+        // Constructor
         public AccountController(UserManager<User> userManager,
             SignInManager<User> signInManager,
             IEmailSender emailSender,
-            ILogger<AccountController> logger) 
+            ILogger<AccountController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _logger = logger;
         }
-        
-        //GET /Account/Register (Metode - Registrering av brukere)
+
+        // ------------------------------------------------------------
+        // Public pages / actions (GET / POST grouped by feature)
+        // ------------------------------------------------------------
+
+        // Access denied view
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
+        // ---------- Register ----------
+        // GET: /Account/Register
         [HttpGet]
         [AllowAnonymous]
         public IActionResult Register(string returnUrl = null)
@@ -42,12 +55,12 @@ namespace NRL_PROJECT.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
-        
-        //POST /Account/Register
+
+        // POST: /Account/Register
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model,  string returnUrl = null)
+        public async Task<IActionResult> Register(RegisterViewModel model, string returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
@@ -71,7 +84,7 @@ namespace NRL_PROJECT.Controllers
                     return RedirectToAction("Login", "Account");
                 }
 
-                // LOG THE ERRORS TO SEE WHAT'S WRONG
+                // Log the identity errors and add to ModelState
                 foreach (var error in result.Errors)
                 {
                     _logger.LogError($"Registration error: {error.Code} - {error.Description}");
@@ -80,7 +93,7 @@ namespace NRL_PROJECT.Controllers
             }
             else
             {
-                // LOG MODELSTATE ERRORS
+                // Log ModelState errors for easier debugging
                 foreach (var modelState in ModelState.Values)
                 {
                     foreach (var error in modelState.Errors)
@@ -91,8 +104,9 @@ namespace NRL_PROJECT.Controllers
             }
             return View(model);
         }
-        
-        // GET /Account/Login
+
+        // ---------- Login ----------
+        // GET: /Account/Login
         [HttpGet]
         [AllowAnonymous]
         public IActionResult Login(string returnUrl = null)
@@ -101,6 +115,7 @@ namespace NRL_PROJECT.Controllers
             return View();
         }
 
+        // POST: /Account/Login
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -124,7 +139,7 @@ namespace NRL_PROJECT.Controllers
                 }
 
                 var result = await _signInManager.PasswordSignInAsync(
-                    user.UserName, // ← Use username internally
+                    user.UserName, // use username internally
                     model.Password,
                     model.RememberMe,
                     lockoutOnFailure: false);
@@ -152,116 +167,19 @@ namespace NRL_PROJECT.Controllers
             return View(model);
         }
 
-        
-        //POST /Account/Logout
+        // ---------- Logout ----------
+        // POST: /Account/Logout
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
             _logger.LogInformation(4, "Brukeren er logget ut.");
-            return RedirectToAction("Login","Account");
+            return RedirectToAction("Login", "Account");
         }
-        
-        /*
-        // POST /Account/ExternalLogin
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public IActionResult ExternalLogin(string provider, string returnUrl = null)
-        {
-            // Request a redirect to the external login provider
-            var redirectUrl = Url.Action("ExternalLoginCallback", "Account", new { ReturnUrl = returnUrl });
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-            return Challenge(properties, provider);
-        }
-        
-        // GET /Account/ExternalLoginCallback
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
-        {
-            if (remoteError != null)
-            {
-                ModelState.AddModelError(string.Empty, $"Error from external provider: {remoteError}");
-                return View(nameof(Login));
-            }
-            var info = await _signInManager.GetExternalLoginInfoAsync();
-            if (info == null)
-            {
-                return RedirectToAction(nameof(Login));
-            }
-            // Sign in the user with this external login provider if the user already has a login
-            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false);
-            if (result.Succeeded)
-            {
-                // Update any authentication tokens if login succeeded
-                await _signInManager.UpdateExternalAuthenticationTokensAsync(info);
-                
-                _logger.LogInformation(5, "User logged in with {Name} provider.", info.LoginProvider);
-                return await RedirectToLocal(returnUrl);
-            }
 
-            if (result.RequiresTwoFactor)
-            {
-                return RedirectToAction(nameof(SendCode), new { ReturnUrl = returnUrl });
-            }
-
-            if (result.IsLockedOut)
-            {
-                return View("Lockout");
-            }
-            else
-            {
-                //If the user does not have an account, then ask the user to create an one.
-                ViewData["ReturnUrl"] = returnUrl;
-                ViewData["ProviderDisplayName"] = info.ProviderDisplayName;
-                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-                return View("ExternalLoginConfirmation", new ExternalLoginConfirmationViewModel { Email = email });
-            }
-        }
-        
-        // POST /Account/ExternalLoginConfirmation
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginConfirmationViewModel model,
-            string returnUrl = null)
-        {
-            if (ModelState.IsValid)
-            {
-                // Get the information about the user from the external login provider
-                var info = await _signInManager.GetExternalLoginInfoAsync();
-                if (info == null)
-                {
-                    return View("ExternalLoginFailure");
-                }
-
-                var user = new User { UserName = model.Email, Email = model.Email };
-                var result = await _userManager.CreateAsync(user);
-                if (result.Succeeded)
-                {
-                    await _userManager.AddLoginAsync(user, info);
-                    if (result.Succeeded)
-                    {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        _logger.LogInformation(6, "User created a new account using {Name} provider.", info.LoginProvider);
-                        
-                        // Update any authentication tokens as well
-                        await _signInManager.UpdateExternalAuthenticationTokensAsync(info);
-                        
-                        return await RedirectToLocal(returnUrl);
-                    }
-                }
-                AddErrors(result);
-            }
-            ViewData["ReturnUrl"] = returnUrl;
-            return View(model);
-        }
-        
-        */
-        
-        // GET /Account/ConfirmEmail
+        // ---------- Email confirmation ----------
+        // GET: /Account/ConfirmEmail
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> ConfirmEmail(string UserID, string code)
@@ -278,16 +196,17 @@ namespace NRL_PROJECT.Controllers
             var result = await _userManager.ConfirmEmailAsync(user, code);
             return View(result.Succeeded ? "ConfirmEmail" : "Error");
         }
-        
-        // GET /Account/ForgotPassword
+
+        // ---------- Forgot password ----------
+        // GET: /Account/ForgotPassword
         [HttpGet]
         [AllowAnonymous]
         public IActionResult ForgotPassword()
         {
             return View();
         }
-        
-        // POST /Account/ForgotPassword
+
+        // POST: /Account/ForgotPassword
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -298,13 +217,13 @@ namespace NRL_PROJECT.Controllers
                 var user = await _userManager.FindByEmailAsync(model.Email);
                 if (user == null || !await _userManager.IsEmailConfirmedAsync(user))
                 {
-                    // Dont reveal that the user does not exist or is not confirmed
+                    // Don't reveal whether user exists or is confirmed
                     return View("ForgotPasswordConfirmation");
                 }
-            } 
+            }
             return View(model);
         }
-        
+
         // GET: /Account/ForgotPasswordConfirmation
         [HttpGet]
         [AllowAnonymous]
@@ -313,7 +232,7 @@ namespace NRL_PROJECT.Controllers
             return View();
         }
 
-        //
+        // ---------- Reset password ----------
         // GET: /Account/ResetPassword
         [HttpGet]
         [AllowAnonymous]
@@ -321,7 +240,7 @@ namespace NRL_PROJECT.Controllers
         {
             return code == null ? View("Error") : View();
         }
-        
+
         // POST: /Account/ResetPassword
         [HttpPost]
         [AllowAnonymous]
@@ -346,16 +265,17 @@ namespace NRL_PROJECT.Controllers
             AddErrors(result);
             return View();
         }
-        
-        // GET /Account/ResetPasswordConfirmation
+
+        // GET: /Account/ResetPasswordConfirmation
         [HttpGet]
         [AllowAnonymous]
         public IActionResult ResetPasswordConfirmation()
         {
             return View();
         }
-        
-        // GET /Account/SendCode
+
+        // ---------- Two-factor / SendCode / Verify flows ----------
+        // GET: /Account/SendCode
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> SendCode(string returnUrl = null, bool rememberMe = false)
@@ -369,7 +289,8 @@ namespace NRL_PROJECT.Controllers
             var factorOptions = userFactors.Select(purpose => new SelectListItem { Text = purpose, Value = purpose }).ToList();
             return View(new SendCodeViewModel { Providers = factorOptions, ReturnUrl = returnUrl, RememberMe = rememberMe });
         }
-        // POST /Account/SendCode
+
+        // POST: /Account/SendCode
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -389,14 +310,14 @@ namespace NRL_PROJECT.Controllers
             {
                 return RedirectToAction(nameof(VerifyAuthenticatorCode), new { model.ReturnUrl, model.RememberMe });
             }
-            
+
             // Generate the token and send it
             var code = await _userManager.GenerateTwoFactorTokenAsync(user, model.SelectedProvider);
             if (string.IsNullOrWhiteSpace(code))
             {
                 return View("Error");
             }
-            
+
             var message = "Din sikkerhetskode er: " + code;
             if (model.SelectedProvider == "Email")
             {
@@ -406,13 +327,12 @@ namespace NRL_PROJECT.Controllers
             return RedirectToAction(nameof(VerifyCode),
                 new { Provider = model.SelectedProvider, model.ReturnUrl, model.RememberMe });
         }
-        
-        // GET /Account/VerifyCode
+
+        // GET: /Account/VerifyCode
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> VerifyCode(string provider, bool rememberMe, string returnUrl = null)
         {
-            // Require that the user has already logged in via username/password
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
@@ -422,8 +342,8 @@ namespace NRL_PROJECT.Controllers
             return View(new VerifyCodeViewModel
                 { Provider = provider, ReturnUrl = returnUrl, RememberMe = rememberMe });
         }
-        
-        // POST /Account/VerifyCode
+
+        // POST: /Account/VerifyCode
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -433,10 +353,7 @@ namespace NRL_PROJECT.Controllers
             {
                 return View(model);
             }
-            
-            // The following code protects for brute force attacks against the two-factor codes.
-            // If a user enters incorrect codes for a specified amount of time then the user account
-            // will be locked out for a specified amount of time
+
             var result = await _signInManager.TwoFactorSignInAsync(model.Provider, model.Code, model.RememberMe, model.RememberBrowser);
             if (result.Succeeded)
             {
@@ -453,13 +370,12 @@ namespace NRL_PROJECT.Controllers
                 return View(model);
             }
         }
-        
-        // GET /Account/VerifyAuthenticatorCode
+
+        // GET: /Account/VerifyAuthenticatorCode
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> VerifyAuthenticatorCode(bool rememberMe, string returnUrl = null)
         {
-            // Require that the user has already logged in via username/password
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
@@ -468,8 +384,8 @@ namespace NRL_PROJECT.Controllers
 
             return View(new VerifyAuthenticatorCodeViewModel { ReturnUrl = returnUrl, RememberMe = rememberMe });
         }
-        
-        // POST /Account/VerifyAuthenticatorCode
+
+        // POST: /Account/VerifyAuthenticatorCode
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -480,9 +396,6 @@ namespace NRL_PROJECT.Controllers
                 return View(model);
             }
 
-            // The following code protects for brute force attacks against the two-factor codes.
-            // If a user enters incorrect codes for a specified amount of time then the user account
-            // will be locked out for a specified amount of time.
             var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(model.Code, model.RememberMe, model.RememberBrowser);
             if (result.Succeeded)
             {
@@ -499,13 +412,13 @@ namespace NRL_PROJECT.Controllers
                 return View(model);
             }
         }
-        
-        // GET /Account/UseRecoveryCode
+
+        // ---------- Recovery code ----------
+        // GET: /Account/UseRecoveryCode
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> UseRecoveryCode(string returnUrl = null)
         {
-            // Require that the user has already logged in via username/password
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
@@ -514,8 +427,8 @@ namespace NRL_PROJECT.Controllers
 
             return View(new UseRecoveryCodeViewModel { ReturnUrl = returnUrl });
         }
-        
-        // POST /Account/UseRecoveryCode
+
+        // POST: /Account/UseRecoveryCode
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]

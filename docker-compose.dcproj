@@ -23,5 +23,10 @@
     </None>
     <None Include="docker-compose.yml" />
     <None Include=".dockerignore" />
+    <None Include="NRL_PROJECT.Tests\Data\DbContextTests.cs" />
+    <None Include="NRL_PROJECT.Tests\Models\MapDataTests.cs" />
+    <None Include="NRL_PROJECT.Tests\Models\ObstacleDataTests.cs" />
+    <None Include="NRL_PROJECT.Tests\NRL_PROJECT.Tests.csproj" />
+    <None Include="NRL_PROJECT.Tests\README.md" />
   </ItemGroup>
 </Project>
