@@ -180,216 +180,303 @@
 </div>
 }
 
-@section Scripts {
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
-<script src="https://rawcdn.githack.com/bbecquet/Leaflet.RotatedMarker/master/leaflet.rotatedMarker.js"></script>
-
 <script>
-    // ------ MAP SETUP ------
-    const map = L.map('mapDraw', {
-        zoomControl: false, touchZoom: true, scrollWheelZoom: true, doubleClickZoom: true, boxZoom: false
-    }); // ⬅ no .setView here
+		 let restoredFromDraft = false;
 
-    L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {
-        layers: 'topo', format: 'image/png', transparent: false, attribution: '© Kartverket'
-    }).addTo(map);
+	// -------------------------------------------
+	//  IKON
+	// -------------------------------------------
+	const helicopterIcon = L.icon({
+		iconUrl: '/icons/helicopter.svg',
+		iconSize: [45, 45],
+		iconAnchor: [19, 19],
+		popupAnchor: [0, -12]
+	});
 
-    // Kick off geolocation immediately (or on DOM ready)
-    function autoLocate() {
-        map.locate({
-            setView: true,       // center on user
-            maxZoom: 18,         // cap zoom
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
-        });
-    }
-    autoLocate();
+	// -------------------------------------------
+	//  KARTINIT – fallback setView hindrer Oslo-hopp
+	// -------------------------------------------
+	const map = L.map('mapDraw', {
+		zoomControl: false,
+		touchZoom: true,
+		scrollWheelZoom: true,
+		doubleClickZoom: true,
+		boxZoom: false
+	}).setView([58.333, 8.233], 5);   // fallback Arendal-regionen
 
-    // Keep the map tidy on resize
-    const invalidateSoon = () => setTimeout(() => map.invalidateSize(), 220);
-    window.addEventListener('resize', invalidateSoon);
-    setTimeout(() => map.invalidateSize(), 200);
+	// Autolocate kjøres KUN hvis ingen utkast gjenopprettes
+	if (!restoredFromDraft) {
+		map.locate({
+			setView: true,        // Leaflet zoomer første gang (ikke ved knappen)
+			maxZoom: 18,
+			enableHighAccuracy: true,
+			timeout: 10000,
+			maximumAge: 0
+		});
+	}
 
-    // Geoman (no default toolbar)
-    map.pm.addControls({ drawMarker: false, drawPolyline: false, editMode: false, removalMode: false });
-    if (map.pm?.Toolbar) map.pm.Toolbar.removeControls();
+	// -------------------------------------------
+	//  TILELAYER
+	// -------------------------------------------
+	L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {
+		layers: 'topo',
+		format: 'image/png',
+		transparent: false,
+		attribution: '© Kartverket'
+	}).addTo(map);
 
-    // Layers for user geometry
-    const drawn = L.featureGroup().addTo(map);
+	// Fjern Geoman-toolbars (vi bruker egne knapper)
+	map.pm.addControls({ drawMarker: false, drawPolyline: false, editMode: false, removalMode: false });
+	if (map.pm?.Toolbar) map.pm.Toolbar.removeControls();
 
-    // Locate
-    const helicopterIcon = L.icon({ iconUrl: '/icons/helicopter.svg', iconSize: [45,45], iconAnchor: [19,19] });
-    function locateUser() {
-        map.locate({ setView: true, maxZoom: 18, enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
-    }
-    map.on("locationfound", e => {
-        map.setView(e.latlng, 18);
-        
-        if (window.currentPosMarker) map.removeLayer(window.currentPosMarker);
-        if (window.currentPosCircle) map.removeLayer(window.currentPosCircle);
+	setTimeout(() => map.invalidateSize(), 300);
 
-        window.currentPosMarker = L.marker(e.latlng, { icon: helicopterIcon })
-            .addTo(map)
-            // .bindPopup(`<b>Helikopterposisjon</b><br/>Nøyaktighet: ±${Math.round(e.accuracy)} m`)
-            .openPopup();
+	const drawn = L.featureGroup().addTo(map);
 
-        setTimeout(() => window.currentPosMarker && window.currentPosMarker.closePopup(), 3000);
+	// -------------------------------------------
+	//  UNØYAKTIGHET-TOAST
+	// -------------------------------------------
+	function showAccuracyToast(accuracyMeters) {
+		const toast = document.getElementById("accuracyToast");
+		const detail = document.getElementById("accuracyToastDetail");
 
-        window.currentPosCircle = L.circle(e.latlng, {
-            radius: Math.min(e.accuracy/2, 100), color: "blue", weight: 2, opacity: .6, fillOpacity: .15
-        }).addTo(map);
+		if (!toast) return;
 
-        if (typeof e.heading === "number" && !isNaN(e.heading)) {
-            window.currentPosMarker.setRotationAngle(e.heading);
-        }
-    });
-    // Fallback location if user blocks location
-    map.on("locationerror", () => {
-        map.setView([58.333, 8.233], 13);
-    });
+		detail.textContent = `Nøyaktighet: ±${Math.round(accuracyMeters)} m`;
+		toast.style.opacity = "1";
 
-    // Draw controls
-    const btnLocate = document.getElementById("btnLocate");
-    const btnPoint  = document.getElementById("btnDrawPoint");
-    const btnLine   = document.getElementById("btnDrawLine");
+		setTimeout(() => { toast.style.opacity = "0"; }, 4000);
+	}
 
-    const resetActive = () => {
-        [btnPoint, btnLine].forEach(b => b && b.classList.remove("ring-2","ring-emerald-400","scale-[.98]"));
-    };
-    const activate = (btn) => { resetActive(); btn && btn.classList.add("ring-2","ring-emerald-400","scale-[.98]"); };
+	// -------------------------------------------
+	//  POSISJON
+	// -------------------------------------------
 
-    btnLocate?.addEventListener("click", () => { resetActive(); locateUser(); });
+	// Helikopter-knappen: setView = false → EN zoom
+	function locateUser() {
+		map.locate({
+			setView: false,
+			maxZoom: 18,
+			enableHighAccuracy: true,
+			timeout: 10000,
+			maximumAge: 0
+		});
+	}
 
-    function startDrawPoint(){ map.pm.disableDraw(); map.pm.enableDraw('Marker', { snappable:false }); }
-    function startDrawLine(){  map.pm.disableDraw(); map.pm.enableDraw('Line',   { snappable:false }); }
+	map.on("locationfound", (e) => {
+		// Fjern tidligere posisjon
+		if (window.currentPosMarker) map.removeLayer(window.currentPosMarker);
+		if (window.currentPosCircle) map.removeLayer(window.currentPosCircle);
 
-    btnPoint?.addEventListener("click", () => { activate(btnPoint); startDrawPoint(); });
-    btnLine ?.addEventListener("click", () => { activate(btnLine ); startDrawLine();  });
+		// Unøyaktig posisjon → toast + ingen zoom
+		if (e.accuracy > 200) {
+			showAccuracyToast(e.accuracy);
+			return;
+		}
 
-    // Limit line to 2 points
-    map.on('pm:drawstart', ({ shape, workingLayer }) => {
-        if (shape === 'Line') {
-            workingLayer.on('pm:vertexadded', () => {
-                const pts = workingLayer.getLatLngs();
-                if (pts.length >= 2) {
-                    if (map.pm?.Draw?.Line?._finishShape) map.pm.Draw.Line._finishShape();
-                    else map.pm.disableDraw();
-                }
-            });
-        }
-    });
+		// God posisjon → ÉN zoom
+		map.setView(e.latlng, 18);
 
-    // Only one geometry total
-    map.on('pm:create', e => {
-        drawn.clearLayers();
-        drawn.addLayer(e.layer);
-        map.pm.disableDraw();
-        document.getElementById('GeoJsonCoordinates').value = JSON.stringify(e.layer.toGeoJSON().geometry);
-        resetActive();
-        saveDraft();
-    });
+		window.currentPosMarker = L.marker(e.latlng, { icon: helicopterIcon })
+			.addTo(map)
+			.bindPopup(`
+				<div class="popup-heading">🚁 Helikopterposisjon</div>
+				<div class="popup-accuracy">Nøyaktighet: ±${Math.round(e.accuracy)} m</div>
+			`)
+			.openPopup();
 
-    // ------ Upload image (hidden input trigger + toast) ------
-    const imgInput = document.getElementById('imageInput');
-    const btnUpload = document.getElementById('btnUploadImage');
-    const imageToast = document.getElementById('imageToast');
+		setTimeout(() => {
+			if (window.currentPosMarker) window.currentPosMarker.closePopup();
+		}, 3000);
 
-    btnUpload?.addEventListener('click', () => imgInput?.click());
-    imgInput?.addEventListener('change', (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        // Subtle toast
-        imageToast.style.opacity = "1";
-        setTimeout(() => imageToast.style.opacity = "0", 3500);
-        saveDraft(); // keep draft behavior consistent
-    });
+		// Heading hvis finnes
+		if (typeof e.heading === "number" && !isNaN(e.heading)) {
+			window.currentPosMarker.setRotationAngle(e.heading);
+		}
 
-    // ------ Comment bottom sheet ------
-    const btnComment = document.getElementById('btnComment');
-    const sheet = document.getElementById('commentSheet');
-    const backdrop = document.getElementById('commentSheetBackdrop');
-    const closeComment = document.getElementById('closeComment');
+		// Nøyaktighetssirkel
+		window.currentPosCircle = L.circle(e.latlng, {
+			radius: Math.min(e.accuracy / 2, 100),
+			color: "blue",
+			weight: 2,
+			opacity: 0.6,
+			fillOpacity: 0.15
+		}).addTo(map);
+	});
 
-    function openSheet(){
-        sheet.classList.remove('translate-y-full');
-        backdrop.classList.remove('hidden');
-        invalidateSoon();
-    }
-    function closeSheet(){
-        sheet.classList.add('translate-y-full');
-        backdrop.classList.add('hidden');
-        invalidateSoon();
-    }
-    btnComment?.addEventListener('click', openSheet);
-    closeComment?.addEventListener('click', closeSheet);
-    backdrop?.addEventListener('click', closeSheet);
+	map.on("locationerror", () => {
+		console.warn("Posisjon ikke tilgjengelig – bruker fallback.");
+	});
 
-    // ------ SMART AUTOSAVE ------
-    const formKey = "ObstacleReportForm";
-    let draftDisabled = false;
+	// Helikopter-knapp
+	document.getElementById("btnLocate")?.addEventListener("click", () => {
+		resetActiveButtons();
+		locateUser();
+	});
 
-    const commentField = document.querySelector('[name="ObstacleComment"]');
-    function saveDraft(){
-        if (draftDisabled) return;
-        const geo = document.getElementById('GeoJsonCoordinates').value || "";
-        const comment = commentField ? (commentField.value || "") : "";
-        // Store a minimal draft when we have geometry (same behavior as before)
-        if (geo.trim().length > 0) {
-            localStorage.setItem(formKey, JSON.stringify({ comment, geoJson: geo }));
-        } else {
-            localStorage.removeItem(formKey);
-        }
-    }
-    commentField?.addEventListener('input', saveDraft);
+	// -------------------------------------------
+	//  TEGNING
+	// -------------------------------------------
+	const btnPoint = document.getElementById("btnDrawPoint");
+	const btnLine = document.getElementById("btnDrawLine");
 
-    window.addEventListener('load', () => {
-        const saved = localStorage.getItem(formKey); if (!saved) return;
-        let data=null; try { data = JSON.parse(saved); } catch { localStorage.removeItem(formKey); return; }
-        if (!data.geoJson) return;
+	function resetActiveButtons() {
+		btnPoint?.classList.remove("active-map-btn");
+		btnLine?.classList.remove("active-map-btn");
+	}
 
-        // restore comment
-        if (data.comment && commentField) commentField.value = data.comment;
-        // restore geometry
-        document.getElementById('GeoJsonCoordinates').value = data.geoJson;
-        try {
-            const geom = JSON.parse(data.geoJson);
-            drawn.clearLayers();
-            if (geom.type === "Point") {
-                const [lng, lat] = geom.coordinates;
-                const m = L.marker([lat,lng]).addTo(map); drawn.addLayer(m); map.setView([lat,lng], 15);
-            } else if (geom.type === "LineString") {
-                const latlngs = geom.coordinates.map(([lng,lat]) => [lat,lng]);
-                const l = L.polyline(latlngs, { color:"orange", weight:4 }).addTo(map);
-                drawn.addLayer(l); map.fitBounds(l.getBounds());
-            }
-        } catch {}
-        // Blue toast
-        const toast = document.getElementById("restoreToast");
-        if (toast){ toast.style.opacity = "1"; setTimeout(() => toast.style.opacity = "0", 5000); }
-    });
+	function setActiveButton(btn) {
+		resetActiveButtons();
+		btn?.classList.add("active-map-btn");
+	}
 
-    // Clear draft on submit
-    document.getElementById('submitBtn')?.addEventListener('click', () => {
-        draftDisabled = true; localStorage.removeItem(formKey);
-    });
+	btnPoint?.addEventListener("click", () => {
+		setActiveButton(btnPoint);
+		map.pm.disableDraw();
+		map.pm.enableDraw('Marker', { snappable: false });
+	});
 
-    // Cancel/reset (if you keep a cancel somewhere else; harmless if missing)
-    const cancelBtn = document.getElementById('cancelBtn');
-    function showCancelToast() {
-        const t = document.getElementById("cancelToast"); if (!t) return;
-        t.style.opacity = "1"; setTimeout(() => t.style.opacity = "0", 5000);
-    }
-    cancelBtn?.addEventListener('click', () => {
-        draftDisabled = true; localStorage.removeItem(formKey);
-        if (commentField) commentField.value = "";
-        document.getElementById('GeoJsonCoordinates').value = "";
-        drawn.clearLayers(); map.pm.disableDraw(); resetActive();
-        if (window.currentPosMarker){ map.removeLayer(window.currentPosMarker); window.currentPosMarker=null; }
-        if (window.currentPosCircle){ map.removeLayer(window.currentPosCircle); window.currentPosCircle=null; }
-        closeSheet(); showCancelToast();
-    });
+	btnLine?.addEventListener("click", () => {
+		setActiveButton(btnLine);
+		map.pm.disableDraw();
+		map.pm.enableDraw('Line', { snappable: false });
+	});
+
+	// Begrens linje til 2 punkter
+	map.on('pm:drawstart', ({ shape, workingLayer }) => {
+		if (shape === 'Line') {
+			workingLayer.on('pm:vertexadded', () => {
+				const pts = workingLayer.getLatLngs();
+				if (pts.length >= 2) {
+					if (map.pm?.Draw?.Line?._finishShape)
+						map.pm.Draw.Line._finishShape();
+					else
+						map.pm.disableDraw();
+				}
+			});
+		}
+	});
+
+	// Ny geometri lagres
+	map.on('pm:create', (e) => {
+		drawn.clearLayers();
+		drawn.addLayer(e.layer);
+		map.pm.disableDraw();
+
+		document.getElementById('GeoJsonCoordinates').value =
+			JSON.stringify(e.layer.toGeoJSON().geometry);
+
+		resetActiveButtons();
+		saveDraft();
+	});
+
+	// -------------------------------------------
+	//  AUTOSAVE
+	// -------------------------------------------
+	const formKey = "ObstacleReportForm";
+	let draftDisabled = false;
+
+	function saveDraft() {
+		if (draftDisabled) return;
+
+		const commentInput = document.querySelector('[name="ObstacleComment"]');
+		const comment = commentInput ? (commentInput.value || "") : "";
+		const geo = document.getElementById('GeoJsonCoordinates').value || "";
+
+		if (geo.trim().length > 0) {
+			localStorage.setItem(formKey, JSON.stringify({ comment, geoJson: geo }));
+		} else {
+			localStorage.removeItem(formKey);
+		}
+	}
+
+	const commentField = document.querySelector('[name="ObstacleComment"]');
+	commentField?.addEventListener("input", saveDraft);
+
+	// -------------------------------------------
+	//  GJENOPPRETT UTKAST
+	// -------------------------------------------
+	window.addEventListener("load", () => {
+		const saved = localStorage.getItem(formKey);
+		if (!saved) return;
+
+		let data;
+		try {
+			data = JSON.parse(saved);
+		} catch {
+			localStorage.removeItem(formKey);
+			return;
+		}
+
+		if (!data.geoJson) return;
+
+		document.getElementById('GeoJsonCoordinates').value = data.geoJson;
+		if (data.comment && commentField) commentField.value = data.comment;
+
+		const geom = JSON.parse(data.geoJson);
+		drawn.clearLayers();
+
+		if (geom.type === "Point") {
+			const [lng, lat] = geom.coordinates;
+			const m = L.marker([lat, lng]).addTo(map);
+			drawn.addLayer(m);
+			map.setView([lat, lng], 18);
+		} else if (geom.type === "LineString") {
+			const latlngs = geom.coordinates.map(([lng, lat]) => [lat, lng]);
+			const l = L.polyline(latlngs, { color: "orange", weight: 4 }).addTo(map);
+			drawn.addLayer(l);
+			map.fitBounds(l.getBounds());
+			setTimeout(() => map.setZoom(18), 150);
+		}
+
+		restoredFromDraft = true;
+
+		const toast = document.getElementById("restoreToast");
+		if (toast) {
+			toast.style.opacity = "1";
+			setTimeout(() => { toast.style.opacity = "0"; }, 5000);
+		}
+	});
+
+	// -------------------------------------------
+	//  SUBMIT
+	// -------------------------------------------
+	document.getElementById("submitBtn")?.addEventListener("click", () => {
+		draftDisabled = true;
+		localStorage.removeItem(formKey);
+	});
+
+	// -------------------------------------------
+	//  CANCEL
+	// -------------------------------------------
+	document.getElementById("cancelBtn")?.addEventListener("click", () => {
+
+		draftDisabled = true;
+		localStorage.removeItem(formKey);
+
+		if (commentField) commentField.value = "";
+		document.getElementById('GeoJsonCoordinates').value = "";
+		drawn.clearLayers();
+
+		map.pm.disableDraw();
+		resetActiveButtons();
+
+		if (window.currentPosMarker) {
+			map.removeLayer(window.currentPosMarker);
+			window.currentPosMarker = null;
+		}
+		if (window.currentPosCircle) {
+			map.removeLayer(window.currentPosCircle);
+			window.currentPosCircle = null;
+		}
+
+		const toast = document.getElementById("cancelToast");
+		if (toast) {
+			toast.style.opacity = "1";
+			setTimeout(() => { toast.style.opacity = "0"; }, 5000);
+		}
+	});
+
 </script>
 }
 
