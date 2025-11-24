@@ -41,7 +41,10 @@ Brukere kan opprette egne kontoer, som deretter godkjennes av en administrator s
 
 <div align="left">
 
-<a href="https://github.com/haldvar/G7_NRL_DEV/blob/main/DOCUMENTATION.md"><img src="https://img.shields.io/badge/documentation-blue"></a>
+<a href="https://github.com/haldvar/G7_NRL_DEV/blob/main/Documentation/Documentation.md"><img src="https://img.shields.io/badge/documentation-blue"></a>
+<a href="https://github.com/haldvar/G7_NRL_DEV/blob/main/Documentation/IconLicenses.md"><img src="https://img.shields.io/badge/licenses-purple"></a>
+
+
 
 </div>
 
