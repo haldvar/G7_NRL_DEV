@@ -31,6 +31,7 @@ namespace NRL_PROJECT.Controllers
             try
             {
                 ViewBag.ReportCount = await _context.ObstacleReports.CountAsync();
+
                 return View();
             }
             catch (Exception ex)
