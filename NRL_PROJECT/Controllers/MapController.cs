@@ -301,6 +301,33 @@ namespace NRL_PROJECT.Controllers
 
             return View(reports);
         }
+        
+        [HttpGet]
+        public async Task<IActionResult> MyReports()
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                // Not logged in – send them to login
+                return Challenge(); // or RedirectToAction("Login", "Account");
+            }
+
+            var reports = await _context.ObstacleReports
+                .Include(r => r.Obstacle)
+                .Include(r => r.SubmittedByUser)
+                .Include(r => r.Reviewer)
+                .Include(r => r.MapData)
+                .ThenInclude(m => m.Coordinates)
+                .Where(r => r.SubmittedByUserId == userId)      // 👈 only this user
+                .OrderByDescending(r => r.ObstacleReportDate)
+                .ToListAsync();
+
+            // Either use a separate view name:
+            return View("MyReports", reports);
+
+            // or if you prefer to reuse the same razor file, just do:
+            // return View("ReportListOverview", reports);
+        }
 
         // GET: /Map/GetObstacles
         [HttpGet]
