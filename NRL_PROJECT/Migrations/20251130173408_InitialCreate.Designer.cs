@@ -12,7 +12,7 @@ using NRL_PROJECT.Data;
 namespace NRL_PROJECT.Migrations
 {
     [DbContext(typeof(NRL_Db_Context))]
-    [Migration("20251130123601_InitialCreate")]
+    [Migration("20251130173408_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
