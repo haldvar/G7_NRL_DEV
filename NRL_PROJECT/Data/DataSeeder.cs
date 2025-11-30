@@ -68,8 +68,8 @@ namespace NRL_PROJECT.Data
             IConfiguration config,
             NRL_Db_Context context)
         {
-            string adminEmail = config["AdminUser:Email"];
-            string adminPassword = config["AdminUser:Password"];
+            string adminEmail = "admin@nrl.no";
+            string adminPassword = "Heisann1!";
 
             var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
             if (existingAdmin != null)
