@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using NRL_PROJECT.Data;
 using NRL_PROJECT.Models;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 
 namespace NRL_PROJECT.Controllers
 {
@@ -49,21 +50,24 @@ namespace NRL_PROJECT.Controllers
         }
 
         // GET: /Map/MapView
+        [Authorize]
         public async Task<IActionResult> MapView(int? id)
         {
-            // 1) Load all reports with GeoJSON + MapData
+            // 1) Load all reports with GeoJSON + MapData + User info
             var reportsWithGeometry = await _context.ObstacleReports
                 .Include(r => r.MapData)
+                    .ThenInclude(m => m.Coordinates)
                 .Include(r => r.SubmittedByUser)
+                .Include(r => r.Obstacle)
                 .Where(r => r.MapData != null &&
                     !string.IsNullOrWhiteSpace(r.MapData.GeoJsonCoordinates))
                 .ToListAsync();
 
-            // 2) Create a MapData to funcion as ViewModel
+            // 2) Create a MapData to function as ViewModel
             var model = new MapData
             {
                 ObstacleReports = reportsWithGeometry,
-                Coordinates = new List<MapCoordinate>()  // unngå null
+                Coordinates = new List<MapCoordinate>()
             };
 
             // 3) Place initial view based on first report
@@ -120,7 +124,6 @@ namespace NRL_PROJECT.Controllers
         }
 
         // POST: /Map/SubmitObstacleWithLocation
-        // - Full flow: parse GeoJSON, save MapData, save uploaded image, save Obstacle, create ObstacleReport
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SubmitObstacleWithLocation(ObstacleData model)
@@ -198,40 +201,39 @@ namespace NRL_PROJECT.Controllers
             // 4) Handle image upload (if present)
             string? imagePath = null;
 
-         if (model.ImageFile != null && model.ImageFile.Length > 0)
-{
-    // Validation: allowed extensions
-    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".heic", ".webp" };
-    var extension = Path.GetExtension(model.ImageFile.FileName).ToLowerInvariant();
+            if (model.ImageFile != null && model.ImageFile.Length > 0)
+            {
+                // Validation: allowed extensions
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".heic", ".webp" };
+                var extension = Path.GetExtension(model.ImageFile.FileName).ToLowerInvariant();
 
-    if (!allowedExtensions.Contains(extension))
-    {
-        ModelState.AddModelError("", "Kun bildefiler (.jpg, .jpeg, .png, .heic, .webp) er tillatt");
-        return View("ObstacleAndMapForm", model);
-    }
+                if (!allowedExtensions.Contains(extension))
+                {
+                    ModelState.AddModelError("", "Kun bildefiler (.jpg, .jpeg, .png, .heic, .webp) er tillatt");
+                    return View("ObstacleAndMapForm", model);
+                }
 
-    // Validation: max file size (5 MB)
-    if (model.ImageFile.Length > 5 * 1024 * 1024)
-    {
-        ModelState.AddModelError("", "Bildet må være mindre enn 5MB");
-        return View("ObstacleAndMapForm", model);
-    }
+                // Validation: max file size (5 MB)
+                if (model.ImageFile.Length > 5 * 1024 * 1024)
+                {
+                    ModelState.AddModelError("", "Bildet må være mindre enn 5MB");
+                    return View("ObstacleAndMapForm", model);
+                }
 
-    // Saving logic
-    var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
+                // Saving logic
+                var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
 
-    if (!Directory.Exists(uploadsFolder))
-        Directory.CreateDirectory(uploadsFolder);
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
 
-    var uniqueFileName = Guid.NewGuid() + extension;
-    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                var uniqueFileName = Guid.NewGuid() + extension;
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-    using var stream = new FileStream(filePath, FileMode.Create);
-    await model.ImageFile.CopyToAsync(stream);
+                using var stream = new FileStream(filePath, FileMode.Create);
+                await model.ImageFile.CopyToAsync(stream);
 
-    imagePath = "/uploads/" + uniqueFileName;
-}
-
+                imagePath = "/uploads/" + uniqueFileName;
+            }
 
             // 5) Save Obstacle
             model.ObstacleImageURL = imagePath;
@@ -245,7 +247,7 @@ namespace NRL_PROJECT.Controllers
             var report = new ObstacleReportData
             {
                 ObstacleID = model.ObstacleID,
-                SubmittedByUserId = currentUserId, // use SubmittedByUserId field
+                SubmittedByUserId = currentUserId,
                 ObstacleReportComment = "Her skal Registerfører kunne skrive inn kommentar.",
                 ObstacleReportDate = DateTime.UtcNow.AddHours(1),
                 ObstacleReportStatus = ObstacleReportData.EnumTypes.New,
@@ -261,7 +263,6 @@ namespace NRL_PROJECT.Controllers
         }
 
         // POST: /Map/SubmitObstacleReport
-        // - Simpler report submission for an existing obstacle (geoJson passed)
         [HttpPost]
         public async Task<IActionResult> SubmitObstacleReport(int ObstacleID, string geoJson)
         {
@@ -285,7 +286,7 @@ namespace NRL_PROJECT.Controllers
                 ObstacleReportDate = DateTime.UtcNow.AddHours(1),
                 ObstacleReportStatus = ObstacleReportData.EnumTypes.New,
                 MapDataID = mapData.MapDataID,
-                SubmittedByUserId = null,   // no logged-in user
+                SubmittedByUserId = null,
                 ReviewedByUserID = null,
             };
 
@@ -301,34 +302,28 @@ namespace NRL_PROJECT.Controllers
 
         // GET: /Map/ReportListOverview
         [HttpGet]
-        // I din MapController.cs, endre ReportListOverview metoden til dette:
-
-// GET: /Map/ReportListOverview
-        [HttpGet]
         public async Task<IActionResult> ReportListOverview()
         {
-            // Load reports including related data for the overview
-           
             var reports = await _context.ObstacleReports
                 .Include(r => r.Obstacle)
                 .Include(r => r.SubmittedByUser)
                 .Include(r => r.Reviewer)
                 .Include(r => r.MapData)
-                .ThenInclude(m => m.Coordinates)
-                .OrderByDescending(r => r.ObstacleReportDate)   // Newest report from top
+                    .ThenInclude(m => m.Coordinates)
+                .OrderByDescending(r => r.ObstacleReportDate)
                 .ToListAsync();
 
             return View(reports);
         }
-        
+
+        // GET: /Map/MyReports
         [HttpGet]
         public async Task<IActionResult> MyReports()
         {
             var userId = _userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
             {
-                // Not logged in – send them to login
-                return Challenge(); // or RedirectToAction("Login", "Account");
+                return Challenge();
             }
 
             var reports = await _context.ObstacleReports
@@ -336,23 +331,18 @@ namespace NRL_PROJECT.Controllers
                 .Include(r => r.SubmittedByUser)
                 .Include(r => r.Reviewer)
                 .Include(r => r.MapData)
-                .ThenInclude(m => m.Coordinates)
-                .Where(r => r.SubmittedByUserId == userId)      // only this user
+                    .ThenInclude(m => m.Coordinates)
+                .Where(r => r.SubmittedByUserId == userId)
                 .OrderByDescending(r => r.ObstacleReportDate)
                 .ToListAsync();
 
-            // Either use a separate view name:
             return View("MyReports", reports);
-
-            // or if you prefer to reuse the same razor file, just do:
-            // return View("ReportListOverview", reports);
         }
 
         // GET: /Map/GetObstacles
         [HttpGet]
         public async Task<IActionResult> GetObstacles()
         {
-            // Return GeoJSON-like structure for all obstacles (used by client)
             var obstacles = await _context.Obstacles
                 .Include(o => o.MapData)
                     .ThenInclude(m => m.Coordinates)

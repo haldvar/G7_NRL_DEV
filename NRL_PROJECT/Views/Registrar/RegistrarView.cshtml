@@ -140,14 +140,17 @@
                 }
                 else
                 {
+                    int index = 0;
                     foreach (var r in list)
                     {
+                        var bgClass = index % 2 == 0 ? "bg-white/95" : "bg-slate-50/95";
+                        
                         <a asp-controller="Registrar"
                            asp-action="ReportDetails"
                            asp-route-id="@r.ObstacleReportID"
                            asp-route-status="@selectedStatus"
                            asp-route-q="@currentSearch"
-                           class="block rounded-2xl border border-white/60 bg-white/95 backdrop-blur p-4 shadow transition hover:-translate-y-0.5 hover:shadow-md">
+                           class="block rounded-2xl border border-white/60 @bgClass backdrop-blur p-4 shadow transition hover:-translate-y-0.5 hover:shadow-md">
                             
                             <!-- Accent -->
                             <div class="h-1 w-full rounded-t-2xl bg-gradient-to-r from-green-600 via-blue-600 to-green-600 mb-3"></div>
@@ -175,6 +178,15 @@
                                     {
                                         <div class="mt-1 text-sm text-slate-600">
                                             <span class="text-slate-500">Organisasjon:</span> @r.OrgName
+                                        </div>
+                                    }
+
+                                    @if (!string.IsNullOrWhiteSpace(r.ObstacleReportComment) && 
+                                         r.ObstacleReportComment != "Her skal Registerfører kunne skrive inn kommentar.")
+                                    {
+                                        <div class="mt-2 text-sm text-slate-600">
+                                            <span class="text-slate-500">Registerfører:</span>
+                                            <span class="text-slate-700">@r.ObstacleReportComment</span>
                                         </div>
                                     }
                                 </div>
@@ -208,6 +220,8 @@
                                 </div>
                             </div>
                         </a>
+                        
+                        index++;
                     }
                 }
             </section>
