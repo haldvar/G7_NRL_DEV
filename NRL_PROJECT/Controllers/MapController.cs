@@ -337,7 +337,7 @@ namespace NRL_PROJECT.Controllers
                 .Include(r => r.Reviewer)
                 .Include(r => r.MapData)
                 .ThenInclude(m => m.Coordinates)
-                .Where(r => r.SubmittedByUserId == userId)      // 👈 only this user
+                .Where(r => r.SubmittedByUserId == userId)      // only this user
                 .OrderByDescending(r => r.ObstacleReportDate)
                 .ToListAsync();
 
