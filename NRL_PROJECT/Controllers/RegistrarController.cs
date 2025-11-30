@@ -127,7 +127,7 @@ namespace NRL_PROJECT.Controllers
                     ObstacleComment = r.Obstacle != null ? (r.Obstacle.ObstacleComment ?? "") : "",
                     ObstacleHeight = r.Obstacle != null ? r.Obstacle.ObstacleHeight : 0,
 
-                    // ⭐ File support
+                    //  File support
                     ObstacleImageURL = r.Obstacle != null ? r.Obstacle.ObstacleImageURL : null,
 
                     Latitude = (r.MapData != null && r.MapData.Coordinates.Any())
@@ -214,7 +214,7 @@ namespace NRL_PROJECT.Controllers
                 ObstacleHeight = report.Obstacle?.ObstacleHeight ?? 0,
                
 
-                // ⭐ Image support
+                //  Image support
                 ObstacleImageURL = report.Obstacle?.ObstacleImageURL,
 
                 MapData = report.MapData,
