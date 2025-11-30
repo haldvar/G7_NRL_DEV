@@ -133,43 +133,53 @@
             </div>
 
             <!-- Toasts -->
-            <div id="restoreToast"
-                 class="pointer-events-none absolute left-1/2 top-4 z-40 -translate-x-1/2 rounded-xl bg-sky-600/95 px-5 py-3
-                        text-white shadow-2xl font-semibold tracking-wide backdrop-blur transition-opacity duration-500"
-                 style="opacity:0;">
-                Utkast gjenopprettet
-            </div>
-            <div id="cancelToast"
-                 class="pointer-events-none absolute left-1/2 top-20 z-40 -translate-x-1/2 rounded-xl bg-sky-600/95 px-5 py-3
-                        text-white shadow-2xl font-semibold tracking-wide backdrop-blur transition-opacity duration-500"
-                 style="opacity:0;">
-                Rapport nullstilt
-            </div>
-            <!-- Image attached toast -->
-            <div id="imageToast"
-                 class="pointer-events-none absolute left-1/2 top-36 z-40 -translate-x-1/2 rounded-xl bg-emerald-600/95 px-5 py-3
-                        text-white shadow-2xl font-semibold tracking-wide backdrop-blur transition-opacity duration-500"
-                 style="opacity:0;">
-                Bilde vedlagt
-            </div>
+<div id="restoreToast"
+     class="pointer-events-none absolute left-1/2 top-4 z-40 -translate-x-1/2 rounded-xl bg-sky-600/95 px-5 py-3
+            text-white shadow-2xl font-semibold tracking-wide backdrop-blur transition-opacity duration-500"
+     style="opacity:0;">
+    Utkast gjenopprettet
+</div>
 
-            <!-- Error toast (NEW) -->
-            <div id="errorToast"
-                 class="pointer-events-none absolute left-1/2 top-52 z-40 -translate-x-1/2 rounded-xl bg-rose-600/95 px-5 py-3
-                        text-white shadow-2xl font-semibold tracking-wide backdrop-blur transition-opacity duration-500"
-                 style="opacity:0;">
-                <span id="errorToastText">Feil ved opplasting</span>
-            </div>
+<div id="cancelToast"
+     class="pointer-events-none absolute left-1/2 top-20 z-40 -translate-x-1/2 rounded-xl bg-sky-600/95 px-5 py-3
+            text-white shadow-2xl font-semibold tracking-wide backdrop-blur transition-opacity duration-500"
+     style="opacity:0;">
+    Rapport nullstilt
+</div>
 
-            <!-- Accuracy toast -->
-            <div id="accuracyToast"
-                 class="pointer-events-none absolute left-1/2 top-[17rem] z-40 -translate-x-1/2
-					rounded-xl bg-orange-500/95 px-6 py-4 text-white shadow-2xl
-					font-semibold tracking-wide backdrop-blur transition-opacity duration-300"
-                 style="opacity:0;">
-                <span id="accuracyToastText">⚠️ Posisjon for unøyaktig</span>
-                <div id="accuracyToastDetail" class="text-sm opacity-90 mt-1"></div>
-            </div>
+<!-- Image attached toast -->
+<div id="imageToast"
+     class="pointer-events-none absolute left-1/2 top-36 z-40 -translate-x-1/2 rounded-xl bg-emerald-600/95 px-5 py-3
+            text-white shadow-2xl font-semibold tracking-wide backdrop-blur transition-opacity duration-500"
+     style="opacity:0;">
+    Bilde vedlagt
+</div>
+
+<!-- Comment saved toast -->
+<div id="commentToast"
+     class="pointer-events-none absolute left-1/2 top-44 z-40 -translate-x-1/2 rounded-xl bg-emerald-600/95 px-5 py-3
+            text-white shadow-2xl font-semibold tracking-wide backdrop-blur transition-opacity duration-500"
+     style="opacity:0;">
+    Kommentar lagret
+</div>
+
+<!-- Error toast -->
+<div id="errorToast"
+     class="pointer-events-none absolute left-1/2 top-52 z-40 -translate-x-1/2 rounded-xl bg-rose-600/95 px-5 py-3
+            text-white shadow-2xl font-semibold tracking-wide backdrop-blur transition-opacity duration-500"
+     style="opacity:0;">
+    <span id="errorToastText">Feil ved opplasting</span>
+</div>
+
+<!-- Accuracy toast -->
+<div id="accuracyToast"
+     class="pointer-events-none absolute left-1/2 top-[17rem] z-40 -translate-x-1/2
+            rounded-xl bg-orange-500/95 px-6 py-4 text-white shadow-2xl
+            font-semibold tracking-wide backdrop-blur transition-opacity duration-300"
+     style="opacity:0;">
+    <span id="accuracyToastText">⚠️ Posisjon for unøyaktig</span>
+    <div id="accuracyToastDetail" class="text-sm opacity-90 mt-1"></div>
+</div>
 
 
             <!-- Bottom comment sheet -->
@@ -465,6 +475,7 @@
     const backdrop = document.getElementById('commentSheetBackdrop');
     const closeComment = document.getElementById('closeComment');
     const commentTextarea = document.querySelector('[name="ObstacleComment"]');
+    const commentToast = document.getElementById('commentToast');
 
     function openSheet(){
         sheet.classList.remove('translate-y-full');
@@ -480,7 +491,13 @@
         sheet.classList.add('translate-y-full');
         backdrop.classList.add('hidden');
         setTimeout(() => map.invalidateSize(), 200);
-    }
+
+        // Show confirmation if there's text in the comment
+        if (commentTextarea?.value.trim().length > 0) {
+            commentToast.style.opacity = "1";
+            setTimeout(() => commentToast.style.opacity = "0", 3500);
+        }
+}
 
     btnComment?.addEventListener('click', openSheet);
     closeComment?.addEventListener('click', closeSheet);
