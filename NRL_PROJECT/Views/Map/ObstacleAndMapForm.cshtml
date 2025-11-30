@@ -2,7 +2,7 @@
 
 @section Styles {
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
+<link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@@latest/dist/leaflet-geoman.css" />
 }
 
 @{
@@ -13,7 +13,9 @@
     @Html.AntiForgeryToken()
 
     <!-- Hidden file input (triggered by Upload button) -->
-    <input asp-for="ImageFile" type="file" accept="image/*" capture="environment"
+    <input asp-for="ImageFile" type="file"
+           accept=".jpg,.jpeg,.png,.heic,.webp"
+           capture="environment"
            id="imageInput" class="hidden" />
     <!-- Keep this hidden field for GeoJSON -->
     <input type="hidden" asp-for="MapData.GeoJsonCoordinates" id="GeoJsonCoordinates" />
@@ -114,7 +116,7 @@
             </div>
 
 
-            <!-- Submit report button (center bottom) --> 
+            <!-- Submit report button (center bottom) -->
             <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-20">
                 <button type="submit" id="submitBtn"
                         class="inline-flex items-center gap-3 rounded-full bg-blue-600 px-11 py-9 
@@ -143,7 +145,7 @@
                  style="opacity:0;">
                 Rapport nullstilt
             </div>
-            <!-- New: image attached toast -->
+            <!-- Image attached toast -->
             <div id="imageToast"
                  class="pointer-events-none absolute left-1/2 top-36 z-40 -translate-x-1/2 rounded-xl bg-emerald-600/95 px-5 py-3
                         text-white shadow-2xl font-semibold tracking-wide backdrop-blur transition-opacity duration-500"
@@ -151,15 +153,23 @@
                 Bilde vedlagt
             </div>
 
-			<!-- Accuracy toast -->
-			<div id="accuracyToast"
-				 class="pointer-events-none absolute left-1/2 top-[11rem] z-40 -translate-x-1/2
+            <!-- Error toast (NEW) -->
+            <div id="errorToast"
+                 class="pointer-events-none absolute left-1/2 top-52 z-40 -translate-x-1/2 rounded-xl bg-rose-600/95 px-5 py-3
+                        text-white shadow-2xl font-semibold tracking-wide backdrop-blur transition-opacity duration-500"
+                 style="opacity:0;">
+                <span id="errorToastText">Feil ved opplasting</span>
+            </div>
+
+            <!-- Accuracy toast -->
+            <div id="accuracyToast"
+                 class="pointer-events-none absolute left-1/2 top-[17rem] z-40 -translate-x-1/2
 					rounded-xl bg-orange-500/95 px-6 py-4 text-white shadow-2xl
 					font-semibold tracking-wide backdrop-blur transition-opacity duration-300"
-				 style="opacity:0;">
-				<span id="accuracyToastText">⚠️ Posisjon for unøyaktig</span>
-				<div id="accuracyToastDetail" class="text-sm opacity-90 mt-1"></div>
-			</div>
+                 style="opacity:0;">
+                <span id="accuracyToastText">⚠️ Posisjon for unøyaktig</span>
+                <div id="accuracyToastDetail" class="text-sm opacity-90 mt-1"></div>
+            </div>
 
 
             <!-- Bottom comment sheet -->
@@ -206,274 +216,295 @@
 </div>
 }
 
+@section Scripts {
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/@@geoman-io/leaflet-geoman-free@@latest/dist/leaflet-geoman.min.js"></script>
+
 <script>
-    
+
     function showAccuracyToast(accuracyMeters) {
-		const toast = document.getElementById("accuracyToast");
-		const detail = document.getElementById("accuracyToastDetail");
+        const toast = document.getElementById("accuracyToast");
+        const detail = document.getElementById("accuracyToastDetail");
 
-		if (!toast) return;
+        if (!toast) return;
 
-		detail.textContent = `Nøyaktighet: ±${Math.round(accuracyMeters)} m`;
+        detail.textContent = `Nøyaktighet: ±${Math.round(accuracyMeters)} m`;
 
-		toast.style.opacity = "1";
-		setTimeout(() => {
-			toast.style.opacity = "0";
-		}, 4000);
-	}
+        toast.style.opacity = "1";
+        setTimeout(() => {
+            toast.style.opacity = "0";
+        }, 4000);
+    }
 
-		 let restoredFromDraft = false;
+    let restoredFromDraft = false;
 
-	// -------------------------------------------
-	//  IKON
-	// -------------------------------------------
-	const helicopterIcon = L.icon({
-		iconUrl: '/icons/helicopter.svg',
-		iconSize: [45, 45],
-		iconAnchor: [19, 19],
-		popupAnchor: [0, -12]
-	});
+    // -------------------------------------------
+    //  IKON
+    // -------------------------------------------
+    const helicopterIcon = L.icon({
+        iconUrl: '/icons/helicopter.svg',
+        iconSize: [45, 45],
+        iconAnchor: [19, 19],
+        popupAnchor: [0, -12]
+    });
 
-	// -------------------------------------------
-	//  MAP SETUP
-	// -------------------------------------------
-	const map = L.map('mapDraw', {
-		zoomControl: false,
-		touchZoom: true,
-		scrollWheelZoom: true,
-		doubleClickZoom: true,
-		boxZoom: false
-	}).setView([58.333, 8.233], 5);   // fallback 
+    // -------------------------------------------
+    //  MAP SETUP
+    // -------------------------------------------
+    const map = L.map('mapDraw', {
+        zoomControl: false,
+        touchZoom: true,
+        scrollWheelZoom: true,
+        doubleClickZoom: true,
+        boxZoom: false
+    }).setView([58.333, 8.233], 5);   // fallback 
 
-	// Autolocate if no draf is restored
-	if (!restoredFromDraft) {
-		map.locate({
-			setView: true,        // Leaflet zoomer første gang (ikke ved knappen)
-			maxZoom: 19,
-			enableHighAccuracy: true,
-			timeout: 10000,
-			maximumAge: 0
-		});
-	}
+    // Autolocate if no draft is restored
+    if (!restoredFromDraft) {
+        map.locate({
+            setView: true,        // Leaflet zoomer første gang (ikke ved knappen)
+            maxZoom: 19,
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        });
+    }
 
-	// -------------------------------------------
-	//  TILELAYER
-	// -------------------------------------------
-	L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {
-		layers: 'topo',
-		format: 'image/png',
-		transparent: false,
-		attribution: '© Kartverket'
-	}).addTo(map);
+    // -------------------------------------------
+    //  TILELAYER
+    // -------------------------------------------
+    L.tileLayer.wms('https://wms.geonorge.no/skwms1/wms.topo', {
+        layers: 'topo',
+        format: 'image/png',
+        transparent: false,
+        attribution: '© Kartverket'
+    }).addTo(map);
 
-	// Remove Geoman toolbars
-	map.pm.addControls({ drawMarker: false, drawPolyline: false, editMode: false, removalMode: false });
-	if (map.pm?.Toolbar) map.pm.Toolbar.removeControls();
+    // Remove Geoman toolbars
+    map.pm.addControls({ drawMarker: false, drawPolyline: false, editMode: false, removalMode: false });
+    if (map.pm?.Toolbar) map.pm.Toolbar.removeControls();
 
-	setTimeout(() => map.invalidateSize(), 300);
+    setTimeout(() => map.invalidateSize(), 300);
 
-	const drawn = L.featureGroup().addTo(map);
+    const drawn = L.featureGroup().addTo(map);
 
-	// -------------------------------------------
-	//  LOW ACCURACY TOAST
-	// -------------------------------------------
-	function showAccuracyToast(accuracyMeters) {
-		const toast = document.getElementById("accuracyToast");
-		const detail = document.getElementById("accuracyToastDetail");
+    // -------------------------------------------
+    //  POSISTION
+    // -------------------------------------------
 
-		if (!toast) return;
+    function locateUser() {
+        map.locate({
+            setView: false,
+            maxZoom: 19,
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        });
+    }
 
-		detail.textContent = `Nøyaktighet: ±${Math.round(accuracyMeters)} m`;
-		toast.style.opacity = "1";
+    map.on("locationfound", (e) => {
+        // Fjern tidligere posisjon
+        if (window.currentPosMarker) map.removeLayer(window.currentPosMarker);
+        if (window.currentPosCircle) map.removeLayer(window.currentPosCircle);
 
-		setTimeout(() => { toast.style.opacity = "0"; }, 4000);
-	}
+        // Unøyaktig posisjon
+        if (e.accuracy > 200) {
+            // Vis toast
+            showAccuracyToast(e.accuracy);
+            map.setView(e.latlng, 8);
+            return;
+        }
 
-	// -------------------------------------------
-	//  POSISTION
-	// -------------------------------------------
+        map.setView(e.latlng, 18);
 
-	function locateUser() {
-		map.locate({
-			setView: false,
-			maxZoom: 19,
-			enableHighAccuracy: true,
-			timeout: 10000,
-			maximumAge: 0
-		});
-	}
-
-	map.on("locationfound", (e) => {
-		// Fjern tidligere posisjon
-		if (window.currentPosMarker) map.removeLayer(window.currentPosMarker);
-		if (window.currentPosCircle) map.removeLayer(window.currentPosCircle);
-
-		// Unøyaktig posisjon
-			if (e.accuracy > 200) {
-		// Vis toast
-		showAccuracyToast(e.accuracy);
-		map.setView(e.latlng, 8);
-
-		return;
-	}
-
-		map.setView(e.latlng, 18);
-
-		window.currentPosMarker = L.marker(e.latlng, { icon: helicopterIcon })
-			.addTo(map)
-			.bindPopup(`
+        window.currentPosMarker = L.marker(e.latlng, { icon: helicopterIcon })
+            .addTo(map)
+            .bindPopup(`
 				<div class="popup-heading">🚁 Helikopterposisjon</div>
 				<div class="popup-accuracy">Nøyaktighet: ±${Math.round(e.accuracy)} m</div>
 			`)
-			.openPopup();
+            .openPopup();
 
-		setTimeout(() => {
-			if (window.currentPosMarker) window.currentPosMarker.closePopup();
-		}, 3000);
+        setTimeout(() => {
+            if (window.currentPosMarker) window.currentPosMarker.closePopup();
+        }, 3000);
 
-		// Heading 
-		if (typeof e.heading === "number" && !isNaN(e.heading)) {
-			window.currentPosMarker.setRotationAngle(e.heading);
-		}
+        // Heading 
+        if (typeof e.heading === "number" && !isNaN(e.heading)) {
+            window.currentPosMarker.setRotationAngle(e.heading);
+        }
 
-		// Accuracy circle
-		window.currentPosCircle = L.circle(e.latlng, {
-			radius: Math.min(e.accuracy / 2, 100),
-			color: "blue",
-			weight: 2,
-			opacity: 0.6,
-			fillOpacity: 0.15
-		}).addTo(map);
-	});
+        // Accuracy circle
+        window.currentPosCircle = L.circle(e.latlng, {
+            radius: Math.min(e.accuracy / 2, 100),
+            color: "blue",
+            weight: 2,
+            opacity: 0.6,
+            fillOpacity: 0.15
+        }).addTo(map);
+    });
 
-	map.on("locationerror", () => {
-		console.warn("Posisjon ikke tilgjengelig – bruker fallback.");
-	});
+    map.on("locationerror", () => {
+        console.warn("Posisjon ikke tilgjengelig – bruker fallback.");
+    });
 
-	// Helikopter-knapp
-	document.getElementById("btnLocate")?.addEventListener("click", () => {
-		resetActiveButtons();
-		locateUser();
-	});
+    // Helikopter-knapp
+    document.getElementById("btnLocate")?.addEventListener("click", () => {
+        resetActiveButtons();
+        locateUser();
+    });
 
-	// -------------------------------------------
-	//  DRAWING
-	// -------------------------------------------
-	const btnPoint = document.getElementById("btnDrawPoint");
-	const btnLine = document.getElementById("btnDrawLine");
+    // -------------------------------------------
+    //  DRAWING
+    // -------------------------------------------
+    const btnPoint = document.getElementById("btnDrawPoint");
+    const btnLine = document.getElementById("btnDrawLine");
 
-	function resetActiveButtons() {
-		[btnPoint, btnLine].forEach(btn => {
-			btn?.classList.remove("ring-4", "ring-green-400", "scale-95", "bg-green-50");
-		});
-	}
+    function resetActiveButtons() {
+        [btnPoint, btnLine].forEach(btn => {
+            btn?.classList.remove("ring-4", "ring-green-400", "scale-95", "bg-green-50");
+        });
+    }
 
-	function setActiveButton(btn) {
-		resetActiveButtons();
-			btn?.classList.add("ring-4", "ring-green-400", "scale-95", "bg-green-50");
-	}
+    function setActiveButton(btn) {
+        resetActiveButtons();
+        btn?.classList.add("ring-4", "ring-green-400", "scale-95", "bg-green-50");
+    }
 
-	btnPoint?.addEventListener("click", () => {
-		setActiveButton(btnPoint);
-		map.pm.disableDraw();
-		map.pm.enableDraw('Marker', { snappable: false });
-	});
+    btnPoint?.addEventListener("click", () => {
+        setActiveButton(btnPoint);
+        map.pm.disableDraw();
+        map.pm.enableDraw('Marker', { snappable: false });
+    });
 
-	btnLine?.addEventListener("click", () => {
-		setActiveButton(btnLine);
-		map.pm.disableDraw();
-		map.pm.enableDraw('Line', { snappable: false });
-	});
+    btnLine?.addEventListener("click", () => {
+        setActiveButton(btnLine);
+        map.pm.disableDraw();
+        map.pm.enableDraw('Line', { snappable: false });
+    });
 
-	// Line limit: 2 points
-	map.on('pm:drawstart', ({ shape, workingLayer }) => {
-		if (shape === 'Line') {
-			workingLayer.on('pm:vertexadded', () => {
-				const pts = workingLayer.getLatLngs();
-				if (pts.length >= 2) {
-					if (map.pm?.Draw?.Line?._finishShape)
-						map.pm.Draw.Line._finishShape();
-					else
-						map.pm.disableDraw();
-				}
-			});
-		}
-	});
+    // Line limit: 2 points
+    map.on('pm:drawstart', ({ shape, workingLayer }) => {
+        if (shape === 'Line') {
+            workingLayer.on('pm:vertexadded', () => {
+                const pts = workingLayer.getLatLngs();
+                if (pts.length >= 2) {
+                    if (map.pm?.Draw?.Line?._finishShape)
+                        map.pm.Draw.Line._finishShape();
+                    else
+                        map.pm.disableDraw();
+                }
+            });
+        }
+    });
 
-	// Only one geometry total
-	map.on('pm:create', (e) => {
-		drawn.clearLayers();
-		drawn.addLayer(e.layer);
-		map.pm.disableDraw();
+    // Only one geometry total
+    map.on('pm:create', (e) => {
+        drawn.clearLayers();
+        drawn.addLayer(e.layer);
+        map.pm.disableDraw();
 
-		document.getElementById('GeoJsonCoordinates').value =
-			JSON.stringify(e.layer.toGeoJSON().geometry);
+        document.getElementById('GeoJsonCoordinates').value =
+            JSON.stringify(e.layer.toGeoJSON().geometry);
 
-		resetActiveButtons();
-		saveDraft();
+        resetActiveButtons();
+        saveDraft();
         updateSubmitVisibility();
-	});
-	 // ------ Upload image (hidden input trigger + toast) ------
-	const imgInput = document.getElementById('imageInput');
-	const btnUpload = document.getElementById('btnUploadImage');
-	const imageToast = document.getElementById('imageToast');
+    });
 
-	btnUpload?.addEventListener('click', () => imgInput?.click());
-	imgInput?.addEventListener('change', (e) => {
-		const file = e.target.files?.[0];
-		if (!file) return;
-		// Subtle toast
-		imageToast.style.opacity = "1";
-		setTimeout(() => imageToast.style.opacity = "0", 3500);
-		saveDraft(); // keep draft behavior consistent
-	});
+    // -------------------------------------------
+    //  UPLOAD IMAGE (with validation) - UPDATED
+    // -------------------------------------------
+    const imgInput = document.getElementById('imageInput');
+    const btnUpload = document.getElementById('btnUploadImage');
+    const imageToast = document.getElementById('imageToast');
+    const errorToast = document.getElementById('errorToast');
+    const errorText = document.getElementById('errorToastText');
 
-	// ------ Comment bottom sheet ------
-	const btnComment = document.getElementById('btnComment');
-	const sheet = document.getElementById('commentSheet');
-	const backdrop = document.getElementById('commentSheetBackdrop');
-	const closeComment = document.getElementById('closeComment');
+    btnUpload?.addEventListener('click', () => imgInput?.click());
 
-	function openSheet(){
-		sheet.classList.remove('translate-y-full');
-		backdrop.classList.remove('hidden');
-		invalidateSoon();
-	}
-	function closeSheet(){
-		sheet.classList.add('translate-y-full');
-		backdrop.classList.add('hidden');
-		invalidateSoon();
-	}
-	btnComment?.addEventListener('click', openSheet);
-	closeComment?.addEventListener('click', closeSheet);
-	backdrop?.addEventListener('click', closeSheet);
+    imgInput?.addEventListener('change', (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
 
-	// -------------------------------------------
-	//  AUTOSAVE
-	// -------------------------------------------
-	const formKey = "ObstacleReportForm";
-	let draftDisabled = false;
+        // Client-side validation
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic', 'image/webp'];
+        const allowedExtensions = ['.jpg', '.jpeg', '.png', '.heic', '.webp'];
+        const maxSize = 5 * 1024 * 1024; // 5MB
 
-	function saveDraft() {
-		if (draftDisabled) return;
+        // Get file extension
+        const fileName = file.name.toLowerCase();
+        const hasValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
 
-		const commentInput = document.querySelector('[name="ObstacleComment"]');
-		const comment = commentInput ? (commentInput.value || "") : "";
-		const geo = document.getElementById('GeoJsonCoordinates').value || "";
+        // Check MIME type AND extension (double validation)
+        if (!allowedTypes.includes(file.type) && !hasValidExtension) {
+            errorText.textContent = 'Kun .jpg, .jpeg, .png, .heic, .webp er tillatt';
+            errorToast.style.opacity = "1";
+            setTimeout(() => errorToast.style.opacity = "0", 5000);
+            e.target.value = ''; // Clear the invalid file
+            return;
+        }
 
-		if (geo.trim().length > 0) {
-			localStorage.setItem(formKey, JSON.stringify({ comment, geoJson: geo }));
-		} else {
-			localStorage.removeItem(formKey);
-		}
-	}
+        if (file.size > maxSize) {
+            errorText.textContent = 'Bildet må være mindre enn 5MB';
+            errorToast.style.opacity = "1";
+            setTimeout(() => errorToast.style.opacity = "0", 5000);
+            e.target.value = ''; // Clear the invalid file
+            return;
+        }
+
+        // Success - show confirmation toast
+        imageToast.style.opacity = "1";
+        setTimeout(() => imageToast.style.opacity = "0", 3500);
+        saveDraft();
+    });
+
+    // ------ Comment bottom sheet ------
+    const btnComment = document.getElementById('btnComment');
+    const sheet = document.getElementById('commentSheet');
+    const backdrop = document.getElementById('commentSheetBackdrop');
+    const closeComment = document.getElementById('closeComment');
+
+    function openSheet(){
+        sheet.classList.remove('translate-y-full');
+        backdrop.classList.remove('hidden');
+        setTimeout(() => map.invalidateSize(), 200);
+    }
+    function closeSheet(){
+        sheet.classList.add('translate-y-full');
+        backdrop.classList.add('hidden');
+        setTimeout(() => map.invalidateSize(), 200);
+    }
+    btnComment?.addEventListener('click', openSheet);
+    closeComment?.addEventListener('click', closeSheet);
+    backdrop?.addEventListener('click', closeSheet);
+
+    // -------------------------------------------
+    //  AUTOSAVE
+    // -------------------------------------------
+    const formKey = "ObstacleReportForm";
+    let draftDisabled = false;
+
+    function saveDraft() {
+        if (draftDisabled) return;
+
+        const commentInput = document.querySelector('[name="ObstacleComment"]');
+        const comment = commentInput ? (commentInput.value || "") : "";
+        const geo = document.getElementById('GeoJsonCoordinates').value || "";
+
+        if (geo.trim().length > 0) {
+            localStorage.setItem(formKey, JSON.stringify({ comment, geoJson: geo }));
+        } else {
+            localStorage.removeItem(formKey);
+        }
+    }
 
     // -------------------------------------------
     //  HIDE AND SHOW SUBMIT BUTTON JS
     // -------------------------------------------
-    
-	const commentField = document.querySelector('[name="ObstacleComment"]');
-	commentField?.addEventListener("input", saveDraft);
+
+    const commentField = document.querySelector('[name="ObstacleComment"]');
+    commentField?.addEventListener("input", saveDraft);
 
     const submitBtn = document.getElementById("submitBtn");
     const geoInput = document.getElementById("GeoJsonCoordinates");
@@ -496,82 +527,92 @@
 
     window.addEventListener("load", () => {
         updateSubmitVisibility();
-        // ... existing draft restore code will follow
     });
-    
-	// -------------------------------------------
-	//  RESTORE DRAFT
-	// -------------------------------------------
-	window.addEventListener("load", () => {
-		const saved = localStorage.getItem(formKey);
-		if (!saved) return;
 
-		let data;
-		try {
-			data = JSON.parse(saved);
-		} catch {
-			localStorage.removeItem(formKey);
-			return;
-		}
+    // -------------------------------------------
+    //  RESTORE DRAFT
+    // -------------------------------------------
+    window.addEventListener("load", () => {
+        const saved = localStorage.getItem(formKey);
+        if (!saved) return;
 
-		if (!data.geoJson) return;
+        let data;
+        try {
+            data = JSON.parse(saved);
+        } catch {
+            localStorage.removeItem(formKey);
+            return;
+        }
 
-		document.getElementById('GeoJsonCoordinates').value = data.geoJson;
-		if (data.comment && commentField) commentField.value = data.comment;
+        if (!data.geoJson) return;
 
-		const geom = JSON.parse(data.geoJson);
-		drawn.clearLayers();
+        document.getElementById('GeoJsonCoordinates').value = data.geoJson;
+        if (data.comment && commentField) commentField.value = data.comment;
 
-		if (geom.type === "Point") {
-			const [lng, lat] = geom.coordinates;
-			const m = L.marker([lat, lng]).addTo(map);
-			drawn.addLayer(m);
-			map.setView([lat, lng], 19);
-		} else if (geom.type === "LineString") {
-			const latlngs = geom.coordinates.map(([lng, lat]) => [lat, lng]);
-			const l = L.polyline(latlngs, { color: "orange", weight: 4 }).addTo(map);
-			drawn.addLayer(l);
-			map.fitBounds(l.getBounds());
-			setTimeout(() => map.setZoom(19), 150);
-		}
+        const geom = JSON.parse(data.geoJson);
+        drawn.clearLayers();
 
-		restoredFromDraft = true;
+        if (geom.type === "Point") {
+            const [lng, lat] = geom.coordinates;
+            const m = L.marker([lat, lng]).addTo(map);
+            drawn.addLayer(m);
+            map.setView([lat, lng], 19);
+        } else if (geom.type === "LineString") {
+            const latlngs = geom.coordinates.map(([lng, lat]) => [lat, lng]);
+            const l = L.polyline(latlngs, { color: "orange", weight: 4 }).addTo(map);
+            drawn.addLayer(l);
+            map.fitBounds(l.getBounds());
+            setTimeout(() => map.setZoom(19), 150);
+        }
 
-		const toast = document.getElementById("restoreToast");
-		if (toast) {
-			toast.style.opacity = "1";
-			setTimeout(() => { toast.style.opacity = "0"; }, 5000);
-		}
+        restoredFromDraft = true;
+
+        const toast = document.getElementById("restoreToast");
+        if (toast) {
+            toast.style.opacity = "1";
+            setTimeout(() => { toast.style.opacity = "0"; }, 5000);
+        }
 
         updateSubmitVisibility();
-	});
+    });
 
-	// -------------------------------------------
-	//  SUBMIT
-	// -------------------------------------------
-	document.getElementById("submitBtn")?.addEventListener("click", () => {
-		draftDisabled = true;
-		localStorage.removeItem(formKey);
-	});
+    // -------------------------------------------
+    //  SUBMIT
+    // -------------------------------------------
+    document.getElementById("submitBtn")?.addEventListener("click", () => {
+        draftDisabled = true;
+        localStorage.removeItem(formKey);
+    });
 
-	// -------------------------------------------
-	//  CANCEL
-	// -------------------------------------------
-	const cancelBtn = document.getElementById('cancelBtn');
-	function showCancelToast() {
-		const t = document.getElementById("cancelToast"); if (!t) return;
-		t.style.opacity = "1"; setTimeout(() => t.style.opacity = "0", 5000);
-	}
-	cancelBtn?.addEventListener('click', () => {
-		draftDisabled = true; localStorage.removeItem(formKey);
-		if (commentField) commentField.value = "";
-		document.getElementById('GeoJsonCoordinates').value = "";
-		drawn.clearLayers(); map.pm.disableDraw(); resetActive();
-		if (window.currentPosMarker){ map.removeLayer(window.currentPosMarker); window.currentPosMarker=null; }
-		if (window.currentPosCircle){ map.removeLayer(window.currentPosCircle); window.currentPosCircle=null; }
-		showCancelToast();
-	});
+    // -------------------------------------------
+    //  CANCEL
+    // -------------------------------------------
+    const cancelBtn = document.getElementById('cancelBtn');
+    function showCancelToast() {
+        const t = document.getElementById("cancelToast");
+        if (!t) return;
+        t.style.opacity = "1";
+        setTimeout(() => t.style.opacity = "0", 5000);
+    }
+
+    cancelBtn?.addEventListener('click', () => {
+        draftDisabled = true;
+        localStorage.removeItem(formKey);
+        if (commentField) commentField.value = "";
+        document.getElementById('GeoJsonCoordinates').value = "";
+        drawn.clearLayers();
+        map.pm.disableDraw();
+        resetActiveButtons();
+        if (window.currentPosMarker){
+            map.removeLayer(window.currentPosMarker);
+            window.currentPosMarker=null;
+        }
+        if (window.currentPosCircle){
+            map.removeLayer(window.currentPosCircle);
+            window.currentPosCircle=null;
+        }
+        showCancelToast();
+    });
 
 </script>
 }
-

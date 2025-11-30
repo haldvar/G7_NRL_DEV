@@ -194,46 +194,46 @@ namespace NRL_PROJECT.Controllers
             model.MapData.Coordinates = coords;
             model.MapData.MapZoomLevel = model.MapData.MapZoomLevel != 0 ? model.MapData.MapZoomLevel : 13;
 
-            // 3) Save MapData (and its coordinates via relationship)
-            _context.MapDatas.Add(model.MapData);
-            await _context.SaveChangesAsync();
+       // 3) VALIDATE IMAGE FIRST (before saving anything)
+string? imagePath = null;
 
-            // 4) Handle image upload (if present)
-            string? imagePath = null;
+if (model.ImageFile != null && model.ImageFile.Length > 0)
+{
+    // Validation: allowed extensions
+    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".heic", ".webp" };
+    var extension = Path.GetExtension(model.ImageFile.FileName).ToLowerInvariant();
 
-            if (model.ImageFile != null && model.ImageFile.Length > 0)
-            {
-                // Validation: allowed extensions
-                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".heic", ".webp" };
-                var extension = Path.GetExtension(model.ImageFile.FileName).ToLowerInvariant();
+    if (!allowedExtensions.Contains(extension))
+    {
+        ModelState.AddModelError("ImageFile", "Kun bildefiler (.jpg, .jpeg, .png, .heic, .webp) er tillatt");
+        return View("ObstacleAndMapForm", model);
+    }
 
-                if (!allowedExtensions.Contains(extension))
-                {
-                    ModelState.AddModelError("", "Kun bildefiler (.jpg, .jpeg, .png, .heic, .webp) er tillatt");
-                    return View("ObstacleAndMapForm", model);
-                }
+    // Validation: max file size (5 MB)
+    if (model.ImageFile.Length > 5 * 1024 * 1024)
+    {
+        ModelState.AddModelError("ImageFile", "Bildet må være mindre enn 5MB");
+        return View("ObstacleAndMapForm", model);
+    }
 
-                // Validation: max file size (5 MB)
-                if (model.ImageFile.Length > 5 * 1024 * 1024)
-                {
-                    ModelState.AddModelError("", "Bildet må være mindre enn 5MB");
-                    return View("ObstacleAndMapForm", model);
-                }
+    // Saving logic
+    var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
 
-                // Saving logic
-                var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
+    if (!Directory.Exists(uploadsFolder))
+        Directory.CreateDirectory(uploadsFolder);
 
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
+    var uniqueFileName = Guid.NewGuid() + extension;
+    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-                var uniqueFileName = Guid.NewGuid() + extension;
-                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+    using var stream = new FileStream(filePath, FileMode.Create);
+    await model.ImageFile.CopyToAsync(stream);
 
-                using var stream = new FileStream(filePath, FileMode.Create);
-                await model.ImageFile.CopyToAsync(stream);
+    imagePath = "/uploads/" + uniqueFileName;
+}
 
-                imagePath = "/uploads/" + uniqueFileName;
-            }
+// 4) NOW Save MapData (only after image validation passes)
+_context.MapDatas.Add(model.MapData);
+await _context.SaveChangesAsync();
 
             // 5) Save Obstacle
             model.ObstacleImageURL = imagePath;
