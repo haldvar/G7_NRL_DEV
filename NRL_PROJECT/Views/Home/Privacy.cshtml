@@ -1,19 +1,265 @@
 ﻿@{
-    ViewData["Title"] = "Privacy Policy";
+    ViewData["Title"] = "Personvernerklæring";
 }
 
-<div class="flex justify-center items-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 px-4">
-    <div class="bg-white shadow-lg rounded-2xl p-10 max-w-2xl w-full">
-        <h1 class="text-4xl font-bold text-center text-gray-800 mb-6">
-            @ViewData["Title"]
-        </h1>
+<div class="min-h-screen w-full bg-gradient-to-b from-green-100 to-blue-100">
+    <div class="mx-auto max-w-4xl px-6 py-12">
 
-        <p class="text-gray-600 text-lg leading-relaxed mb-4">
-            Use this page to detail your site's privacy policy.
-        </p>
+        <!-- Header -->
+        <header class="mb-8">
+            <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-green-700">
+                Personvernerklæring
+            </h1>
+            <p class="mt-2 text-sm text-gray-600">
+                Sist oppdatert: @DateTime.Now.ToString("dd.MM.yyyy")
+            </p>
+            <div class="mt-3 h-1 w-48 rounded-full bg-gradient-to-r from-green-600 to-blue-600"></div>
+        </header>
 
-        <p class="text-gray-600 text-lg leading-relaxed">
-            You can include sections about data collection, cookies, user rights, and any other relevant information here. Make sure your policy is clear and easy to read.
-        </p>
+        <!-- Content -->
+        <div class="rounded-2xl border border-white/70 bg-white/90 backdrop-blur shadow-xl overflow-hidden">
+            <div class="h-1 bg-gradient-to-r from-green-600 via-blue-600 to-green-600"></div>
+
+            <div class="p-8 space-y-8 text-gray-800">
+
+                <!-- 1. Introduction -->
+                <section>
+                    <h2 class="text-2xl font-bold text-green-700 mb-3">1. Innledning</h2>
+                    <p class="leading-relaxed">
+                        Dette er et studentprosjekt utviklet av Gruppe 7 for rapportering av luftfartshindre. 
+                        Denne personvernerklæringen forklarer hvilke personopplysninger systemet samler inn 
+                        og hvordan de behandles.
+                    </p>
+                    <p class="mt-3 text-sm text-amber-700 bg-amber-50 p-3 rounded-lg border border-amber-200">
+                        <strong>Merk:</strong> Dette er et demonstrasjonssystem for eksamensformål og 
+                        skal ikke brukes til reell rapportering av luftfartshindre.
+                    </p>
+                </section>
+
+                <!-- 2. Data Collection -->
+                <section>
+                    <h2 class="text-2xl font-bold text-green-700 mb-3">2. Hvilke opplysninger samler vi inn?</h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">2.1 Brukerregistrering</h3>
+                            <p class="leading-relaxed">Ved registrering samler vi inn:</p>
+                            <ul class="mt-2 ml-6 space-y-1 list-disc text-gray-700">
+                                <li>Brukernavn</li>
+                                <li>E-postadresse</li>
+                                <li>Fornavn og etternavn</li>
+                                <li>Passord (lagres kryptert)</li>
+                                <li>Organisasjonstilhørighet (hvis tildelt av administrator)</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">2.2 Hinderrapporter</h3>
+                            <p class="leading-relaxed">Når du melder inn et hinder, lagres:</p>
+                            <ul class="mt-2 ml-6 space-y-1 list-disc text-gray-700">
+                                <li>GPS-koordinater (breddegrad og lengdegrad)</li>
+                                <li>Hindertype (f.eks. Radio/Mobilmast, Kran, Vindmølle)</li>
+                                <li>Hinderhøyde og bredde</li>
+                                <li>Valgfri kommentar</li>
+                                <li>Valgfritt bilde</li>
+                                <li>Tidspunkt for rapportering</li>
+                                <li>Informasjon om hvem som meldte inn (for sporbarhet)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. Purpose -->
+                <section>
+                    <h2 class="text-2xl font-bold text-green-700 mb-3">3. Formål med datainnsamlingen</h2>
+                    <p class="leading-relaxed mb-3">Vi bruker personopplysningene til:</p>
+                    <ul class="ml-6 space-y-2 list-disc text-gray-700">
+                        <li><strong>Autentisering:</strong> Sikker innlogging av brukere</li>
+                        <li><strong>Tilgangskontroll:</strong> Rollebasert tilgang (Administrator, Registerfører, Pilot, Ekstern organisasjon)</li>
+                        <li><strong>Hinderdatabase:</strong> Lagre og vise rapporterte luftfartshindre</li>
+                        <li><strong>Saksbehandling:</strong> Behandle, godkjenne eller avvise rapporter</li>
+                        <li><strong>Sporbarhet:</strong> Dokumentere hvem som meldte inn hva, og når</li>
+                        <li><strong>Kommunikasjon:</strong> Kontakte deg ved behov om rapporterte hindre</li>
+                    </ul>
+                </section>
+
+                <!-- 4. Data Storage -->
+                <section>
+                    <h2 class="text-2xl font-bold text-green-700 mb-3">4. Lagring og sikkerhet</h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">4.1 Lagring</h3>
+                            <p class="leading-relaxed">
+                                Alle data lagres i en sikker database. Opplastede bilder lagres på serveren 
+                                og er kun tilgjengelige for autoriserte brukere.
+                            </p>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">4.2 Sikkerhetstiltak</h3>
+                            <ul class="mt-2 ml-6 space-y-1 list-disc text-gray-700">
+                                <li>Passord lagres kryptert og kan ikke leses av systemadministratorer</li>
+                                <li>All kommunikasjon skjer over sikret HTTPS-tilkobling</li>
+                                <li>Tilgangskontroll sikrer at brukere kun ser data de har tillatelse til</li>
+                                <li>Beskyttelse mot uautorisert tilgang og datamanipulering</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">4.3 Lagringstid</h3>
+                            <p class="leading-relaxed">
+                                Dette er et eksamensprosjekt. I et reelt system ville hinderrapporter lagres 
+                                i henhold til luftfartsmyndighetenes krav, typisk i 10 år for sporbarhet og 
+                                etterprøvbarhet.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. Data Access -->
+                <section>
+                    <h2 class="text-2xl font-bold text-green-700 mb-3">5. Hvem har tilgang til dataene?</h2>
+                    <div class="space-y-3">
+                        <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <h4 class="font-semibold text-gray-900">👤 Pilot</h4>
+                            <p class="text-sm text-gray-700 mt-1">
+                                Kan melde inn hindre og se egne rapporter
+                            </p>
+                        </div>
+                        <div class="p-4 bg-green-50 rounded-lg border border-green-200">
+                            <h4 class="font-semibold text-gray-900">📋 Registerfører</h4>
+                            <p class="text-sm text-gray-700 mt-1">
+                                Kan se alle rapporter, behandle saker, endre status og oppdatere hinderinformasjon
+                            </p>
+                        </div>
+                        <div class="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                            <h4 class="font-semibold text-gray-900">🏢 Ekstern organisasjon</h4>
+                            <p class="text-sm text-gray-700 mt-1">
+                                Kan se rapporter fra egen organisasjon
+                            </p>
+                        </div>
+                        <div class="p-4 bg-red-50 rounded-lg border border-red-200">
+                            <h4 class="font-semibold text-gray-900">⚙️ Administrator</h4>
+                            <p class="text-sm text-gray-700 mt-1">
+                                Kan administrere brukere, tildele roller og organisasjonstilhørigheter
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <p class="mt-4 text-sm leading-relaxed text-gray-700">
+                        Data deles ikke med tredjeparter. Kun autoriserte brukere i systemet har tilgang 
+                        til data i henhold til sin rolle og organisasjonstilhørighet.
+                    </p>
+                </section>
+
+                <!-- 6. Cookies and LocalStorage -->
+                <section>
+                    <h2 class="text-2xl font-bold text-green-700 mb-3">6. Informasjonskapsler og lokal lagring</h2>
+                    
+                    <div class="space-y-3">
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <h4 class="font-semibold text-gray-900">🍪 Informasjonskapsler (Cookies)</h4>
+                            <p class="text-sm text-gray-700 mt-1">
+                                Vi bruker nødvendige informasjonskapsler for å holde deg innlogget under 
+                                økten din (maksimalt 2 timer med automatisk forlengelse ved aktivitet).
+                            </p>
+                            <p class="text-sm text-gray-700 mt-2">
+                                Disse kapslene er nødvendige for at systemet skal fungere, og kan ikke slås av.
+                            </p>
+                        </div>
+
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <h4 class="font-semibold text-gray-900">💾 Lokal lagring i nettleseren</h4>
+                            <p class="text-sm text-gray-700 mt-1">
+                                For å hindre tap av data lagrer systemet rapportutkast lokalt i nettleseren din. 
+                                Dette betyr at hvis du mister nettforbindelse eller lukker nettleseren, kan du 
+                                fortsette der du slapp.
+                            </p>
+                            <p class="text-sm text-gray-700 mt-2">
+                                Denne informasjonen lagres kun på din enhet og slettes automatisk når du 
+                                fullfører eller avbryter rapporten. Du kan også manuelt tømme nettleserens 
+                                cache for å slette lagret data.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 7. Your Rights -->
+                <section>
+                    <h2 class="text-2xl font-bold text-green-700 mb-3">7. Dine rettigheter</h2>
+                    <p class="leading-relaxed mb-3">
+                        I henhold til personvernlovgivningen har du følgende rettigheter:
+                    </p>
+                    
+                    <div class="space-y-2">
+                        <div class="p-3 border-l-4 border-green-600 bg-green-50">
+                            <p class="text-sm text-gray-700">
+                                <strong>Innsyn:</strong> Rett til å se hvilke opplysninger vi har om deg
+                            </p>
+                        </div>
+                        <div class="p-3 border-l-4 border-blue-600 bg-blue-50">
+                            <p class="text-sm text-gray-700">
+                                <strong>Retting:</strong> Rett til å få rettet feilaktige eller utdaterte opplysninger
+                            </p>
+                        </div>
+                        <div class="p-3 border-l-4 border-amber-600 bg-amber-50">
+                            <p class="text-sm text-gray-700">
+                                <strong>Sletting:</strong> Rett til å be om sletting av dine personopplysninger
+                            </p>
+                        </div>
+                        <div class="p-3 border-l-4 border-purple-600 bg-purple-50">
+                            <p class="text-sm text-gray-700">
+                                <strong>Dataportabilitet:</strong> Rett til å få dine data i et maskinlesbart format
+                            </p>
+                        </div>
+                    </div>
+
+                    <p class="mt-4 text-sm bg-amber-50 p-3 rounded-lg border border-amber-200">
+                        <strong>Merk:</strong> Dette er et studentprosjekt for eksamensformål. 
+                        I et produksjonssystem ville disse rettighetene kunne utøves gjennom 
+                        dedikerte funksjoner i brukergrensesnittet.
+                    </p>
+                </section>
+
+                <!-- 8. Contact -->
+                <section class="p-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-200">
+                    <h2 class="text-2xl font-bold text-green-700 mb-3">8. Kontakt</h2>
+                    <p class="leading-relaxed mb-3">
+                        Dette er et studentprosjekt utviklet av Gruppe 7, andreårsstudenter ved UiA, høsten 2025.
+                    </p>
+                    <p class="text-sm text-gray-700">
+                        For spørsmål om personvern eller hvordan systemet behandler dine data, 
+                        kontakt prosjektgruppen eller faglærer/veileder.
+                    </p>
+                    
+                    <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <p class="text-sm text-gray-700">
+                            <strong>I et produksjonssystem ville kontaktinformasjon inkludere:</strong>
+                        </p>
+                        <ul class="mt-2 ml-6 space-y-1 list-disc text-sm text-gray-700">
+                            <li>Personvernombud eller dataansvarlig</li>
+                            <li>E-postadresse for personvernhenvendelser</li>
+                            <li>Referanse til Datatilsynet</li>
+                        </ul>
+                    </div>
+                </section>
+
+            </div>
+
+            <div class="h-1 bg-gradient-to-r from-green-600 via-blue-600 to-green-600"></div>
+        </div>
+
+        <!-- Footer navigation -->
+        <div class="mt-8 text-center">
+            <a asp-controller="Home" asp-action="Index" 
+               class="inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-white font-semibold shadow hover:bg-blue-700 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Tilbake til forsiden
+            </a>
+        </div>
+
     </div>
 </div>
