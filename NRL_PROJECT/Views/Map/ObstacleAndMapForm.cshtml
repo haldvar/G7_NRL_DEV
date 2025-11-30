@@ -464,17 +464,24 @@
     const sheet = document.getElementById('commentSheet');
     const backdrop = document.getElementById('commentSheetBackdrop');
     const closeComment = document.getElementById('closeComment');
+    const commentTextarea = document.querySelector('[name="ObstacleComment"]');
 
     function openSheet(){
         sheet.classList.remove('translate-y-full');
         backdrop.classList.remove('hidden');
-        setTimeout(() => map.invalidateSize(), 200);
+        setTimeout(() => {
+            map.invalidateSize();
+            // Auto-focus the textarea when sheet opens
+            commentTextarea?.focus();
+        }, 200);
     }
+
     function closeSheet(){
         sheet.classList.add('translate-y-full');
         backdrop.classList.add('hidden');
         setTimeout(() => map.invalidateSize(), 200);
     }
+
     btnComment?.addEventListener('click', openSheet);
     closeComment?.addEventListener('click', closeSheet);
     backdrop?.addEventListener('click', closeSheet);
