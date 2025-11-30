@@ -198,21 +198,40 @@ namespace NRL_PROJECT.Controllers
             // 4) Handle image upload (if present)
             string? imagePath = null;
 
-            if (model.ImageFile != null && model.ImageFile.Length > 0)
-            {
-                var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
+         if (model.ImageFile != null && model.ImageFile.Length > 0)
+{
+    // Validation: allowed extensions
+    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".heic", ".webp" };
+    var extension = Path.GetExtension(model.ImageFile.FileName).ToLowerInvariant();
 
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
+    if (!allowedExtensions.Contains(extension))
+    {
+        ModelState.AddModelError("", "Kun bildefiler (.jpg, .jpeg, .png, .heic, .webp) er tillatt");
+        return View("ObstacleAndMapForm", model);
+    }
 
-                var uniqueFileName = Guid.NewGuid() + Path.GetExtension(model.ImageFile.FileName);
-                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+    // Validation: max file size (5 MB)
+    if (model.ImageFile.Length > 5 * 1024 * 1024)
+    {
+        ModelState.AddModelError("", "Bildet må være mindre enn 5MB");
+        return View("ObstacleAndMapForm", model);
+    }
 
-                using var stream = new FileStream(filePath, FileMode.Create);
-                await model.ImageFile.CopyToAsync(stream);
+    // Saving logic
+    var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
 
-                imagePath = "/uploads/" + uniqueFileName;
-            }
+    if (!Directory.Exists(uploadsFolder))
+        Directory.CreateDirectory(uploadsFolder);
+
+    var uniqueFileName = Guid.NewGuid() + extension;
+    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+    using var stream = new FileStream(filePath, FileMode.Create);
+    await model.ImageFile.CopyToAsync(stream);
+
+    imagePath = "/uploads/" + uniqueFileName;
+}
+
 
             // 5) Save Obstacle
             model.ObstacleImageURL = imagePath;
