@@ -57,6 +57,7 @@
 
     <ItemGroup>
       <Folder Include="Migrations\" />
+      <Folder Include="wwwroot\js\modules\" />
       <Folder Include="wwwroot\lib\leaflet\" />
       <Folder Include="wwwroot\uploads\" />
     </ItemGroup>
