@@ -944,8 +944,8 @@ class ObstacleMapManager {
     }
 
     /**
-     * Restore a draft from local storage, if one exists.
-     */
+      * Restore a draft from local storage, if one exists.
+      */
     restoreDraft() {
         const draft = this.draftManager.restore();
         if (!draft) return;
@@ -953,6 +953,14 @@ class ObstacleMapManager {
         this.ui.setGeoJson(draft.geoJson);
         if (draft.comment) {
             this.ui.setComment(draft.comment);
+        }
+
+        // NOTE: We cannot restore the actual file, so we just check if one was previously attached.
+        // If the user submits without re-selecting the file, it will be missing. 
+        // We only restore the GeoJSON and comment.
+        if (draft.hasImage) {
+            // Optional: Show a message that the image needs to be re-selected if not present.
+            console.warn("Draft had image, but file cannot be restored automatically.");
         }
 
         try {
