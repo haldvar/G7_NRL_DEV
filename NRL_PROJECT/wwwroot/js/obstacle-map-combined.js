@@ -502,6 +502,13 @@ class UIController {
         this.activeButton = null;
         this.elements = this.cacheElements();
         this.setupEventListeners();
+        // Delete draft
+        this.elements.btnDeleteDraft?.addEventListener("click", () => {
+            if (this.onDeleteDraft) {
+                this.onDeleteDraft();
+            }
+        });
+
     }
 
     /**
@@ -780,6 +787,10 @@ class UIController {
         };
         return buttonMap[name] || null;
     }
+    setOnDeleteDraft(callback) {
+        this.onDeleteDraft = callback;
+    }
+
 }
 
 // ============================================================================
@@ -806,6 +817,21 @@ class ObstacleMapManager {
         this.ui = new UIController();
 
         this.init();
+
+        ui.setOnDeleteDraft(() => {
+            drafts.clear();
+
+            // Slett tegninger
+            map.clearDrawnFeatures();
+
+            // Tøm GeoJSON-input
+            ui.elements.geoJsonInput.value = "";
+            ui.updateSubmitVisibility();
+
+            // Sentrer kartet på brukerens posisjon
+            geo.locate(true);  // true = sett view automatisk
+        });
+
     }
 
     /**
