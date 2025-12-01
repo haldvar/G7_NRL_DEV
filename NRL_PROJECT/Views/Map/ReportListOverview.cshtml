@@ -1,10 +1,10 @@
 @model List<NRL_PROJECT.Models.ObstacleReportData>
 @using NRL_PROJECT.Models
 @{
-    ViewData["Title"] = "Hinderlogg";
-    var q = (string)Context.Request.Query["q"];
-    var status = (string)Context.Request.Query["status"];
-    var type = (string)Context.Request.Query["type"];
+ViewData["Title"] = "Hinderlogg";
+var q = (string)Context.Request.Query["q"];
+var status = (string)Context.Request.Query["status"];
+var type = (string)Context.Request.Query["type"];
 }
 
 <div class="min-h-screen w-full bg-gradient-to-b from-green-100 to-blue-100">
@@ -34,7 +34,7 @@
                     <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-500"
                          xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                          stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                         d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                                     d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
             </div>
 
@@ -64,261 +64,305 @@
             <div class="hidden lg:block overflow-x-auto">
                 <table class="min-w-full text-sm">
                     <thead class="bg-white">
-                        <tr class="text-left text-gray-600 border-b">
-                            <th class="px-4 py-3 cursor-pointer hover:bg-gray-50 group" data-sort="id">
-                                <div class="flex items-center gap-1">
-                                    ID
-                                    <svg class="h-4 w-4 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
-                                    </svg>
-                                </div>
-                            </th>
-                            <th class="px-4 py-3 cursor-pointer hover:bg-gray-50 group" data-sort="submitter">
-                                <div class="flex items-center gap-1">
-                                    Innmelder
-                                    <svg class="h-4 w-4 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
-                                    </svg>
-                                </div>
-                            </th>
-                            <th class="px-4 py-3 cursor-pointer hover:bg-gray-50 group" data-sort="reviewer">
-                                <div class="flex items-center gap-1">
-                                    Saksbehandler
-                                    <svg class="h-4 w-4 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
-                                    </svg>
-                                </div>
-                            </th>
-                            <th class="px-4 py-3 cursor-pointer hover:bg-gray-50 group" data-sort="type">
-                                <div class="flex items-center gap-1">
-                                    Type
-                                    <svg class="h-4 w-4 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
-                                    </svg>
-                                </div>
-                            </th>
-                            <th class="px-4 py-3">Kommentar (innmelder)</th>
-                            <th class="px-4 py-3">Kommentar (saksbehandler)</th>
-                            <th class="px-4 py-3 cursor-pointer hover:bg-gray-50 group" data-sort="date">
-                                <div class="flex items-center gap-1">
-                                    Dato
-                                    <svg class="h-4 w-4 text-blue-600 group-hover:text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
-                                    </svg>
-                                </div>
-                            </th>
-                            <th class="px-4 py-3 cursor-pointer hover:bg-gray-50 group" data-sort="status">
-                                <div class="flex items-center gap-1">
-                                    Status
-                                    <svg class="h-4 w-4 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
-                                    </svg>
-                                </div>
-                            </th>
-                            <th class="px-4 py-3">Koordinater</th>
-                            <th class="px-4 py-3">Bilde</th>
-                        </tr>
+                    <tr class="text-left text-gray-600 border-b">
+                        <th class="px-4 py-3 cursor-pointer hover:bg-gray-50 group" data-sort="id">
+                            <div class="flex items-center gap-1">
+                                ID
+                                <svg class="h-4 w-4 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                </svg>
+                            </div>
+                        </th>
+                        <th class="px-4 py-3 cursor-pointer hover:bg-gray-50 group" data-sort="submitter">
+                            <div class="flex items-center gap-1">
+                                Innmelder
+                                <svg class="h-4 w-4 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                </svg>
+                            </div>
+                        </th>
+                        <th class="px-4 py-3 cursor-pointer hover:bg-gray-50 group" data-sort="reviewer">
+                            <div class="flex items-center gap-1">
+                                Saksbehandler
+                                <svg class="h-4 w-4 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                </svg>
+                            </div>
+                        </th>
+                        <th class="px-4 py-3 cursor-pointer hover:bg-gray-50 group" data-sort="type">
+                            <div class="flex items-center gap-1">
+                                Type
+                                <svg class="h-4 w-4 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                </svg>
+                            </div>
+                        </th>
+                        <th class="px-4 py-3">Kommentar (innmelder)</th>
+                        <th class="px-4 py-3">Kommentar (saksbehandler)</th>
+                        <th class="px-4 py-3 cursor-pointer hover:bg-gray-50 group" data-sort="date">
+                            <div class="flex items-center gap-1">
+                                Dato
+                                <svg class="h-4 w-4 text-blue-600 group-hover:text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                </svg>
+                            </div>
+                        </th>
+                        <th class="px-4 py-3 cursor-pointer hover:bg-gray-50 group" data-sort="status">
+                            <div class="flex items-center gap-1">
+                                Status
+                                <svg class="h-4 w-4 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                </svg>
+                            </div>
+                        </th>
+                        <th class="px-4 py-3">Koordinater</th>
+                        <th class="px-4 py-3">Bilde</th>
+                    </tr>
                     </thead>
                     <tbody id="logBody" class="divide-y divide-gray-100">
-                        @foreach (var report in Model)
-                        {
-                            // Helpers
-                            string submittedBy = report.SubmittedByUser?.UserName ?? "(ukjent)";
-                            string reviewer = report.Reviewer?.UserName ?? "(ingen)";
-                            string typeTxt = report.Obstacle?.ObstacleType ?? "—";
-                            string coordsTxt = report.MapData?.CoordinateSummary ?? "—";
-                            string imgUrl = report.Obstacle?.ObstacleImageURL;
-
-                            // Status pill
-                            string pillText;
-                            string pillClasses;
-                            switch (report.ObstacleReportStatus)
-                            {
-                                case ObstacleReportData.EnumTypes.New:
-                                    pillText = "Ny";
-                                    pillClasses = "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200";
-                                    break;
-                                case ObstacleReportData.EnumTypes.Open:
-                                    pillText = "Venter";
-                                    pillClasses = "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200";
-                                    break;
-                                case ObstacleReportData.EnumTypes.InProgress:
-                                    pillText = "Under behandling";
-                                    pillClasses = "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200";
-                                    break;
-                                case ObstacleReportData.EnumTypes.Resolved:
-                                    pillText = "Godkjent";
-                                    pillClasses = "bg-green-50 text-green-700 ring-1 ring-inset ring-green-200";
-                                    break;
-                                case ObstacleReportData.EnumTypes.Deleted:
-                                    pillText = "Avvist";
-                                    pillClasses = "bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200";
-                                    break;
-                                default:
-                                    pillText = report.ObstacleReportStatus.ToString();
-                                    pillClasses = "bg-gray-50 text-gray-700 ring-1 ring-inset ring-gray-200";
-                                    break;
-                            }
-
-                            <tr class="hover:bg-white/60 transition" 
-                                data-q="@($"{report.ObstacleReportID} {submittedBy} {reviewer} {typeTxt} {report.Obstacle?.ObstacleComment} {report.ObstacleReportComment} {coordsTxt} {report.ObstacleReportStatus}")"
-                                data-status="@report.ObstacleReportStatus"
-                                data-id="@report.ObstacleReportID"
-                                data-submitter="@submittedBy"
-                                data-reviewer="@reviewer"
-                                data-type="@typeTxt"
-                                data-date="@report.ObstacleReportDate.ToString("yyyy-MM-dd HH:mm:ss")">
-                                <td class="px-4 py-3 font-semibold text-slate-900">@report.ObstacleReportID</td>
-                                <td class="px-4 py-3 text-slate-700">@submittedBy</td>
-                                <td class="px-4 py-3 text-slate-700">@reviewer</td>
-                                <td class="px-4 py-3">
-                                    <span class="inline-flex items-center rounded-full bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-200">
-                                        @typeTxt
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3 text-slate-700 max-w-[22rem] truncate" title="@report.Obstacle?.ObstacleComment">
-                                    @report.Obstacle?.ObstacleComment
-                                </td>
-                                <td class="px-4 py-3 text-slate-700 max-w-[22rem] truncate" title="@report.ObstacleReportComment">
-                                    @report.ObstacleReportComment
-                                </td>
-                                <td class="px-4 py-3 text-slate-700 whitespace-nowrap">
-                                    @report.ObstacleReportDate.ToString("dd.MM.yyyy HH:mm")
-                                </td>
-                                <td class="px-4 py-3">
-                                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold @pillClasses">
-                                        @pillText
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3 text-slate-700">
-                                    <span class="inline-flex items-center rounded-md bg-white px-2.5 py-1 text-xs ring-1 ring-inset ring-gray-200">
-                                        @coordsTxt
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3">
-                                    @if (!string.IsNullOrWhiteSpace(imgUrl))
-                                    {
-                                        <a href="@imgUrl" target="_blank" class="inline-block">
-                                            <img src="@imgUrl" alt="Bilde" class="h-16 w-16 rounded-lg border border-gray-200 object-cover shadow-sm" />
-                                        </a>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-gray-400 italic">Ingen</span>
-                                    }
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Mobile Card View -->
-            <div class="lg:hidden divide-y divide-gray-100" id="mobileLogBody">
-                @foreach (var report in Model)
-                {
+                    @{
+                    int rowIndex = 0;
+                    }
+                    @foreach (var report in Model)
+                    {
+                    // Helpers
                     string submittedBy = report.SubmittedByUser?.UserName ?? "(ukjent)";
                     string reviewer = report.Reviewer?.UserName ?? "(ingen)";
                     string typeTxt = report.Obstacle?.ObstacleType ?? "—";
                     string coordsTxt = report.MapData?.CoordinateSummary ?? "—";
                     string imgUrl = report.Obstacle?.ObstacleImageURL;
 
+                    var rowBgClass = rowIndex % 2 == 0 ? "bg-white" : "bg-slate-50";
+
+                    // Status pill
                     string pillText;
                     string pillClasses;
                     switch (report.ObstacleReportStatus)
                     {
-                        case ObstacleReportData.EnumTypes.New:
-                            pillText = "Ny";
-                            pillClasses = "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200";
-                            break;
-                        case ObstacleReportData.EnumTypes.Open:
-                            pillText = "Venter";
-                            pillClasses = "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200";
-                            break;
-                        case ObstacleReportData.EnumTypes.InProgress:
-                            pillText = "Under behandling";
-                            pillClasses = "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200";
-                            break;
-                        case ObstacleReportData.EnumTypes.Resolved:
-                            pillText = "Godkjent";
-                            pillClasses = "bg-green-50 text-green-700 ring-1 ring-inset ring-green-200";
-                            break;
-                        case ObstacleReportData.EnumTypes.Deleted:
-                            pillText = "Avvist";
-                            pillClasses = "bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200";
-                            break;
-                        default:
-                            pillText = report.ObstacleReportStatus.ToString();
-                            pillClasses = "bg-gray-50 text-gray-700 ring-1 ring-inset ring-gray-200";
-                            break;
+                    case ObstacleReportData.EnumTypes.New:
+                    pillText = "Ny";
+                    pillClasses = "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200";
+                    break;
+                    case ObstacleReportData.EnumTypes.Open:
+                    pillText = "Venter";
+                    pillClasses = "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200";
+                    break;
+                    case ObstacleReportData.EnumTypes.InProgress:
+                    pillText = "Under behandling";
+                    pillClasses = "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200";
+                    break;
+                    case ObstacleReportData.EnumTypes.Resolved:
+                    pillText = "Godkjent";
+                    pillClasses = "bg-green-50 text-green-700 ring-1 ring-inset ring-green-200";
+                    break;
+                    case ObstacleReportData.EnumTypes.Deleted:
+                    pillText = "Avvist";
+                    pillClasses = "bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200";
+                    break;
+                    default:
+                    pillText = report.ObstacleReportStatus.ToString();
+                    pillClasses = "bg-gray-50 text-gray-700 ring-1 ring-inset ring-gray-200";
+                    break;
                     }
 
-                    <div class="p-3 sm:p-4 hover:bg-white/60 transition mobile-card"
-                         data-q="@($"{report.ObstacleReportID} {submittedBy} {reviewer} {typeTxt} {report.Obstacle?.ObstacleComment} {report.ObstacleReportComment} {coordsTxt} {report.ObstacleReportStatus}")"
-                         data-status="@report.ObstacleReportStatus"
-                         data-id="@report.ObstacleReportID"
-                         data-submitter="@submittedBy"
-                         data-reviewer="@reviewer"
-                         data-type="@typeTxt"
-                         data-date="@report.ObstacleReportDate.ToString("yyyy-MM-dd HH:mm:ss")">
-                        
-                        <div class="flex items-start justify-between mb-2">
-                            <div class="font-semibold text-slate-900 text-base">ID: @report.ObstacleReportID</div>
-                            <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold @pillClasses">
-                                @pillText
-                            </span>
-                        </div>
-
-                        <div class="space-y-1.5 text-sm">
-                            <div class="flex items-start">
-                                <span class="text-gray-500 min-w-[100px] sm:min-w-[120px]">Innmelder:</span>
-                                <span class="text-slate-700">@submittedBy</span>
-                            </div>
-                            <div class="flex items-start">
-                                <span class="text-gray-500 min-w-[100px] sm:min-w-[120px]">Saksbehandler:</span>
-                                <span class="text-slate-700">@reviewer</span>
-                            </div>
-                            <div class="flex items-start">
-                                <span class="text-gray-500 min-w-[100px] sm:min-w-[120px]">Type:</span>
-                                <span class="inline-flex items-center rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-200">
-                                    @typeTxt
-                                </span>
-                            </div>
-                            <div class="flex items-start">
-                                <span class="text-gray-500 min-w-[100px] sm:min-w-[120px]">Dato:</span>
-                                <span class="text-slate-700">@report.ObstacleReportDate.ToString("dd.MM.yyyy HH:mm")</span>
-                            </div>
+                    <tr class="@rowBgClass hover:bg-white/60 transition"
+                        data-q="@($"{report.ObstacleReportID} {submittedBy} {reviewer} {typeTxt} {report.Obstacle?.ObstacleComment} {report.ObstacleReportComment} {coordsTxt} {report.ObstacleReportStatus}")"
+                        data-status="@report.ObstacleReportStatus"
+                        data-id="@report.ObstacleReportID"
+                        data-submitter="@submittedBy"
+                        data-reviewer="@reviewer"
+                        data-type="@typeTxt"
+                        data-date="@report.ObstacleReportDate.ToString("yyyy-MM-dd HH:mm:ss")">
+                        <td class="px-4 py-3 font-semibold text-slate-900">@report.ObstacleReportID</td>
+                        <td class="px-4 py-3 text-slate-700">@submittedBy</td>
+                        <td class="px-4 py-3 text-slate-700">@reviewer</td>
+                        <td class="px-4 py-3">
+                                    <span class="inline-flex items-center rounded-full bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-200">
+                                        @typeTxt
+                                    </span>
+                        </td>
+                        <td class="px-4 py-3 text-slate-700 max-w-[22rem] truncate" title="@report.Obstacle?.ObstacleComment">
                             @if (!string.IsNullOrWhiteSpace(report.Obstacle?.ObstacleComment))
                             {
-                                <div class="flex items-start">
-                                    <span class="text-gray-500 min-w-[100px] sm:min-w-[120px]">Kommentar:</span>
-                                    <span class="text-slate-700">@report.Obstacle?.ObstacleComment</span>
-                                </div>
+                            @report.Obstacle.ObstacleComment
                             }
-                            @if (!string.IsNullOrWhiteSpace(report.ObstacleReportComment))
+                            else
                             {
-                                <div class="flex items-start">
-                                    <span class="text-gray-500 min-w-[100px] sm:min-w-[120px]">Saksbehandler:</span>
-                                    <span class="text-slate-700">@report.ObstacleReportComment</span>
-                                </div>
+                            <span class="text-slate-400 italic">Ingen kommentar</span>
                             }
-                            <div class="flex items-start">
-                                <span class="text-gray-500 min-w-[100px] sm:min-w-[120px]">Koordinater:</span>
-                                <span class="inline-flex items-center rounded-md bg-white px-2 py-0.5 text-xs ring-1 ring-inset ring-gray-200">
+                        </td>
+                        <td class="px-4 py-3 text-slate-700 max-w-[22rem] truncate" title="@report.ObstacleReportComment">
+                            @if (!string.IsNullOrWhiteSpace(report.ObstacleReportComment) &&
+                            report.ObstacleReportComment != "Her skal Registerfører kunne skrive inn kommentar.")
+                            {
+                            @report.ObstacleReportComment
+                            }
+                            else
+                            {
+                            <span class="text-slate-400 italic">Ikke behandlet</span>
+                            }
+                        </td>
+                        <td class="px-4 py-3 text-slate-700 whitespace-nowrap">
+                            @report.ObstacleReportDate.ToString("dd.MM.yyyy HH:mm")
+                        </td>
+                        <td class="px-4 py-3">
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold @pillClasses">
+                                        @pillText
+                                    </span>
+                        </td>
+                        <td class="px-4 py-3 text-slate-700">
+                                    <span class="inline-flex items-center rounded-md bg-white px-2.5 py-1 text-xs ring-1 ring-inset ring-gray-200">
+                                        @coordsTxt
+                                    </span>
+                        </td>
+                        <td class="px-4 py-3">
+                            @if (!string.IsNullOrWhiteSpace(imgUrl))
+                            {
+                            <a href="@imgUrl" target="_blank" class="inline-block">
+                                <img src="@imgUrl" alt="Bilde" class="h-16 w-16 rounded-lg border border-gray-200 object-cover shadow-sm" />
+                            </a>
+                            }
+                            else
+                            {
+                            <span class="text-gray-400 italic">Ingen</span>
+                            }
+                        </td>
+                    </tr>
+
+                    rowIndex++;
+                    }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile Card View -->
+            <div class="lg:hidden divide-y divide-gray-100" id="mobileLogBody">
+                @{
+                int cardIndex = 0;
+                }
+                @foreach (var report in Model)
+                {
+                string submittedBy = report.SubmittedByUser?.UserName ?? "(ukjent)";
+                string reviewer = report.Reviewer?.UserName ?? "(ingen)";
+                string typeTxt = report.Obstacle?.ObstacleType ?? "—";
+                string coordsTxt = report.MapData?.CoordinateSummary ?? "—";
+                string imgUrl = report.Obstacle?.ObstacleImageURL;
+
+                var cardBgClass = cardIndex % 2 == 0 ? "bg-white" : "bg-slate-50/80";
+
+                string pillText;
+                string pillClasses;
+                switch (report.ObstacleReportStatus)
+                {
+                case ObstacleReportData.EnumTypes.New:
+                pillText = "Ny";
+                pillClasses = "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200";
+                break;
+                case ObstacleReportData.EnumTypes.Open:
+                pillText = "Venter";
+                pillClasses = "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200";
+                break;
+                case ObstacleReportData.EnumTypes.InProgress:
+                pillText = "Under behandling";
+                pillClasses = "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200";
+                break;
+                case ObstacleReportData.EnumTypes.Resolved:
+                pillText = "Godkjent";
+                pillClasses = "bg-green-50 text-green-700 ring-1 ring-inset ring-green-200";
+                break;
+                case ObstacleReportData.EnumTypes.Deleted:
+                pillText = "Avvist";
+                pillClasses = "bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200";
+                break;
+                default:
+                pillText = report.ObstacleReportStatus.ToString();
+                pillClasses = "bg-gray-50 text-gray-700 ring-1 ring-inset ring-gray-200";
+                break;
+                }
+
+                <div class="p-3 sm:p-4 @cardBgClass hover:bg-white/60 transition mobile-card"
+                     data-q="@($"{report.ObstacleReportID} {submittedBy} {reviewer} {typeTxt} {report.Obstacle?.ObstacleComment} {report.ObstacleReportComment} {coordsTxt} {report.ObstacleReportStatus}")"
+                     data-status="@report.ObstacleReportStatus"
+                     data-id="@report.ObstacleReportID"
+                     data-submitter="@submittedBy"
+                     data-reviewer="@reviewer"
+                     data-type="@typeTxt"
+                     data-date="@report.ObstacleReportDate.ToString("yyyy-MM-dd HH:mm:ss")">
+
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="font-semibold text-slate-900 text-base">ID: @report.ObstacleReportID</div>
+                        <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold @pillClasses">
+                                @pillText
+                            </span>
+                    </div>
+
+                    <div class="space-y-1.5 text-sm">
+                        <div class="flex items-start">
+                            <span class="text-gray-500 min-w-[100px] sm:min-w-[120px]">Innmelder:</span>
+                            <span class="text-slate-700">@submittedBy</span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-gray-500 min-w-[100px] sm:min-w-[120px]">Saksbehandler:</span>
+                            <span class="text-slate-700">@reviewer</span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-gray-500 min-w-[100px] sm:min-w-[120px]">Type:</span>
+                            <span class="inline-flex items-center rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-200">
+                                    @typeTxt
+                                </span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-gray-500 min-w-[100px] sm:min-w-[120px]">Dato:</span>
+                            <span class="text-slate-700">@report.ObstacleReportDate.ToString("dd.MM.yyyy HH:mm")</span>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(report.Obstacle?.ObstacleComment))
+                        {
+                        <div class="flex items-start">
+                            <span class="text-gray-500 min-w-[100px] sm:min-w-[120px]">Kommentar:</span>
+                            <span class="text-slate-700">@report.Obstacle?.ObstacleComment</span>
+                        </div>
+                        }
+                        else
+                        {
+                        <div class="flex items-start">
+                            <span class="text-gray-500 min-w-[100px] sm:min-w-[120px]">Kommentar:</span>
+                            <span class="text-slate-400 italic">Ingen kommentar</span>
+                        </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(report.ObstacleReportComment) &&
+                        report.ObstacleReportComment != "Her skal Registerfører kunne skrive inn kommentar.")
+                        {
+                        <div class="flex items-start">
+                            <span class="text-gray-500 min-w-[100px] sm:min-w-[120px]">Saksbehandler:</span>
+                            <span class="text-slate-700">@report.ObstacleReportComment</span>
+                        </div>
+                        }
+                        else
+                        {
+                        <div class="flex items-start">
+                            <span class="text-gray-500 min-w-[100px] sm:min-w-[120px]">Saksbehandler:</span>
+                            <span class="text-slate-400 italic">Ikke behandlet</span>
+                        </div>
+                        }
+                        <div class="flex items-start">
+                            <span class="text-gray-500 min-w-[100px] sm:min-w-[120px]">Koordinater:</span>
+                            <span class="inline-flex items-center rounded-md bg-white px-2 py-0.5 text-xs ring-1 ring-inset ring-gray-200">
                                     @coordsTxt
                                 </span>
-                            </div>
                         </div>
-
-                        @if (!string.IsNullOrWhiteSpace(imgUrl))
-                        {
-                            <div class="mt-3">
-                                <a href="@imgUrl" target="_blank" class="inline-block">
-                                    <img src="@imgUrl" alt="Bilde" class="h-24 w-24 sm:h-32 sm:w-32 rounded-lg border border-gray-200 object-cover shadow-sm" />
-                                </a>
-                            </div>
-                        }
                     </div>
+
+                    @if (!string.IsNullOrWhiteSpace(imgUrl))
+                    {
+                    <div class="mt-3">
+                        <a href="@imgUrl" target="_blank" class="inline-block">
+                            <img src="@imgUrl" alt="Bilde" class="h-24 w-24 sm:h-32 sm:w-32 rounded-lg border border-gray-200 object-cover shadow-sm" />
+                        </a>
+                    </div>
+                    }
+                </div>
+
+                cardIndex++;
                 }
             </div>
         </div>
@@ -462,10 +506,6 @@
             });
         });
 
-        // Initial sort by date descending (newest first)
-        sortTable('date');
-        
-        // Then apply filters
         applyFilter();
     })();
 </script>

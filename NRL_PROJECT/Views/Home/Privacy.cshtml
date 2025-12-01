@@ -1,19 +1,169 @@
 ﻿@{
-    ViewData["Title"] = "Privacy Policy";
+    ViewData["Title"] = "Personvernerklæring";
 }
 
-<div class="flex justify-center items-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 px-4">
-    <div class="bg-white shadow-lg rounded-2xl p-10 max-w-2xl w-full">
-        <h1 class="text-4xl font-bold text-center text-gray-800 mb-6">
-            @ViewData["Title"]
-        </h1>
+<div class="min-h-screen w-full bg-gradient-to-b from-green-100 to-blue-100">
+    <div class="mx-auto max-w-4xl px-6 py-12">
 
-        <p class="text-gray-600 text-lg leading-relaxed mb-4">
-            Use this page to detail your site's privacy policy.
-        </p>
+        <!-- Header -->
+        <header class="mb-8">
+            <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-green-700">
+                Personvernerklæring
+            </h1>
+            <p class="mt-2 text-sm text-gray-600">
+                Sist oppdatert: @DateTime.Now.ToString("dd.MM.yyyy")
+            </p>
+            <div class="mt-3 h-1 w-48 rounded-full bg-gradient-to-r from-green-600 to-blue-600"></div>
+        </header>
 
-        <p class="text-gray-600 text-lg leading-relaxed">
-            You can include sections about data collection, cookies, user rights, and any other relevant information here. Make sure your policy is clear and easy to read.
-        </p>
+        <!-- Content -->
+        <div class="rounded-2xl border border-white/70 bg-white/90 backdrop-blur shadow-xl overflow-hidden">
+            <div class="h-1 bg-gradient-to-r from-green-600 via-blue-600 to-green-600"></div>
+
+            <div class="p-8 space-y-8 text-gray-800">
+
+                <!-- 1. Introduction -->
+                <section>
+                    <h2 class="text-2xl font-bold text-green-700 mb-3">1. Om systemet</h2>
+                    <p class="leading-relaxed">
+                        Dette er et studentprosjekt utviklet av Gruppe 7 ved UiA for demonstrasjon av 
+                        et system for rapportering av luftfartshindre.
+                    </p>
+                    <p class="mt-3 text-sm text-amber-700 bg-amber-50 p-3 rounded-lg border border-amber-200">
+                        <strong>Viktig:</strong> Dette er et eksamensprosjekt og skal ikke brukes til 
+                        reell rapportering av luftfartshindre.
+                    </p>
+                </section>
+
+                <!-- 2. Data Collection -->
+                <section>
+                    <h2 class="text-2xl font-bold text-green-700 mb-3">2. Hvilke opplysninger lagres?</h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Brukerinformasjon</h3>
+                            <ul class="ml-6 space-y-1 list-disc text-gray-700">
+                                <li>Brukernavn og e-postadresse</li>
+                                <li>Fornavn og etternavn</li>
+                                <li>Passord (kryptert)</li>
+                                <li>Rolle og organisasjonstilhørighet</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Rapportinformasjon</h3>
+                            <ul class="ml-6 space-y-1 list-disc text-gray-700">
+                                <li>GPS-koordinater</li>
+                                <li>Hindertype, høyde og bredde</li>
+                                <li>Kommentar og bilde (valgfritt)</li>
+                                <li>Tidspunkt og hvem som rapporterte</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. Purpose -->
+                <section>
+                    <h2 class="text-2xl font-bold text-green-700 mb-3">3. Hvorfor samles dataene inn?</h2>
+                    <ul class="ml-6 space-y-2 list-disc text-gray-700">
+                        <li>Autentisering og tilgangskontroll</li>
+                        <li>Lagring og visning av hinderrapporter</li>
+                        <li>Saksbehandling av rapporter</li>
+                        <li>Sporbarhet og dokumentasjon</li>
+                    </ul>
+                </section>
+
+                <!-- 4. Storage and Security -->
+                <section>
+                    <h2 class="text-2xl font-bold text-green-700 mb-3">4. Sikkerhet</h2>
+                    <ul class="ml-6 space-y-2 list-disc text-gray-700">
+                        <li>Passord lagres kryptert</li>
+                        <li>Tilgangskontroll basert på brukerrolle</li>
+                        <li>Data deles ikke med tredjeparter</li>
+                    </ul>
+                </section>
+
+                <!-- 5. Cookies and LocalStorage -->
+                <section>
+                    <h2 class="text-2xl font-bold text-green-700 mb-3">5. Informasjonskapsler og lokal lagring</h2>
+                    
+                    <div class="space-y-3">
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <h4 class="font-semibold text-gray-900 mb-2">Innloggingsinformasjon</h4>
+                            <p class="text-sm text-gray-700">
+                                Vi bruker nødvendige informasjonskapsler for å holde deg innlogget. 
+                                Disse er påkrevd for at systemet skal fungere.
+                            </p>
+                        </div>
+
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <h4 class="font-semibold text-gray-900 mb-2">Rapportutkast</h4>
+                            <p class="text-sm text-gray-700">
+                                Rapportutkast lagres lokalt i nettleseren din for å hindre tap av data. 
+                                Denne informasjonen lagres kun på din enhet og slettes automatisk når 
+                                rapporten fullføres eller avbrytes.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 6. Your Rights -->
+                <section>
+                    <h2 class="text-2xl font-bold text-green-700 mb-3">6. Dine rettigheter</h2>
+                    <p class="leading-relaxed mb-3">
+                        Du har rett til:
+                    </p>
+                    
+                    <div class="space-y-2">
+                        <div class="p-3 border-l-4 border-green-600 bg-green-50">
+                            <p class="text-sm text-gray-700">
+                                <strong>Innsyn:</strong> Se hvilke opplysninger vi har om deg
+                            </p>
+                        </div>
+                        <div class="p-3 border-l-4 border-blue-600 bg-blue-50">
+                            <p class="text-sm text-gray-700">
+                                <strong>Retting:</strong> Få rettet feilaktige opplysninger
+                            </p>
+                        </div>
+                        <div class="p-3 border-l-4 border-amber-600 bg-amber-50">
+                            <p class="text-sm text-gray-700">
+                                <strong>Sletting:</strong> Be om sletting av dine personopplysninger
+                            </p>
+                        </div>
+                        <div class="p-3 border-l-4 border-purple-600 bg-purple-50">
+                            <p class="text-sm text-gray-700">
+                                <strong>Dataportabilitet:</strong> Få dine data i maskinlesbart format
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 7. Contact -->
+                <section class="p-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-200">
+                    <h2 class="text-2xl font-bold text-green-700 mb-3">7. Kontakt</h2>
+                    <p class="leading-relaxed">
+                        Dette er et studentprosjekt utviklet av Gruppe 7, andreårsstudenter ved UiA, høsten 2025.
+                    </p>
+                    <p class="text-sm text-gray-700 mt-3">
+                        For spørsmål om personvern, kontakt prosjektgruppen eller faglærer.
+                    </p>
+                </section>
+
+            </div>
+
+            <div class="h-1 bg-gradient-to-r from-green-600 via-blue-600 to-green-600"></div>
+        </div>
+
+        <!-- Footer navigation -->
+        <div class="mt-8 text-center">
+            <a asp-controller="Home" asp-action="Index" 
+               class="inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-white font-semibold shadow hover:bg-blue-700 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Tilbake til forsiden
+            </a>
+        </div>
+
     </div>
 </div>

@@ -27,4 +27,9 @@ RUN dotnet publish "./NRL_PROJECT.csproj" -c $BUILD_CONFIGURATION -o /app/publis
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+# Added for permission to wwwroot/uploads 
+USER root
+RUN mkdir -p /app/wwwroot/uploads && chown -R app:app /app/wwwroot/uploads
+USER app
 ENTRYPOINT ["dotnet", "NRL_PROJECT.dll"]
