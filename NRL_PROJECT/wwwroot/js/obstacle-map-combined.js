@@ -939,7 +939,8 @@ class ObstacleMapManager {
     saveDraft() {
         this.draftManager.save({
             comment: this.ui.getComment(),
-            geoJson: this.ui.getGeoJson()
+            geoJson: this.ui.getGeoJson(),
+            hasImage: this.ui.hasImageFile() // Store ONLY the presence status
         });
     }
 
