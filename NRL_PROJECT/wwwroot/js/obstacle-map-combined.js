@@ -1,6 +1,4 @@
-/**
- * ObstacleMapManager
- */
+
 
 // ============================================================================
 // MapController
@@ -143,7 +141,7 @@ class MapController {
             this.drawnFeatures.addLayer(polyline);
             polyline.addTo(this.map);
             this.map.fitBounds(polyline.getBounds());
-            setTimeout(() => this.map.setZoom(19), 150);
+            setTimeout(() => this.map.setZoom(17), 150);
         }
     }
 
@@ -222,9 +220,9 @@ class GeolocationHandler {
     /**
      * Request user's current location
      * @param {boolean} [setView=false] - If true, the map view is adjusted to the location.
-     * @param {number} [zoom=18] - Zoom level to use if setView is true.
+     * @param {number} [zoom=16] - Zoom level to use if setView is true.
      */
-    locate(setView = false, zoom = 18) {
+    locate(setView = false, zoom = 16) {
         // Clear any previous location markers before starting a new search
         this.clearMarkers();
 
@@ -862,19 +860,16 @@ class ObstacleMapManager {
 
         // Callback for locating the map to user position after resetting report
         this.geolocation.setOnLocationFound((e) => {
-            // Note: This callback is only used for the locate button/reset after its original purpose is finished
-            // The initial locate() call handles view setting itself.
             console.log("Location found:", e.latlng);
         });
     }
 
     setupDrawingHandlers() {
-        // Line limit: 2 points
+        // Line limit: 2 points, drawing is over after 2 points
         this.mapController.on('pm:drawstart', ({ shape, workingLayer }) => {
             if (shape === 'Line') {
                 workingLayer.on('pm:vertexadded', () => {
                     const pts = workingLayer.getLatLngs();
-                    // If 2 points are added, finish the line drawing
                     if (pts.length >= 2) {
                         if (this.mapController.map.pm?.Draw?.Line?._finishShape)
                             this.mapController.map.pm.Draw.Line._finishShape();
@@ -966,14 +961,6 @@ class ObstacleMapManager {
             this.ui.setComment(draft.comment);
         }
 
-        // NOTE: We cannot restore the actual file, so we just check if one was previously attached.
-        // If the user submits without re-selecting the file, it will be missing. 
-        // We only restore the GeoJSON and comment.
-        if (draft.hasImage) {
-            // Optional: Show a message that the image needs to be re-selected if not present.
-            console.warn("Draft had image, but file cannot be restored automatically.");
-        }
-
 
         try {
             const geometry = JSON.parse(draft.geoJson);
@@ -999,8 +986,6 @@ class ObstacleMapManager {
         this.mapController.clearDrawnFeatures();
         this.mapController.disableDrawing();
         this.geolocation.clearMarkers();
-
-        // NY LOGIKK: Sentrer kartet til brukerens posisjon etter sletting
         this.ui.showCancelToast();
         this.geolocation.locate(true, 16); // locate(setView=true, zoom=16)
 
