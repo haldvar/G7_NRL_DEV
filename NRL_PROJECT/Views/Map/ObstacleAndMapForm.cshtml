@@ -22,15 +22,6 @@
 			<!-- MAP -->
 			<div id="mapDraw" class="absolute inset-0 z-0" style="height: 100%; width: 100%;"></div>
 
-			<!-- TOP BANNER -->
-			<div id="topBanner" class="fixed inset-x-0 top-0 z-50 bg-yellow-400/90 backdrop-blur border-b border-yellow-500 shadow-md pointer-events-none">
-				<div class="py-2 text-center">
-					<span class="text-sm font-semibold text-yellow-900 tracking-wide block">
-						Helikopter viser din posisjon. Marker objekt med punkt eller linje. Kommenter eller legg ved bilde om du vil.
-					</span>
-				</div>
-			</div>
-
 			<div class="relative z-10 w-full h-full pt-[3rem] pb-24 md:pb-32 pointer-events-none">
 				<div class="h-full w-full relative">
 
@@ -69,26 +60,47 @@
 						</a>
 					</div>
 
-					<!-- ACTION TOOLS (LEFT) -->
-					<div class="absolute bottom-4 left-4 z-20 pointer-events-auto">
-						<div class="flex flex-col gap-2 rounded-[2rem] bg-white/40 backdrop-blur border border-white/60 p-2 shadow-lg">
-							
+					<!-- NY OG PEN VENSTRESIDE – CARD-STYLE (fungerer 100 %) -->
+					<div class="absolute bottom-6 left-4 z-20 pointer-events-none">
+						<div class="flex flex-col gap-3 rounded-[2rem] bg-white/40 backdrop-blur border border-white/60 p-3 shadow-lg pointer-events-auto">
+
+							<!-- LEGG TIL BILDE -->
 							<button id="btnUploadImage" type="button"
-									class="h-16 w-16 md:h-24 md:w-24 rounded-full bg-white/85 backdrop-blur border border-white/70 shadow-lg hover:shadow-xl active:scale-95 transition inline-flex items-center justify-center"
-									title="Legg til bilde">
-								<img src="/icons/kamera.svg" alt="" class="h-8 w-8 md:h-12 md:w-12 opacity-90 pointer-events-none" />
+									class="w-64 md:w-60 rounded-3xl bg-white/90 backdrop-blur border border-white/80 shadow-md
+                       hover:shadow-lg active:scale-[0.98] transition flex items-center px-4 py-3 text-left">
+								<div class="flex items-center justify-center h-12 w-12 rounded-full bg-blue-50 flex-shrink-0">
+									<img src="/icons/kamera.svg" alt="Kamera" class="h-6 w-6 opacity-90 pointer-events-none" />
+								</div>
+								<div class="ml-3 flex flex-col">
+									<span class="text-sm font-semibold text-slate-900">Legg til bilde</span>
+									<span class="text-xs text-gray-500">(Frivillig)</span>
+								</div>
 							</button>
 
+							<!-- LEGG TIL KOMMENTAR -->
 							<button id="btnComment" type="button"
-									class="h-16 w-16 md:h-24 md:w-24 rounded-full bg-white/85 backdrop-blur border border-white/70 shadow-lg hover:shadow-xl active:scale-95 transition inline-flex items-center justify-center"
-									title="Legg til kommentar">
-								<img src="/icons/kommentar.svg" alt="" class="h-8 w-8 md:h-12 md:w-12 opacity-90 pointer-events-none" />
+									class="w-64 md:w-60 rounded-3xl bg-white/90 backdrop-blur border border-white/80 shadow-md
+                       hover:shadow-lg active:scale-[0.98] transition flex items-center px-4 py-3 text-left">
+								<div class="flex items-center justify-center h-12 w-12 rounded-full bg-green-50 flex-shrink-0">
+									<img src="/icons/kommentar.svg" alt="Kommentar" class="h-6 w-6 opacity-90 pointer-events-none" />
+								</div>
+								<div class="ml-3 flex flex-col">
+									<span class="text-sm font-semibold text-slate-900">Legg til kommentar</span>
+									<span class="text-xs text-gray-500">(Frivillig)</span>
+								</div>
 							</button>
 
+							<!-- FINN MIN POSISJON -->
 							<button id="btnLocate" type="button"
-									class="h-16 w-16 md:h-24 md:w-24 rounded-full bg-white/85 backdrop-blur border border-white/70 shadow-lg hover:shadow-xl active:scale-95 transition inline-flex items-center justify-center"
-									title="Finn min posisjon">
-								<img src="/icons/helicopter.svg" alt="" class="h-8 w-8 md:h-12 md:w-12 opacity-90 pointer-events-none" />
+									class="w-64 md:w-60 rounded-3xl bg-white/90 backdrop-blur border border-white/80 shadow-md
+										hover:shadow-lg active:scale-[0.98] transition flex items-center px-4 py-3 text-left">
+								<div class="flex items-center justify-center h-12 w-12 rounded-full bg-amber-50 flex-shrink-0">
+									<img src="/icons/helicopter.svg" alt="GPS" class="h-6 w-6 opacity-90 pointer-events-none" />
+								</div>
+								<div class="ml-3 flex flex-col">
+									<span class="text-sm font-semibold text-slate-900">Finn min posisjon</span>
+									<span class="text-xs text-gray-500">(GPS)</span>
+								</div>
 							</button>
 						</div>
 					</div>
