@@ -1,10 +1,10 @@
 
 
 // ============================================================================
-// MapController
+// MapHandler
 // Manages the Leaflet map instance and basic drawing operations.
 // ============================================================================
-class MapController {
+class MapHandler {
     /**
      * @param {string} elementId - The ID of the map container element.
      * @param {object} [options] - Configuration options.
@@ -187,11 +187,11 @@ class MapController {
 // ============================================================================
 class GeolocationHandler {
     /**
-     * @param {MapController} mapController - The map controller instance.
+     * @param {MapHandler} mapHandler - The map Handler instance.
      * @param {object} [options] - Configuration options.
      */
-    constructor(mapController, options = {}) {
-        this.map = mapController;
+    constructor(mapHandler, options = {}) {
+        this.map = mapHandler;
         this.options = {
             maxZoom: 19,
             timeout: 10000,
@@ -499,10 +499,10 @@ class DraftManager {
 }
 
 // ============================================================================
-// UIController
+// UIHandler
 // Manages DOM interactions, button states, toasts, and the comment sheet.
 // ============================================================================
-class UIController {
+class UIHandler {
     constructor() {
         this.activeButton = null;
         this.elements = this.cacheElements();
@@ -826,10 +826,10 @@ class ObstacleMapManager {
 
         this.restoredFromDraft = false;
 
-        this.mapController = new MapController(mapElementId);
-        this.geolocation = new GeolocationHandler(this.mapController);
+        this.mapHandler = new MapHandler(mapElementId);
+        this.geolocation = new GeolocationHandler(this.mapHandler);
         this.draftManager = new DraftManager(this.options.formKey);
-        this.ui = new UIController();
+        this.ui = new UIHandler();
 
         this.init();
     }
@@ -866,24 +866,24 @@ class ObstacleMapManager {
 
     setupDrawingHandlers() {
         // Line limit: 2 points, drawing is over after 2 points
-        this.mapController.on('pm:drawstart', ({ shape, workingLayer }) => {
+        this.mapHandler.on('pm:drawstart', ({ shape, workingLayer }) => {
             if (shape === 'Line') {
                 workingLayer.on('pm:vertexadded', () => {
                     const pts = workingLayer.getLatLngs();
                     if (pts.length >= 2) {
-                        if (this.mapController.map.pm?.Draw?.Line?._finishShape)
-                            this.mapController.map.pm.Draw.Line._finishShape();
+                        if (this.mapHandler.map.pm?.Draw?.Line?._finishShape)
+                            this.mapHandler.map.pm.Draw.Line._finishShape();
                         else
-                            this.mapController.map.pm.disableDraw();
+                            this.mapHandler.map.pm.disableDraw();
                     }
                 });
             }
         });
 
         // Handle created geometry
-        this.mapController.on('pm:create', (e) => {
-            this.mapController.addDrawnLayer(e.layer);
-            this.mapController.disableDrawing();
+        this.mapHandler.on('pm:create', (e) => {
+            this.mapHandler.addDrawnLayer(e.layer);
+            this.mapHandler.disableDrawing();
 
             const geoJson = JSON.stringify(e.layer.toGeoJSON().geometry);
             this.ui.setGeoJson(geoJson);
@@ -902,12 +902,12 @@ class ObstacleMapManager {
     setupButtonHandlers() {
         this.ui.getButton('drawPoint')?.addEventListener('click', () => {
             this.ui.setActiveButton(this.ui.getButton('drawPoint'));
-            this.mapController.enableMarkerDrawing();
+            this.mapHandler.enableMarkerDrawing();
         });
 
         this.ui.getButton('drawLine')?.addEventListener('click', () => {
             this.ui.setActiveButton(this.ui.getButton('drawLine'));
-            this.mapController.enableLineDrawing();
+            this.mapHandler.enableLineDrawing();
         });
 
         this.ui.getButton('locate')?.addEventListener('click', () => {
@@ -964,7 +964,7 @@ class ObstacleMapManager {
 
         try {
             const geometry = JSON.parse(draft.geoJson);
-            this.mapController.restoreGeometry(geometry);
+            this.mapHandler.restoreGeometry(geometry);
             this.restoredFromDraft = true;
             this.ui.showRestoreToast();
         } catch (error) {
@@ -983,8 +983,8 @@ class ObstacleMapManager {
         this.draftManager.disable();
         this.draftManager.clear();
         this.ui.resetForm();
-        this.mapController.clearDrawnFeatures();
-        this.mapController.disableDrawing();
+        this.mapHandler.clearDrawnFeatures();
+        this.mapHandler.disableDrawing();
         this.geolocation.clearMarkers();
         this.ui.showCancelToast();
         this.geolocation.locate(true, 16); // locate(setView=true, zoom=16)
@@ -996,7 +996,7 @@ class ObstacleMapManager {
      * @returns {L.Map} The Leaflet map instance.
      */
     getMap() {
-        return this.mapController.map;
+        return this.mapHandler.map;
     }
 
     /**
