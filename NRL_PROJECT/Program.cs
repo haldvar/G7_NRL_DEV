@@ -92,6 +92,11 @@ builder.Services.AddTransient<IEmailSender, AuthMessageSender>();
 // Build the app
 // -----------------------------------------------------------------
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<NRL_Db_Context>();
+    context.Database.Migrate();
+}
 
 // -----------------------------------------------------------------
 // Seeding (run within a scoped service provider)
