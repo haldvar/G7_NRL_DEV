@@ -89,14 +89,9 @@ Brukere kan opprette egne kontoer, som deretter godkjennes av en administrator s
 
 ### Systemarkitektur
 
-Dette prosjektet er bygd med en MVC (Model–View–Controller) struktur. Det vil si at systemets oppgaver – datastrukturering, datahåndtering og datasamling/framvisning – er delt inn i komponentene **models, views** og **controllers**. Under kan du se en modell av vår applikasjonsstruktur.
+Dette prosjektet er bygd med en MVC (Model–View–Controller) struktur. Det vil si at systemets oppgaver – datastrukturering, datahåndtering og datasamling/framvisning – er delt inn i komponentene **models, controllers** og **views**. Under kan du se en modell av vår applikasjonsstruktur.
 
-![alt text](http://url/to/img.png](https://drive.google.com/file/d/1Xno1EgDpPgHmZgXAMAqmt1BBQbB4dRUQ/view?usp=sharing))
-
-
-
-https://drive.google.com/drive/folders/1f7Tz6_q4gXhWA6FJ4hZBSniprREjYIxQ?dmr=1&ec=wgc-drive-globalnav-goto
-
+![alt text](https://github.com/haldvar/G7_NRL_DEV/blob/README_rework/Documentation/Images/system_model.png)
 
 Prosjektet fungerer gjennom en nettleser. MVC applikasjonen ligger i en Docker container som kommuniserer med MariaDB databasen. I MVC applikasjonen ligger det forskjellige "layers" som jobber sammen og formaterer output, mens i databasen lagres alt av nødvendig data om prosjektet.
 
