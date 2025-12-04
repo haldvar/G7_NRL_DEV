@@ -40,6 +40,27 @@ Hvis løsningen ikke vil kjøre:
 - Kjør docker compose på nytt fra IDE
 - Prøv å kjøre localhost igjen.
 
+---
+
+### Login-informasjon (for testing)
+
+#### Administrator
+- E-post: admin@test.no
+- Passord: Heisann1!
+  
+#### Registerførere
+
+- reg1@test.no – Heisann1!
+- reg2@test.no – Heisann1!
+  
+#### Flybesetning / Piloter
+- pilot3@test.no (Forsvaret) – Heisann1!
+- pilot2@test.no (Politiet) – Heisann1!
+  
+#### Eksterne organisasjoner
+- ext2_Politiet@test.no – Heisann1!
+- ext1_Forsvaret@test.no – Heisann1!
+
 --- 
 
 ## Prosjektbeskrivelse
@@ -75,6 +96,7 @@ Brukere kan opprette egne kontoer, som deretter godkjennes av en administrator s
 
 <a href="https://github.com/haldvar/G7_NRL_DEV/blob/main/Documentation/Documentation.md"><img src="https://img.shields.io/badge/documentation-blue"></a>
 <a href="https://github.com/haldvar/G7_NRL_DEV/blob/main/Documentation/IconLicenses.md"><img src="https://img.shields.io/badge/licenses-purple"></a>
+<a href="https://github.com/haldvar/G7_NRL_DEV/blob/README_rework/NRL_PROJECT.Tests/README.md"><img src="https://img.shields.io/badge/testing-green"></a>
 
 
 
@@ -95,26 +117,32 @@ Dette prosjektet er bygd med en MVC (Model–View–Controller) struktur. Det vi
 
 Prosjektet fungerer gjennom en nettleser. MVC applikasjonen ligger i en Docker container som kommuniserer med MariaDB databasen. I MVC applikasjonen ligger det forskjellige "layers" som jobber sammen og formaterer output, mens i databasen lagres alt av nødvendig data om prosjektet.
 
-
-
 ---
 
-### Login-informasjon (for testing)
-#### Administrator
-- E-post: admin@test.no
-- Passord: Heisann1!
-#### Registerførere
-- reg1@test.no – Heisann1!
-- reg2@test.no – Heisann1!
-#### Flybesetning / Piloter
-- pilot3@test.no (Forsvaret) – Heisann1!
-- pilot2@test.no (Politiet) – Heisann1!
-#### Eksterne organisasjoner
-- ext2_Politiet@test.no – Heisann1!
-- ext1_Forsvaret@test.no – Heisann1!
-
 ## Testing
-Testing-scenarier og unit-testing er gjennomført (flere detaljer kan legges til senere).
+
+Prosjektet har 70 enhetstester som verifiserer **sikkerhet, forretningslogikk** og **dataflyt**.
+
+### Kjøre testing:
+
+**Forutsetning:** Prosjekt er kjørende etter beskrivelsen i readme
+
+- Naviger til NRL_PROJECT.Tests.
+- Skriv inn i terminal:
+  
+```dotnet test```
+
+**Forventet output:**
+
+```
+Test summary: total: 70; failed: 0; succeeded: 70; skipped: 0
+Build succeeded
+```
+
+**Status:** 70/70 passerer | < 1s kjøretid
+
+*For fullstendig testdokumentasjon, se —->* [NRL_PROJECT.Tests
+/README.md](https://github.com/haldvar/G7_NRL_DEV/blob/README_rework/NRL_PROJECT.Tests/README.md)
 
 ## Forbedringspotensial
 - Administrator-godkjenning for nyregistrerte brukere
