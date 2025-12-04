@@ -2,11 +2,17 @@
 
 ## Innhold
 [Installasjon](#installasjon)
+
 [Prosjektbeskrivelse](#prosjektbeskrivelse)
+
 [Dokumentasjon](#dokumentasjon)
+
 [Testing](#testing)
+
 [Forbedringspotensial](#forbedringspotensial)
+
 [Videreutvikling](#videreutvikling)
+
 [Gruppemedlemmer](#gruppemedlemmer)
 
 ---
