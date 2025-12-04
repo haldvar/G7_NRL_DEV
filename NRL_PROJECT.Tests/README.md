@@ -4,7 +4,7 @@
 
 [Oversikt](#oversikt)
 
-[Hvordan gjøre testing](#hvordan-gjøre-testing)
+[Hvordan gjøre testing](#hvordan_gjøre_testing)
 
 [Struktur i testprosjektet](Struktur-i-testprosjektet)
 
