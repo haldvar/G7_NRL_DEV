@@ -95,6 +95,10 @@ Testing-scenarier og unit-testing er gjennomført (flere detaljer kan legges til
 - Varsling ved statusendring
 - Offline-modus (per nå kun draft ved manglende dekning)
 - Mulighet for bruker å endre/slette innmeldinger på kartet
+- 2-faktor og sending av sikkerhetskoder
+- Reset/endring/glemtpassord av passord fra innloggingssiden
+- Registrering av bruker på innloggingssiden (brukeren lages men lagres foreløpig ikke i databasen)
+
 
 ## Videreutvikling
 Prosjektet er åpent for videre utvidelser og forbedringer.
