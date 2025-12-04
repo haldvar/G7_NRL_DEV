@@ -1,6 +1,17 @@
 # NRL PROSJEKT – GRUPPE 7
 
-## Installasjon og kjøring
+## Innhold
+[Installasjon](#installasjon)
+[Prosjektbeskrivelse](#prosjektbeskrivelse)
+[Dokumentasjon](#dokumentasjon)
+[Testing](#testing)
+[Forbedringspotensial](#forbedringspotensial)
+[Videreutvikling](#videreutvikling)
+[Gruppemedlemmer](#gruppemedlemmer)
+
+---
+
+## Installasjon
 
 ### 1. Last ned prosjektet
 - Last ned `.zip` **eller**  
@@ -17,7 +28,7 @@ Naviger (`cd`) til rotmappen `G7_NRL_DEV`
 Åpne Docker Desktop og trykk på:
 `localhost:5001`
 
-## Feilsøking
+### Feilsøking
 Hvis løsningen ikke vil kjøre:
 - Stopp NRL_PROJECT-containeren i Docker
 - Kjør docker compose på nytt fra IDE
@@ -25,7 +36,7 @@ Hvis løsningen ikke vil kjøre:
 
 --- 
 
-## Om prosjektet
+## Prosjektbeskrivelse
 
 Målet med prosjektet er å utvikle en web-løsning for **NRL** som gjør det mulig å rapportere og registrere nye luftfartshindre over hele Norge.  
 
@@ -98,7 +109,6 @@ Testing-scenarier og unit-testing er gjennomført (flere detaljer kan legges til
 - 2-faktor og sending av sikkerhetskoder
 - Reset/endring/glemtpassord av passord fra innloggingssiden
 - Registrering av bruker på innloggingssiden (brukeren lages men lagres foreløpig ikke i databasen)
-
 
 ## Videreutvikling
 Prosjektet er åpent for videre utvidelser og forbedringer.
