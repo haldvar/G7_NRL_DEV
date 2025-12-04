@@ -19,8 +19,12 @@
 
 ## Installasjon
 
+### *Forutsetninger*
+- Ha [Docker Desktop](https://www.docker.com/get-started/) installert og kjørende
+- Ha [```git```](https://git-scm.com/install/windows) installert for å kunne kjøre git-kommandoer
+
 ### 1. Last ned prosjektet
-- Last ned `.zip` **eller**  
+- Last ned prosjektet som `.zip` **eller**  
 - Kjør kommandoen `git clone https://github.com/haldvar/G7_NRL_DEV.git`
 
 ### 2. Naviger i prosjektet
@@ -36,9 +40,9 @@ Naviger (`cd`) til rotmappen `G7_NRL_DEV`
 
 ### Feilsøking
 Hvis løsningen ikke vil kjøre:
-- Stopp NRL_PROJECT-containeren i Docker
-- Kjør docker compose på nytt fra IDE
-- Prøv å kjøre localhost igjen.
+- Stopp alle containere i Docker Desktop
+- Kjør ```docker compose down```
+- Kjør ```docker compose up --build``` på nytt
 
 ---
 
