@@ -19,6 +19,7 @@ namespace NRL_PROJECT.Tests.Controllers
     /// <summary>
     /// Tests for RegistrarController - handles report processing, status updates,
     /// obstacle data modifications, and registrar assignments.
+    /// </summary>
     public class RegistrarControllerTests : IDisposable
     {
         private readonly NRL_Db_Context _context;
