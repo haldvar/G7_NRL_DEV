@@ -13,7 +13,7 @@
 
 [Videreutvikling](#videreutvikling)
 
-[Gruppemedlemmer](#gruppemedlemmer)
+[Om oss](#om-oss)
 
 ---
 
@@ -154,12 +154,27 @@ Build succeeded
 - Reset/endring/glemtpassord av passord fra innloggingssiden
 - Registrering av bruker på innloggingssiden (brukeren lages men lagres foreløpig ikke i databasen)
 
+## Sikkerhet
+### Autentisering og Autorisasjon
+Applikasjonen bruker ASP.NET Core Identity for brukerautentisering med rollebasert tilgangskontroll. Systemet opererer med fire brukerroller:
+
+Pilot: Rapportere hindre, administrere egne rapporter
+Registerfører: Saksbehandling, statusendringer, full tilgang til rapporter
+Administrator: Brukeradministrasjon, rolletildeling, systemkonfigurasjon
+Ekstern Organisasjon: Lesetilgang til godkjente rapporter for egen organisasjon
+
+### Dataisolasjon og Validering
+
+Piloter har kun tilgang til egne data, eksterne organisasjoner ser kun rapporter relatert til egen organisasjon, mens registerflrer og administratorer har full tilgang. All input valideres: filstørrelse (maks 5MB), tillatte formater, datatyper og koordinater. Sikkerhet er verifisert med 12 dedikerte enhetstester. 
+
+
 ## Videreutvikling
 Prosjektet er åpent for videre utvidelser og forbedringer.
 
 ---
 
-## Gruppemedlemmer
+## Om oss
+### Gruppemedlemmer
 - Karoline  
 - Milana  
 - Jan Kåre  
