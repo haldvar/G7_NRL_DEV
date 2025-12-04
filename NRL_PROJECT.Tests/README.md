@@ -4,17 +4,17 @@
 
 [Oversikt](#oversikt)
 
-[Hvordan gjøre testing](#hvordan_gjøre_testing)
+[Hvordan gjøre testing](#hvordan–gjøre–testing)
 
-[Struktur i testprosjektet](Struktur-i-testprosjektet)
+[Struktur i testprosjektet](Struktur–i–testprosjektet)
 
-[Teststrategi og testoversikt](#teststrategi-og-testoversikt)
+[Teststrategi og testoversikt](#teststrategi–og–testoversikt)
 
 [Testmønstre](#testmønstre)
 
-[Beste praksis](#beste-praksis)
+[Beste praksis](#beste–praksis)
 
-[Kjente advarsler](#kjente-advarsler)
+[Kjente advarsler](#kjente–advarsler)
 
 [Refleksjon](#refleksjon)
 
