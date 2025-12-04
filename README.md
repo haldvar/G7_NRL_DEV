@@ -1,14 +1,29 @@
 # NRL PROSJEKT – GRUPPE 7
 
-## Gruppemedlemmer
-- Karoline  
-- Milana  
-- Jan Kåre  
-- Emma  
-- Elise  
-- Halvard  
+## Installasjon og kjøring
 
----
+### 1. Last ned prosjektet
+- Last ned `.zip` **eller**  
+- Kjør kommandoen `git clone https://github.com/haldvar/G7_NRL_DEV.git`
+
+### 2. Naviger i prosjektet
+Naviger (`cd`) til rotmappen `G7_NRL_DEV`
+
+### 3. Bygg prosjektet
+- Dobbeltsjekk at `docker-compose.yml` filen ligger i directory ved å skrive `ls`
+- Kjør kommandoen `docker compose up --build`
+
+### 4. Start applikasjonen
+Åpne Docker Desktop og trykk på:
+`localhost:5001`
+
+## Feilsøking
+Hvis løsningen ikke vil kjøre:
+- Stopp NRL_PROJECT-containeren i Docker
+- Kjør docker compose på nytt fra IDE
+- Prøv å kjøre localhost igjen.
+
+--- 
 
 ## Om prosjektet
 
@@ -57,62 +72,16 @@ Brukere kan opprette egne kontoer, som deretter godkjennes av en administrator s
 
 ---
 
-## Installasjon og kjøring
-
-### 1. Last ned prosjektet
-- Last ned `.zip` **eller**  
-- `git clone <repo-url>`
-
-### 2. Åpne prosjektet
-Åpne `.sln` i **Visual Studio** eller **Rider**.
-
-### 3. Bygg prosjektet
-Kjør løsning som docker compose
-
-### 4. Klargjør database via Docker
-Åpne Docker-terminal:
-
-```bash
-docker exec -it mariadbcontainer mariadb -u root -p
-```
-Passord:
-```bash
-Begripeligvis1214
-```
-Slett eksisterende database:
-```bash
-drop database nrl_project_db;
-```
-### 4. Kjør migrations
-Naviger til:
-~/G7_NRL_DEV/NRL_PROJECT
-Kjør:
-```bash
-dotnet ef migrations add InitialCreate
-dotnet ef database update
-```
-### 5. Start applikasjonen
-Åpne Docker Desktop og trykk på:
-localhost:5001
-
-## Feilsøking
-Hvis løsningen ikke vil kjøre:
-- Stopp NRL_PROJECT-containeren i Docker
-- Kjør docker compose på nytt fra IDE
-- Start containere igjen i Docker Desktop
-
---- 
-
 ### Login-informasjon (for testing)
 #### Administrator
-- E-post: admin@nrl.no
-- Passord: Admin@123
-#### Registerfører
-- E-post: reg4@test.no
+- E-post: admin@test.no
 - Passord: Heisann1!
+#### Registerførere
+- reg1@test.no – Heisann1!
+- reg2@test.no – Heisann1!
 #### Flybesetning / Piloter
-- pilot7@test.no (Forsvaret) – Heisann1!
-- pilot6@test.no (Politiet) – Heisann1!
+- pilot3@test.no (Forsvaret) – Heisann1!
+- pilot2@test.no (Politiet) – Heisann1!
 #### Eksterne organisasjoner
 - ext2_Politiet@test.no – Heisann1!
 - ext1_Forsvaret@test.no – Heisann1!
@@ -126,6 +95,20 @@ Testing-scenarier og unit-testing er gjennomført (flere detaljer kan legges til
 - Varsling ved statusendring
 - Offline-modus (per nå kun draft ved manglende dekning)
 - Mulighet for bruker å endre/slette innmeldinger på kartet
+- 2-faktor og sending av sikkerhetskoder
+- Reset/endring/glemtpassord av passord fra innloggingssiden
+- Registrering av bruker på innloggingssiden (brukeren lages men lagres foreløpig ikke i databasen)
+
 
 ## Videreutvikling
 Prosjektet er åpent for videre utvidelser og forbedringer.
+
+---
+
+## Gruppemedlemmer
+- Karoline  
+- Milana  
+- Jan Kåre  
+- Emma  
+- Elise  
+- Halvard  
