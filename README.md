@@ -1,6 +1,23 @@
 # NRL PROSJEKT – GRUPPE 7
 
-## Installasjon og kjøring
+## Innhold
+[Installasjon](#installasjon)
+
+[Prosjektbeskrivelse](#prosjektbeskrivelse)
+
+[Dokumentasjon](#dokumentasjon)
+
+[Testing](#testing)
+
+[Forbedringspotensial](#forbedringspotensial)
+
+[Videreutvikling](#videreutvikling)
+
+[Gruppemedlemmer](#gruppemedlemmer)
+
+---
+
+## Installasjon
 
 ### 1. Last ned prosjektet
 - Last ned `.zip` **eller**  
@@ -17,7 +34,7 @@ Naviger (`cd`) til rotmappen `G7_NRL_DEV`
 Åpne Docker Desktop og trykk på:
 `localhost:5001`
 
-## Feilsøking
+### Feilsøking
 Hvis løsningen ikke vil kjøre:
 - Stopp NRL_PROJECT-containeren i Docker
 - Kjør docker compose på nytt fra IDE
@@ -25,7 +42,7 @@ Hvis løsningen ikke vil kjøre:
 
 --- 
 
-## Om prosjektet
+## Prosjektbeskrivelse
 
 Målet med prosjektet er å utvikle en web-løsning for **NRL** som gjør det mulig å rapportere og registrere nye luftfartshindre over hele Norge.  
 
@@ -68,7 +85,22 @@ Brukere kan opprette egne kontoer, som deretter godkjennes av en administrator s
 - **MariaDB**  
 - **Entity Framework** (migrations)  
 - **ASP.NET MVC** (på .NET 9.0)  
-- **Tailwind CSS**  
+- **Tailwind CSS**
+
+### Systemarkitektur
+
+Dette prosjektet er bygd med en MVC (Model–View–Controller) struktur. Det vil si at systemets oppgaver – datastrukturering, datahåndtering og datasamling/framvisning – er delt inn i komponentene **models, views** og **controllers**. Under kan du se en modell av vår applikasjonsstruktur.
+
+![alt text](http://url/to/img.png](https://drive.google.com/file/d/1Xno1EgDpPgHmZgXAMAqmt1BBQbB4dRUQ/view?usp=sharing))
+
+
+
+https://drive.google.com/drive/folders/1f7Tz6_q4gXhWA6FJ4hZBSniprREjYIxQ?dmr=1&ec=wgc-drive-globalnav-goto
+
+
+Prosjektet fungerer gjennom en nettleser. MVC applikasjonen ligger i en Docker container som kommuniserer med MariaDB databasen. I MVC applikasjonen ligger det forskjellige "layers" som jobber sammen og formaterer output, mens i databasen lagres alt av nødvendig data om prosjektet.
+
+
 
 ---
 
@@ -98,7 +130,6 @@ Testing-scenarier og unit-testing er gjennomført (flere detaljer kan legges til
 - 2-faktor og sending av sikkerhetskoder
 - Reset/endring/glemtpassord av passord fra innloggingssiden
 - Registrering av bruker på innloggingssiden (brukeren lages men lagres foreløpig ikke i databasen)
-
 
 ## Videreutvikling
 Prosjektet er åpent for videre utvidelser og forbedringer.
