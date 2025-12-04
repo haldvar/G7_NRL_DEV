@@ -124,7 +124,9 @@ namespace NRL_PROJECT.Controllers
                     ObstacleReportDate = r.ObstacleReportDate,
                     ObstacleID = r.Obstacle != null ? r.Obstacle.ObstacleID : 0,
                     ObstacleType = r.Obstacle != null ? (r.Obstacle.ObstacleType ?? "") : "",
-                    ObstacleComment = r.Obstacle != null ? (r.Obstacle.ObstacleComment ?? "") : "",
+                    ObstacleReportComment = string.IsNullOrWhiteSpace(r.ObstacleReportComment)
+                        ? "Uten kommentar"
+                        : r.ObstacleReportComment,
                     ObstacleHeight = r.Obstacle != null ? r.Obstacle.ObstacleHeight : 0,
 
                     //  File support
