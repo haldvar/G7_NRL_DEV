@@ -24,7 +24,12 @@
 - Ha [```git```](https://git-scm.com/install/windows) installert for å kunne kjøre git-kommandoer
 
 ### 1. Last ned prosjektet
-- Last ned prosjektet som `.zip` **eller**  
+- Last ned prosjektet som [`.zip`](https://github.com/haldvar/G7_NRL_DEV/archive/refs/heads/main.zip)
+  
+ **eller**
+  
+- Åpne terminal
+- Naviger (cd) til din mappe for kodeprosjekter
 - Kjør kommandoen `git clone https://github.com/haldvar/G7_NRL_DEV.git`
 
 ### 2. Naviger i prosjektet
@@ -107,12 +112,14 @@ Brukere kan opprette egne kontoer, som deretter godkjennes av en administrator s
 </div>
 
 ### Verktøy brukt
-- **Docker** (Docker Desktop)  
-- **MariaDB**  
-- **Entity Framework** (migrations)  
-- **ASP.NET MVC** (på .NET 9.0)  
-- **Tailwind CSS**
-
+- **[Docker](https://www.docker.com)** (Docker Desktop)  
+- **[MariaDB](https://mariadb.org)**  
+- **[Entity Framework](https://learn.microsoft.com/en-us/ef/)** (migrations)  
+- **[ASP.NET MVC](https://dotnet.microsoft.com/en-us/apps/aspnet/mvc)** (på .NET 9.0)  
+- **[Tailwind CSS](https://tailwindcss.com)**
+- **[Leaflet](https://leafletjs.com)**
+  - **[Leaflet.pm](https://github.com/themre/leaflet.pm)**
+  
 ### Systemarkitektur
 
 Dette prosjektet er bygd med en MVC (Model–View–Controller) struktur. Det vil si at systemets oppgaver – datastrukturering, datahåndtering og datasamling/framvisning – er delt inn i komponentene **models, controllers** og **views**. Under kan du se en modell av vår applikasjonsstruktur.
