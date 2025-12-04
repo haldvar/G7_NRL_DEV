@@ -15,7 +15,7 @@ namespace NRL_PROJECT.Data
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
-            await context.Database.MigrateAsync();
+            // await context.Database.MigrateAsync();
 
             await SeedRoles(roleManager);
             await SeedOrganisations(context);
