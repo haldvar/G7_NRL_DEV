@@ -248,7 +248,7 @@ await _context.SaveChangesAsync();
             {
                 ObstacleID = model.ObstacleID,
                 SubmittedByUserId = currentUserId,
-                ObstacleReportComment = "Her skal Registerfører kunne skrive inn kommentar.",
+                ObstacleReportComment = null,
                 ObstacleReportDate = DateTime.UtcNow.AddHours(1),
                 ObstacleReportStatus = ObstacleReportData.EnumTypes.New,
                 MapDataID = model.MapData?.MapDataID,
