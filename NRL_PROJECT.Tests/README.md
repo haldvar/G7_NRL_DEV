@@ -22,7 +22,7 @@
 
 [Beste praksis](#beste-praksis)
 
-[Kjente advarsler](#kjente advarsler)
+[Kjente advarsler](#kjente-advarsler)
 
 [Refleksjon](#refleksjon)
 
