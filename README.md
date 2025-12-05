@@ -1,8 +1,6 @@
 # NRL PROSJEKT – GRUPPE 7
 
 ## Innhold
-[Installasjon](#installasjon)
-
 [Prosjektbeskrivelse](#prosjektbeskrivelse)
 
 [Dokumentasjon](#dokumentasjon)
@@ -11,49 +9,60 @@
 
 [Forbedringspotensial](#forbedringspotensial)
 
+[Sikkerhet](#sikkerhet)
+
 [Videreutvikling](#videreutvikling)
+
+[Installasjon](#installasjon)
 
 [Om oss](#om-oss)
 
 ---
 
-## Installasjon
+## Prosjektbeskrivelse
 
-### *Forutsetninger*
-- Ha [Docker Desktop](https://www.docker.com/get-started/) installert og kjørende
-  - Pass på å ikke ha andre containers kjørende
-- Ha [```git```](https://git-scm.com/install/windows) installert for å kunne kjøre git-kommandoer
+<div align="left">
 
-### 1. Last ned prosjektet
-- Last ned prosjektet som [`.zip`](https://github.com/haldvar/G7_NRL_DEV/archive/refs/heads/main.zip)
-  
- **eller**
-  
-- Åpne terminal
-- Naviger (cd) til din mappe for kodeprosjekter
-- Kjør kommandoen `git clone https://github.com/haldvar/G7_NRL_DEV.git`
+<a href="https://github.com/haldvar/G7_NRL_DEV/blob/main/Documentation/Documentation.md"><img src="https://img.shields.io/badge/documentation-blue"></a>
+<a href="https://github.com/haldvar/G7_NRL_DEV/blob/main/Documentation/IconLicenses.md"><img src="https://img.shields.io/badge/licenses-purple"></a>
+<a href="https://github.com/haldvar/G7_NRL_DEV/blob/README_rework/NRL_PROJECT.Tests/README.md"><img src="https://img.shields.io/badge/testing-green"></a>
 
-### 2. Naviger i prosjektet
-Naviger (`cd`) til rotmappen `G7_NRL_DEV`
+</div>
 
-### 3. Bygg prosjektet
-- Dobbeltsjekk at `docker-compose.yml` filen ligger i directory ved å skrive `ls`
-- Kjør kommandoen `docker compose up --build`
+Målet med prosjektet er å utvikle en web-løsning for **NRL** som gjør det mulig å rapportere og registrere nye luftfartshindre over hele Norge.  
 
-### 4. Start applikasjonen
-Åpne Docker Desktop og trykk på:
-`localhost:5001`
+Brukere kan opprette egne kontoer, som deretter godkjennes av en administrator som tildeler riktig rolle og organisasjonstilhørighet:
 
-### Alternativ fremgangsmåte
-- Åpne ```~/G7_NRL_DEV/```**```GROUP7.sln```** i din IDE (Rider, VSCode, Visual Studio...)
-- Kjør løsningen som ```docker compose```
+### Brukerroller
+**Pilot**  
+- Går rett til Hinderrapportering ved innlogging
+- Lager og sender rapporter om nye luftfartshindre
+- Kan se hinderlogg for sine egne innsendte rapporter
+- Ser alle innsendte rapporter i Situasjonskartet, men med anonymisert innsender.
+- Løsningen er tilpasset bruk på nettbrett
 
-### Feilsøking
-Hvis løsningen ikke vil kjøre:
-- Stopp alle containere i Docker Desktop
-- Kjør ```docker compose down``` i docker terminal
-- Evt slett tidligere containers
-- Kjør ```docker compose up --build``` på nytt
+**Registerfører**  
+- Går rett til Rapporthåndtering ved innlogging
+- Kan se alle innsendte rapporter.
+- Endre status
+- Delegere rapporter
+- Endre/legge til opplysninger (hindertype, høyde osv.)
+- Ser hvem som har sendt inn rapportene som vises i Situasjonskart
+
+**Ekstern organisasjon**  
+- Går rett til rapporter fra egen organisasjon ved innlogging
+- Kan se rapporter som er sendt inn av flybesetninger i egen organisasjon
+
+**Administrator**  
+- Går rett til Brukerhåndtering ved innlogging
+- Full tilgang til hele løsningen
+- Brukerhåndtering (roller, organisasjoner, godkjenning)
+
+### Brukerregistrering (Innloggingssida)
+ 
+- Personer kan opprette egen bruker
+- Tilgangsrolle og organsiasjonstilhørighet må legges til av Admin.
+- Uten godkjenning fra Admin kan bruker kun melde nytt hinder, se egne rapporter og se anonymisert Situasjonskart.
 
 ---
 
@@ -78,44 +87,7 @@ Hvis løsningen ikke vil kjøre:
 
 --- 
 
-## Prosjektbeskrivelse
-
-Målet med prosjektet er å utvikle en web-løsning for **NRL** som gjør det mulig å rapportere og registrere nye luftfartshindre over hele Norge.  
-
-Brukere kan opprette egne kontoer, som deretter godkjennes av en administrator som tildeler riktig rolle og organisasjonstilhørighet:
-
-### Brukerroller
-**Pilot**  
-- Lager og sender rapporter om nye luftfartshindre  
-- Kan se hinderlogg  
-- Løsningen støtter bruk på nettbrett  
-
-**Registerfører**  
-- Kan se rapporter  
-- Endre status  
-- Delegere rapporter  
-- Endre/legge til opplysninger (hindertype, høyde osv.)
-
-**Ekstern organisasjon**  
-- Kan se rapporter som er sendt inn av flybesetninger i egen organisasjon
-
-**Administrator**  
-- Full tilgang  
-- Brukerhåndtering (roller, organisasjoner, godkjenning)
-
----
-
 ## Dokumentasjon
-
-<div align="left">
-
-<a href="https://github.com/haldvar/G7_NRL_DEV/blob/main/Documentation/Documentation.md"><img src="https://img.shields.io/badge/documentation-blue"></a>
-<a href="https://github.com/haldvar/G7_NRL_DEV/blob/main/Documentation/IconLicenses.md"><img src="https://img.shields.io/badge/licenses-purple"></a>
-<a href="https://github.com/haldvar/G7_NRL_DEV/blob/README_rework/NRL_PROJECT.Tests/README.md"><img src="https://img.shields.io/badge/testing-green"></a>
-
-
-
-</div>
 
 ### Verktøy brukt
 - **[Docker](https://www.docker.com)** (Docker Desktop)  
@@ -186,6 +158,46 @@ Prosjektet er åpent for videre utvidelser og forbedringer.
 
 ---
 
+## Installasjon
+
+### *Forutsetninger*
+- Ha [Docker Desktop](https://www.docker.com/get-started/) installert og kjørende
+  - Pass på å ikke ha andre containers kjørende
+- Ha [```git```](https://git-scm.com/install/windows) installert for å kunne kjøre git-kommandoer
+
+### 1. Last ned prosjektet
+- Last ned prosjektet som [`.zip`](https://github.com/haldvar/G7_NRL_DEV/archive/refs/heads/main.zip)
+  
+ **eller**
+  
+- Åpne terminal
+- Naviger (cd) til din mappe for kodeprosjekter
+- Kjør kommandoen `git clone https://github.com/haldvar/G7_NRL_DEV.git`
+
+### 2. Naviger i prosjektet
+Naviger (`cd`) til rotmappen `G7_NRL_DEV`
+
+### 3. Bygg prosjektet
+- Dobbeltsjekk at `docker-compose.yml` filen ligger i directory ved å skrive `ls`
+- Kjør kommandoen `docker compose up --build`
+
+### 4. Start applikasjonen
+Åpne Docker Desktop og trykk på:
+`localhost:5001`
+
+### Alternativ fremgangsmåte
+- Åpne ```~/G7_NRL_DEV/```**```GROUP7.sln```** i din IDE (Rider, VSCode, Visual Studio...)
+- Kjør løsningen som ```docker compose```
+
+### Feilsøking
+Hvis løsningen ikke vil kjøre:
+- Stopp alle containere i Docker Desktop
+- Kjør ```docker compose down``` i docker terminal
+- Evt slett tidligere containers
+- Kjør ```docker compose up --build``` på nytt
+
+---
+
 ## Om oss
 ### Gruppemedlemmer
 - Karoline  
@@ -193,4 +205,4 @@ Prosjektet er åpent for videre utvidelser og forbedringer.
 - Jan Kåre  
 - Emma  
 - Elise  
-- Halvard  
+- Halvard
