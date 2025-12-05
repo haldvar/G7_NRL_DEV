@@ -18,6 +18,8 @@ All teknisk dokumentasjon – inkludert DOCUMENTATION.md og dokumentasjon i selv
 
 [Installasjon](#installasjon)
 
+[Bruk av Kunstig Intelligens](#bruk-av-kunstig-intelligens)
+
 [Om oss](#om-oss)
 
 ---
@@ -216,6 +218,20 @@ Hvis løsningen ikke vil kjøre:
 
 *For å teste fullstendige funksjonalitet se —->* [Documentation/UserTesting.md](https://github.com/haldvar/G7_NRL_DEV/blob/main/Documentation/UserTesting.md)
 
+
+---
+
+## Bruk av Kunstig Intelligens
+
+I utviklingen av dette prosjektet har vi brukt KIsom verktøy for å finne løsninger på problemer og kode. Det har vært et svært nyttig redskap for å kunne gjennomføre prosjektet på et tilfredsstillende nivå. Som sparringspartner har KI også bidratt med ideer så vel som konkret kode. I og med at vi er flere som har jobbet parallelt, og også revidert hverandres løsninger underveis, er det ikke praktisk mulig å si konkret hvor hver enkelt modell har blitt brukt som hjelpemiddel. 
+
+*Følgende modeller ble benyttet som generelle assistenter i prosjektets utvikling:*
+
+- ChatGPT (https://chat.openai.com/)
+- GitHub Copilot (https://github.com/features/copilot)
+- Claude (https://www.anthropic.com/)
+- Grok (https://grok.com/)
+- Microsoft Copilot (https://copilot.microsoft.com/)
 
 ---
 
