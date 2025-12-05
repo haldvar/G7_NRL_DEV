@@ -114,14 +114,26 @@ Prosjektet fungerer gjennom en nettleser. MVC applikasjonen ligger i en Docker c
 
 ## Testing
 
-Prosjektet har 70 enhetstester som verifiserer **sikkerhet, forretningslogikk** og **dataflyt**.
+*Prosjektet har to typer tester:*
 
-### Kjøre testing:
+### Brukervennlighetstester
+Utført som scenario‑baserte tester på EXPO‑dagen, der testpersoner skulle simulere en rolle  som vi har i løsningen vår (pilot, registerfører, administrator eller ekstern organisasjon).
+Fokus: hvor intuitivt og raskt det er å registrere et hinder.
+Resultat: gjennomsnittlig registreringstid ca. 37 sekunder, med konsistente tilbakemeldinger som ga grunnlag for forbedringer i brukergrensesnittet.
+
+### Enhetstester (70 stk)
+Verifiserer sikkerhet, forretningslogikk og dataflyt.
+Status: 70/70 passerer
+Kjøretid: under 1 sekund
+Rammeverk: xUnit 2.5.3 | .NET 9.0
+
+
+### Kjøre enhetstester:
 
 **Forutsetning:** Prosjekt er kjørende etter beskrivelsen i readme
 
-- Naviger til NRL_PROJECT.Tests.
-- Skriv inn i terminal: ```dotnet test```
+- Naviger til `NRL_PROJECT.Tests.` i terminal
+- Kjør kommando: ```dotnet test```
 
 **Forventet output:**
 
