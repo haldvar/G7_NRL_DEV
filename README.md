@@ -21,6 +21,7 @@
 
 ### *Forutsetninger*
 - Ha [Docker Desktop](https://www.docker.com/get-started/) installert og kjørende
+  - Pass på å ikke ha andre containers kjørende
 - Ha [```git```](https://git-scm.com/install/windows) installert for å kunne kjøre git-kommandoer
 
 ### 1. Last ned prosjektet
@@ -43,10 +44,15 @@ Naviger (`cd`) til rotmappen `G7_NRL_DEV`
 Åpne Docker Desktop og trykk på:
 `localhost:5001`
 
+### Alternativ fremgangsmåte
+- Åpne ```~/G7_NRL_DEV/```**```GROUP7.sln```** i din IDE (Rider, VSCode, Visual Studio...)
+- Kjør løsningen som ```docker compose```
+
 ### Feilsøking
 Hvis løsningen ikke vil kjøre:
 - Stopp alle containere i Docker Desktop
-- Kjør ```docker compose down```
+- Kjør ```docker compose down``` i docker terminal
+- Evt slett tidligere containers
 - Kjør ```docker compose up --build``` på nytt
 
 ---
@@ -139,9 +145,7 @@ Prosjektet har 70 enhetstester som verifiserer **sikkerhet, forretningslogikk** 
 **Forutsetning:** Prosjekt er kjørende etter beskrivelsen i readme
 
 - Naviger til NRL_PROJECT.Tests.
-- Skriv inn i terminal:
-  
-```dotnet test```
+- Skriv inn i terminal: ```dotnet test```
 
 **Forventet output:**
 
@@ -156,27 +160,25 @@ Build succeeded
 /README.md](https://github.com/haldvar/G7_NRL_DEV/blob/README_rework/NRL_PROJECT.Tests/README.md)
 
 ## Forbedringspotensial
-- Administrator-godkjenning for nyregistrerte brukere
 - Tilbakemeldingssystem fra registerfører til innmelder
 - Varsling ved statusendring
 - Offline-modus (per nå kun draft ved manglende dekning)
 - Mulighet for bruker å endre/slette innmeldinger på kartet
 - 2-faktor og sending av sikkerhetskoder
 - Reset/endring/glemtpassord av passord fra innloggingssiden
-- Registrering av bruker på innloggingssiden (brukeren lages men lagres foreløpig ikke i databasen)
 
 ## Sikkerhet
 ### Autentisering og Autorisasjon
 Applikasjonen bruker ASP.NET Core Identity for brukerautentisering med rollebasert tilgangskontroll. Systemet opererer med fire brukerroller:
 
-Pilot: Rapportere hindre, administrere egne rapporter
-Registerfører: Saksbehandling, statusendringer, full tilgang til rapporter
-Administrator: Brukeradministrasjon, rolletildeling, systemkonfigurasjon
-Ekstern Organisasjon: Lesetilgang til godkjente rapporter for egen organisasjon
+- **Pilot:** Rapportere hindre, administrere egne rapporter
+- **Registerfører:** Saksbehandling, statusendringer, full tilgang til rapporter
+- **Administrator:** Brukeradministrasjon, rolletildeling, systemkonfigurasjon
+- **Ekstern Organisasjon:** Lesetilgang til godkjente rapporter for egen organisasjon
 
 ### Dataisolasjon og Validering
 
-Piloter har kun tilgang til egne data, eksterne organisasjoner ser kun rapporter relatert til egen organisasjon, mens registerflrer og administratorer har full tilgang. All input valideres: filstørrelse (maks 5MB), tillatte formater, datatyper og koordinater. Sikkerhet er verifisert med 12 dedikerte enhetstester. 
+Piloter har kun tilgang til egne data, eksterne organisasjoner ser kun rapporter relatert til egen organisasjon, mens registerfører og administratorer har full tilgang. All input valideres: filstørrelse (maks 5MB), tillatte formater, datatyper og koordinater. Sikkerhet er verifisert med 12 dedikerte enhetstester. 
 
 
 ## Videreutvikling
