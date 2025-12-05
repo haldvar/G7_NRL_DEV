@@ -62,9 +62,6 @@ Husk tidtaking!
 
 ## Testresultater
 
-| Testperson | Tid  | Grensesnitt/ Kommentarer |
-
-
 | Testperson | Tid | Grensesnitt/ Kommentarer |
 | :---         |     :---      |          :--- |
 | 1   | 36 sek     |  Meldte hinderet for fort - skjønte ikke funksjonen til “Meld hinder”-knappen (trodde kanskje den tok den videre til legg til bilde- og kommentar-funksjoner) - Hinderloggen kunne vært lettere å skille linjene fra hverandre. Enten med avstand/farger   |
@@ -81,16 +78,20 @@ Vi ser på 36,8 som en akseptabel tid for å registrere et hinder. Fire av fem b
 **“Meld hinder-knappen”:**
 Vi har gjort slik at den ikke er synlig før man har markert kartet med et punkt eller linjer. Slik vil man ikke kunne trykke på knappen for raskt, og få feilmelding, og bruke unødvendig tid på det.
 
-Bilde
+<img src="https://github.com/haldvar/G7_NRL_DEV/blob/main/Documentation/Images/skjermbilde1.png" width="500">
+
 *Før man har markert hinder i kart*
 
-Bilde
+<img src="https://github.com/haldvar/G7_NRL_DEV/blob/main/Documentation/Images/skjermbilde2.png" width="500">
+
 *Etter man har markert hinder kart*
 
-Bilde
+<img src="https://github.com/haldvar/G7_NRL_DEV/blob/main/Documentation/Images/skjermbilde3.png" width="500">
+
 Bekreftelse på at kommentaren er lagret:
 
-Bilde
+<img src="https://github.com/haldvar/G7_NRL_DEV/blob/main/Documentation/Images/skjermbilde4.png" width="500">
+
 Hinderlogg fått en farge på annenhver linje:
 
 ## Enhetstesting
