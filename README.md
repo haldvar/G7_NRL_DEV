@@ -214,6 +214,14 @@ Hvis løsningen ikke vil kjøre:
 - Evt slett tidligere containers
 - Kjør ```docker compose up --build``` på nytt
 
+### Ekstra: Logg inn i database
+
+- Åpne docker terminal
+- Kjør kommando `docker exec -it mariadbcontainer mariadb -u root -p`
+- Skriv passord `Begripeligvis1214`
+- Skriv kommando `USE nrl_project_db;`
+- Vis tabeller med `SHOW TABLES`
+
 ### Bruk av applikasjonen
 
 *For å gjennomgå fullstendig funksjonalitet se vårt testløp —->* [Documentation/UserTesting.md](https://github.com/haldvar/G7_NRL_DEV/blob/main/Documentation/UserTesting.md)
