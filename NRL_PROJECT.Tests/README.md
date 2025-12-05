@@ -62,9 +62,6 @@ Husk tidtaking!
 
 ## Testresultater
 
-| Testperson | Tid  | Grensesnitt/ Kommentarer |
-
-
 | Testperson | Tid | Grensesnitt/ Kommentarer |
 | :---         |     :---      |          :--- |
 | 1   | 36 sek     |  Meldte hinderet for fort - skjønte ikke funksjonen til “Meld hinder”-knappen (trodde kanskje den tok den videre til legg til bilde- og kommentar-funksjoner) - Hinderloggen kunne vært lettere å skille linjene fra hverandre. Enten med avstand/farger   |
