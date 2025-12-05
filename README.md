@@ -28,7 +28,8 @@ All teknisk dokumentasjon – inkludert DOCUMENTATION.md og dokumentasjon i selv
 
 <a href="https://github.com/haldvar/G7_NRL_DEV/blob/main/Documentation/Documentation.md"><img src="https://img.shields.io/badge/documentation-blue"></a>
 <a href="https://github.com/haldvar/G7_NRL_DEV/blob/main/Documentation/IconLicenses.md"><img src="https://img.shields.io/badge/licenses-purple"></a>
-<a href="https://github.com/haldvar/G7_NRL_DEV/blob/README_rework/NRL_PROJECT.Tests/README.md"><img src="https://img.shields.io/badge/testing-green"></a>
+<a href="https://github.com/haldvar/G7_NRL_DEV/blob/main/NRL_PROJECT.Tests/README.md"><img src="https://img.shields.io/badge/testing-green"></a>
+<a href="https://github.com/haldvar/G7_NRL_DEV/blob/main/Documentation/Testflow.md"><img src="https://img.shields.io/badge/user_testing-red"></a>
 
 </div>
 
@@ -105,7 +106,7 @@ Brukere kan opprette egne kontoer, som deretter godkjennes av en administrator s
 
 Dette prosjektet er bygd med en MVC (Model–View–Controller) struktur. Det vil si at systemets oppgaver – datastrukturering, datahåndtering og datasamling/framvisning – er delt inn i komponentene **models, controllers** og **views**. Under kan du se en modell av vår applikasjonsstruktur.
 
-![alt text](https://github.com/haldvar/G7_NRL_DEV/blob/README_rework/Documentation/Images/system_model.png)
+![alt text](https://github.com/haldvar/G7_NRL_DEV/blob/main/Documentation/Images/system_model.png)
 
 Prosjektet fungerer gjennom en nettleser. MVC applikasjonen ligger i en Docker container som kommuniserer med MariaDB databasen. I MVC applikasjonen ligger det forskjellige "layers" som jobber sammen og formaterer output, mens i databasen lagres alt av nødvendig data om prosjektet.
 
@@ -132,7 +133,7 @@ Build succeeded
 **Status:** 70/70 passerer | < 1s kjøretid
 
 *For fullstendig testdokumentasjon, se —->* [NRL_PROJECT.Tests
-/README.md](https://github.com/haldvar/G7_NRL_DEV/blob/README_rework/NRL_PROJECT.Tests/README.md)
+/README.md](https://github.com/haldvar/G7_NRL_DEV/blob/main/NRL_PROJECT.Tests/README.md)
 
 ## Forbedringspotensial
 - Tilbakemeldingssystem fra registerfører til innmelder
@@ -198,6 +199,11 @@ Hvis løsningen ikke vil kjøre:
 - Kjør ```docker compose down``` i docker terminal
 - Evt slett tidligere containers
 - Kjør ```docker compose up --build``` på nytt
+
+### Bruk av applikasjonen
+
+*For å teste fullstendige funksjonalitet se —->* Documentation/Test-flyt
+
 
 ---
 
