@@ -1,5 +1,8 @@
 # NRL PROSJEKT – GRUPPE 7
 
+*README-en er skrevet på norsk, ettersom den fungerer som overordnet prosjektbeskrivelse og veiledning for sensorer og oppdragsgiver.
+All teknisk dokumentasjon – inkludert DOCUMENTATION.md og dokumentasjon i selve koden – er skrevet på engelsk, i tråd med bransjestandard for utviklingsprosjekter.*
+
 ## Innhold
 [Prosjektbeskrivelse](#prosjektbeskrivelse)
 
