@@ -202,7 +202,7 @@ Hvis løsningen ikke vil kjøre:
 
 ### Bruk av applikasjonen
 
-*For å teste fullstendige funksjonalitet se —->* Documentation/Test-flyt
+*For å teste fullstendige funksjonalitet se —->* [Documentation/UserTesting.md](https://github.com/haldvar/G7_NRL_DEV/blob/main/Documentation/UserTesting.md)
 
 
 ---
