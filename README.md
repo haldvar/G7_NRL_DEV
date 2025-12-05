@@ -29,7 +29,7 @@ All teknisk dokumentasjon – inkludert DOCUMENTATION.md og dokumentasjon i selv
 <a href="https://github.com/haldvar/G7_NRL_DEV/blob/main/Documentation/Documentation.md"><img src="https://img.shields.io/badge/documentation-blue"></a>
 <a href="https://github.com/haldvar/G7_NRL_DEV/blob/main/Documentation/IconLicenses.md"><img src="https://img.shields.io/badge/licenses-purple"></a>
 <a href="https://github.com/haldvar/G7_NRL_DEV/blob/main/NRL_PROJECT.Tests/README.md"><img src="https://img.shields.io/badge/testing-green"></a>
-<a href="https://github.com/haldvar/G7_NRL_DEV/blob/main/Documentation/Testflow.md"><img src="https://img.shields.io/badge/user_testing-red"></a>
+<a href="https://github.com/haldvar/G7_NRL_DEV/blob/main/Documentation/UserTesting.md"><img src="https://img.shields.io/badge/user_testing-red"></a>
 
 </div>
 
