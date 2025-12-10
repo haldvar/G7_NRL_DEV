@@ -13,7 +13,7 @@ namespace NRL_PROJECT.Data
         public DbSet<MapCoordinate> MapCoordinates { get; set; }
         public DbSet<ObstacleReportData> ObstacleReports { get; set; }
         public DbSet<Organisation> Organisations { get; set; }
-        public DbSet<User> Users  { get; set; }
+        public new DbSet<User> Users  { get; set; }
         public DbSet<MapData> MapDatas { get; set; }
 
 
